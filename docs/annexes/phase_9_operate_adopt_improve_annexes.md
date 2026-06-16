@@ -1,4 +1,84 @@
-# How to use this annex
+**Table of contents**
+
+- [1 How to use this annex](#1-how-to-use-this-annex)
+- [2 Activity 1: Activate early-life support and operating cadence](#2-activity-1-activate-early-life-support-and-operating-cadence)
+  - [2.1 Early-life operating start checklist](#21-early-life-operating-start-checklist)
+  - [2.2 Early-life operating cadence template](#22-early-life-operating-cadence-template)
+  - [2.3 Early-life signal review checklist](#23-early-life-signal-review-checklist)
+  - [2.4 Upstream change review route](#24-upstream-change-review-route)
+  - [2.5 Pause, rollback and narrowing trigger examples](#25-pause-rollback-and-narrowing-trigger-examples)
+  - [2.6 Transition to stable operation criteria](#26-transition-to-stable-operation-criteria)
+  - [2.7 First operating review agenda](#27-first-operating-review-agenda)
+  - [2.8 Common mistakes to avoid](#28-common-mistakes-to-avoid)
+  - [2.9 Evidence to retain](#29-evidence-to-retain)
+- [3 Activity 2: Monitor production usage, quality, trust, reliability and cost](#3-activity-2-monitor-production-usage-quality-trust-reliability-and-cost)
+  - [3.1 Production monitoring view](#31-production-monitoring-view)
+  - [3.2 Monitoring threshold template](#32-monitoring-threshold-template)
+  - [3.3 Unsupported-question log](#33-unsupported-question-log)
+  - [3.4 Trust and interpretation check](#34-trust-and-interpretation-check)
+  - [3.5 Monitoring review agenda](#35-monitoring-review-agenda)
+  - [3.6 Evidence to retain](#36-evidence-to-retain)
+- [4 Activity 3: Manage incidents, support requests and feedback-to-trace diagnosis](#4-activity-3-manage-incidents-support-requests-and-feedback-to-trace-diagnosis)
+  - [4.1 Incident, support and feedback log](#41-incident-support-and-feedback-log)
+  - [4.2 Feedback-to-trace register](#42-feedback-to-trace-register)
+  - [4.3 Root-cause classification guide](#43-root-cause-classification-guide)
+  - [4.4 T2D versus upstream fix decision](#44-t2d-versus-upstream-fix-decision)
+  - [4.5 Communication note template](#45-communication-note-template)
+  - [4.6 Evidence to retain](#46-evidence-to-retain)
+- [5 Activity 4: Maintain access lifecycle and protect the release boundary](#5-activity-4-maintain-access-lifecycle-and-protect-the-release-boundary)
+  - [5.1 Access lifecycle log](#51-access-lifecycle-log)
+  - [5.2 Release boundary exception log](#52-release-boundary-exception-log)
+  - [5.3 Temporary shortcut register](#53-temporary-shortcut-register)
+  - [5.4 Boundary review checklist](#54-boundary-review-checklist)
+  - [5.5 Evidence to retain](#55-evidence-to-retain)
+- [6 Activity 5: Run live governance, residual-risk and decision-rights cadence](#6-activity-5-run-live-governance-residual-risk-and-decision-rights-cadence)
+  - [6.1 Live governance cadence](#61-live-governance-cadence)
+  - [6.2 Decision-rights matrix](#62-decision-rights-matrix)
+  - [6.3 Residual-risk review log](#63-residual-risk-review-log)
+  - [6.4 Upstream change impact record](#64-upstream-change-impact-record)
+  - [6.5 Governance review agenda](#65-governance-review-agenda)
+  - [6.6 Evidence to retain](#66-evidence-to-retain)
+- [7 Activity 6: Maintain BAU service, data, semantic, metadata and documentation](#7-activity-6-maintain-bau-service-data-semantic-metadata-and-documentation)
+  - [7.1 Automated BAU check register](#71-automated-bau-check-register)
+  - [7.2 Upstream change impact checklist](#72-upstream-change-impact-checklist)
+  - [7.3 Currency update log](#73-currency-update-log)
+  - [7.4 Human review prompt](#74-human-review-prompt)
+  - [7.5 User check-in guide](#75-user-check-in-guide)
+  - [7.6 BAU regression check trigger](#76-bau-regression-check-trigger)
+  - [7.7 Evidence to retain](#77-evidence-to-retain)
+- [8 Activity 7: Manage the run / fix / improve / expand backlog and capacity](#8-activity-7-manage-the-run-fix-improve-expand-backlog-and-capacity)
+  - [8.1 Backlog classification guide](#81-backlog-classification-guide)
+  - [8.2 Run / fix / improve / expand backlog](#82-run-fix-improve-expand-backlog)
+  - [8.3 Ownership and dependency check](#83-ownership-and-dependency-check)
+  - [8.4 Adjacent-needs routing log](#84-adjacent-needs-routing-log)
+  - [8.5 Capacity view](#85-capacity-view)
+  - [8.6 Prioritisation questions](#86-prioritisation-questions)
+  - [8.7 Evidence to retain](#87-evidence-to-retain)
+- [9 Activity 8: Control service development, regression testing and version deployment](#9-activity-8-control-service-development-regression-testing-and-version-deployment)
+  - [9.1 Change intake record](#91-change-intake-record)
+  - [9.2 Change impact checklist](#92-change-impact-checklist)
+  - [9.3 Model review record](#93-model-review-record)
+  - [9.4 Regression checklist](#94-regression-checklist)
+  - [9.5 Version and release record](#95-version-and-release-record)
+  - [9.6 Post-release review](#96-post-release-review)
+  - [9.7 Evidence to retain](#97-evidence-to-retain)
+- [10 Activity 9: Drive controlled adoption and responsible use within approved scope](#10-activity-9-drive-controlled-adoption-and-responsible-use-within-approved-scope)
+  - [10.1 User onboarding checklist](#101-user-onboarding-checklist)
+  - [10.2 Representative user check-in guide](#102-representative-user-check-in-guide)
+  - [10.3 Responsible-use issue log](#103-responsible-use-issue-log)
+  - [10.4 Adoption signal summary](#104-adoption-signal-summary)
+  - [10.5 Scope reminder template](#105-scope-reminder-template)
+  - [10.6 Evidence to retain](#106-evidence-to-retain)
+- [11 Activity 10: Manage lifecycle, retirement and decommissioning readiness](#11-activity-10-manage-lifecycle-retirement-and-decommissioning-readiness)
+  - [11.1 Lifecycle review checklist](#111-lifecycle-review-checklist)
+  - [11.2 Lifecycle action guide](#112-lifecycle-action-guide)
+  - [11.3 Retirement or decommissioning decision record](#113-retirement-or-decommissioning-decision-record)
+  - [11.4 Decommissioning action checklist](#114-decommissioning-action-checklist)
+  - [11.5 Evidence to retain](#115-evidence-to-retain)
+
+---
+
+# 1 How to use this annex
 
 These annexes provide optional working templates for Phase 9: Operate, adopt and improve. They are intended to help teams run a controlled T2D production release, monitor real usage, manage incidents, govern change, improve safely and prepare for longer-term lifecycle decisions.
 
@@ -8,9 +88,9 @@ For a narrow internal release, a lightweight operating cadence, issue log and ch
 
 The annexes should support operation, not create bureaucracy. If a template does not help the team run, control, improve or safely stop the service, it should be simplified or skipped.
 
-#  Activity 1: Activate early-life support and operating cadence
+# 2 Activity 1: Activate early-life support and operating cadence
 
-## Early-life operating start checklist
+## 2.1 Early-life operating start checklist
 
 Purpose: confirm that the service is ready to be operated after controlled release.
 
@@ -29,7 +109,7 @@ Purpose: confirm that the service is ready to be operated after controlled relea
 
 Suggested status values: Ready / Ready with caveat / Gap / Blocked / Not applicable.
 
-## Early-life operating cadence template
+## 2.2 Early-life operating cadence template
 
 | Item                         | Decision                                                                                 |
 |------------------------------|------------------------------------------------------------------------------------------|
@@ -44,7 +124,7 @@ Suggested status values: Ready / Ready with caveat / Gap / Blocked / Not applica
 | User communication route     | How users are informed of incidents, fixes or behaviour changes.                         |
 | Stable-operation review date | Date when early-life support can be reduced or extended.                                 |
 
-## Early-life signal review checklist
+## 2.3 Early-life signal review checklist
 
 | Signal                      | Review question                                                  | Typical owner                      |
 |-----------------------------|------------------------------------------------------------------|------------------------------------|
@@ -59,7 +139,7 @@ Suggested status values: Ready / Ready with caveat / Gap / Blocked / Not applica
 | Support load                | Is the support burden sustainable?                               | Support / operating owner          |
 | User feedback               | Is feedback trace-linked and diagnosable?                        | Product / support owner            |
 
-## Upstream change review route
+## 2.4 Upstream change review route
 
 Purpose: detect changes in the analytical flow before they affect live T2D behaviour.
 
@@ -73,7 +153,7 @@ Purpose: detect changes in the analytical flow before they affect live T2D behav
 | Reporting logic      | Dashboard or certified report change                      | Reconciliation mismatch                          | BI / reporting owner    |
 | Platform             | Warehouse, model gateway, logging or orchestration change | Latency, cost, reliability or traceability issue | Platform owner          |
 
-## Pause, rollback and narrowing trigger examples
+## 2.5 Pause, rollback and narrowing trigger examples
 
 | Trigger                                         | Possible response                                        |
 |-------------------------------------------------|----------------------------------------------------------|
@@ -85,7 +165,7 @@ Purpose: detect changes in the analytical flow before they affect live T2D behav
 | Upstream semantic change without T2D review     | Pause affected metric until retested.                    |
 | Model or prompt change degrades behaviour       | Roll back to previous approved version.                  |
 
-## Transition to stable operation criteria
+## 2.6 Transition to stable operation criteria
 
 | Criterion       | Stable-operation expectation                                   |
 |-----------------|----------------------------------------------------------------|
@@ -98,7 +178,7 @@ Purpose: detect changes in the analytical flow before they affect live T2D behav
 | Governance      | Change, risk and boundary decisions have an active forum.      |
 | Upstream change | Upstream owners are engaged and material changes are reviewed. |
 
-## First operating review agenda
+## 2.7 First operating review agenda
 
 - Review usage, incidents, cost, latency and support signals.
 
@@ -116,7 +196,7 @@ Purpose: detect changes in the analytical flow before they affect live T2D behav
 
 - Update issue log, decision log and next review actions.
 
-##  Common mistakes to avoid
+## 2.8 Common mistakes to avoid
 
 | Mistake                                            | Why it matters                                                         |
 |----------------------------------------------------|------------------------------------------------------------------------|
@@ -127,7 +207,7 @@ Purpose: detect changes in the analytical flow before they affect live T2D behav
 | No pause or rollback owner                         | The team may be unable to act quickly when trust or access is at risk. |
 | Treating early-life support as permanent           | The service should transition to stable operation or be redesigned.    |
 
-## Evidence to retain
+## 2.9 Evidence to retain
 
 - Operating start checklist.
 
@@ -147,9 +227,9 @@ Purpose: detect changes in the analytical flow before they affect live T2D behav
 
 - Stable-operation transition decision.
 
-# Activity 2: Monitor production usage, quality, trust, reliability and cost
+# 3 Activity 2: Monitor production usage, quality, trust, reliability and cost
 
-## Production monitoring view
+## 3.1 Production monitoring view
 
 Purpose: define the minimum monitoring view needed to operate the live T2D service.
 
@@ -163,7 +243,7 @@ Purpose: define the minimum monitoring view needed to operate the live T2D servi
 | Cost        | Model calls, query execution, logging, support effort      | Product / platform owner   | Weekly / monthly      |
 | Access      | Denied access, permission issues, exposure concerns        | Security / access owner    | Weekly                |
 
-## Monitoring threshold template
+## 3.2 Monitoring threshold template
 
 | Signal                    | Expected range | Review trigger | Action owner | Response                                    |
 |---------------------------|----------------|----------------|--------------|---------------------------------------------|
@@ -175,7 +255,7 @@ Purpose: define the minimum monitoring view needed to operate the live T2D servi
 | Access issue              |                |                |              | Escalate to access owner                    |
 | Trust concern             |                |                |              | Follow up with user / review guidance       |
 
-## Unsupported-question log
+## 3.3 Unsupported-question log
 
 | Date | User group | Question type | Example question | Reason unsupported                                                                      | Suggested route                                       |
 |------|------------|---------------|------------------|-----------------------------------------------------------------------------------------|-------------------------------------------------------|
@@ -183,7 +263,7 @@ Purpose: define the minimum monitoring view needed to operate the live T2D servi
 
 Purpose: distinguish real demand from unsafe scope creep. Unsupported questions may reveal useful needs, but they should not automatically become part of the live T2D service.
 
-## Trust and interpretation check
+## 3.4 Trust and interpretation check
 
 Purpose: capture signals that are unlikely to appear clearly in logs.
 
@@ -195,7 +275,7 @@ Purpose: capture signals that are unlikely to appear clearly in logs.
 | Are refusals understood?                    | Feedback / support tickets          |                | Improve refusal wording            |
 | Are users repeatedly rephrasing?            | Logs + user follow-up               |                | Review answer clarity or scope     |
 
-## Monitoring review agenda
+## 3.5 Monitoring review agenda
 
 - Review usage, cost, latency and reliability signals.
 
@@ -209,7 +289,7 @@ Purpose: capture signals that are unlikely to appear clearly in logs.
 
 - Confirm owners and next actions.
 
-## Evidence to retain
+## 3.6 Evidence to retain
 
 - Monitoring dashboard or signal extract.
 
@@ -223,9 +303,9 @@ Purpose: capture signals that are unlikely to appear clearly in logs.
 
 - Actions routed into the run / fix / improve / expand backlog.
 
-# Activity 3: Manage incidents, support requests and feedback-to-trace diagnosis
+# 4 Activity 3: Manage incidents, support requests and feedback-to-trace diagnosis
 
-## Incident, support and feedback log
+## 4.1 Incident, support and feedback log
 
 Purpose: capture live issues in a structured way before diagnosis.
 
@@ -233,7 +313,7 @@ Purpose: capture live issues in a structured way before diagnosis.
 |------|-------------------------------|------------|---------------|--------------------------------|-------|-----------------------------|
 |      | Incident / support / feedback |            |               | Low / Medium / High / Critical |       | Open / In progress / Closed |
 
-## Feedback-to-trace register
+## 4.2 Feedback-to-trace register
 
 Purpose: link user-reported issues to the evidence needed for diagnosis.
 
@@ -241,7 +321,7 @@ Purpose: link user-reported issues to the evidence needed for diagnosis.
 |-------|---------------|--------------------|---------------|------------|------------------------|-------------------|
 |       |               |                    |               |            |                        |                   |
 
-## Root-cause classification guide
+## 4.3 Root-cause classification guide
 
 | Root cause      | Typical example                               | Likely owner            |
 |-----------------|-----------------------------------------------|-------------------------|
@@ -257,7 +337,7 @@ Purpose: link user-reported issues to the evidence needed for diagnosis.
 | Cost / latency  | Expensive or slow interaction pattern         | Platform / AI           |
 | Support process | Escalation or ownership unclear               | Operating owner         |
 
-## T2D versus upstream fix decision
+## 4.4 T2D versus upstream fix decision
 
 Purpose: avoid patching the symptom in the wrong layer.
 
@@ -268,7 +348,7 @@ Purpose: avoid patching the symptom in the wrong layer.
 | Is a temporary T2D constraint needed while upstream fix is pending?                    | Constrain, caveat, pause or refuse affected scope. |
 | Does the fix change production behaviour?                                              | Trigger regression test and change record.         |
 
-## Communication note template
+## 4.5 Communication note template
 
 | Item             | Content                                                                      |
 |------------------|------------------------------------------------------------------------------|
@@ -278,7 +358,7 @@ Purpose: avoid patching the symptom in the wrong layer.
 | Resolution       | Fix applied, constraint added, upstream remediation pending or issue closed. |
 | Behaviour change | Any change users or support teams should notice.                             |
 
-## Evidence to retain
+## 4.6 Evidence to retain
 
 - Incident, support and feedback log.
 
@@ -294,9 +374,9 @@ Purpose: avoid patching the symptom in the wrong layer.
 
 - Regression or retest evidence where behaviour changed.
 
-# Activity 4: Maintain access lifecycle and protect the release boundary
+# 5 Activity 4: Maintain access lifecycle and protect the release boundary
 
-## Access lifecycle log
+## 5.1 Access lifecycle log
 
 Purpose: track user access changes after release.
 
@@ -304,7 +384,7 @@ Purpose: track user access changes after release.
 |------|--------------|----------------------------------------|--------|-------------|----------------------------------------|
 |      |              | Add / remove / role change / exception |        |             | Open / approved / rejected / completed |
 
-##  Release boundary exception log
+## 5.2 Release boundary exception log
 
 Purpose: capture where usage starts to drift beyond the approved boundary.
 
@@ -312,7 +392,7 @@ Purpose: capture where usage starts to drift beyond the approved boundary.
 |------|--------------------------------------------------|-----------------------------|---------------------|---------------------------------------------------|-------|
 |      | New user / question / domain / export / workflow | User / support / monitoring | Low / medium / high | Allow temporarily / constrain / reject / escalate |       |
 
-## Temporary shortcut register
+## 5.3 Temporary shortcut register
 
 Purpose: allow small-cohort adoption shortcuts without letting them become permanent.
 
@@ -322,7 +402,7 @@ Purpose: allow small-cohort adoption shortcuts without letting them become perma
 
 Suggested rule: any shortcut must be visible, time-bound, owned and reviewed.
 
-## Boundary review checklist
+## 5.4 Boundary review checklist
 
 | Check      | Question                                                        |
 |------------|-----------------------------------------------------------------|
@@ -334,7 +414,7 @@ Suggested rule: any shortcut must be visible, time-bound, owned and reviewed.
 | Exceptions | Are temporary shortcuts still justified?                        |
 | Drift      | Is repeated support creating informal scope expansion?          |
 
-## Evidence to retain
+## 5.5 Evidence to retain
 
 - Access lifecycle log.
 
@@ -350,9 +430,9 @@ Suggested rule: any shortcut must be visible, time-bound, owned and reviewed.
 
 - Updated user guidance where needed.
 
-# Activity 5: Run live governance, residual-risk and decision-rights cadence
+# 6 Activity 5: Run live governance, residual-risk and decision-rights cadence
 
-## Live governance cadence
+## 6.1 Live governance cadence
 
 Purpose: define how often governance reviews are held and who attends.
 
@@ -363,7 +443,7 @@ Purpose: define how often governance reviews are held and who attends.
 | Material change review  | As needed            | Relevant owners                                         | Scope, model, data, semantic, access or risk change |
 | Lifecycle review        | Periodic             | Sponsor, product, governance, finance                   | Continue, expand, constrain, retire or decommission |
 
-## Decision-rights matrix
+## 6.2 Decision-rights matrix
 
 | Decision                     | Typical owner / forum        | Evidence required                                   |
 |------------------------------|------------------------------|-----------------------------------------------------|
@@ -376,13 +456,13 @@ Purpose: define how often governance reviews are held and who attends.
 | Expansion                    | Sponsor / governance forum   | Production evidence, funding, support and readiness |
 | Retirement / decommissioning | Sponsor / governance forum   | Value, cost, usage, risk and replacement assessment |
 
-## Residual-risk review log
+## 6.3 Residual-risk review log
 
 | Risk | Accepted condition | Current signal | Still acceptable?  | Action                                     |
 |------|--------------------|----------------|--------------------|--------------------------------------------|
 |      |                    |                | Yes / No / Monitor | Continue / mitigate / constrain / escalate |
 
-## Upstream change impact record
+## 6.4 Upstream change impact record
 
 Purpose: capture upstream changes before they affect live T2D behaviour.
 
@@ -390,7 +470,7 @@ Purpose: capture upstream changes before they affect live T2D behaviour.
 |-----------------------------------------------------------------|----------------|--------------------------------------------------------------|---------------------------------------------------------|--------------|
 | Metric update / schema change / access change / platform change |                | Answer, caveat, access, cost, latency or traceability impact | No impact / test / constrain / deploy update / escalate |              |
 
-## Governance review agenda
+## 6.5 Governance review agenda
 
 - Review service health, incidents, cost and support load.
 
@@ -406,7 +486,7 @@ Purpose: capture upstream changes before they affect live T2D behaviour.
 
 - Update decision log and next review actions.
 
-## Evidence to retain
+## 6.6 Evidence to retain
 
 - Governance attendance and review notes.
 
@@ -420,9 +500,9 @@ Purpose: capture upstream changes before they affect live T2D behaviour.
 
 - Pause, rollback, expansion or lifecycle decisions.
 
-# Activity 6: Maintain BAU service, data, semantic, metadata and documentation
+# 7 Activity 6: Maintain BAU service, data, semantic, metadata and documentation
 
-## Automated BAU check register
+## 7.1 Automated BAU check register
 
 Purpose: track routine checks that protect the live T2D service from upstream drift.
 
@@ -435,7 +515,7 @@ Purpose: track routine checks that protect the live T2D service from upstream dr
 | Access          | Row, column, masking and role rules still apply          |           |       |             |
 | Metadata        | Required metric, dimension and caveat metadata available |           |       |             |
 
-## Upstream change impact checklist
+## 7.2 Upstream change impact checklist
 
 Purpose: assess whether an upstream change affects live T2D behaviour.
 
@@ -448,13 +528,13 @@ Purpose: assess whether an upstream change affects live T2D behaviour.
 | Access                  | Does the change affect visibility, refusal or exposure?   | No action / test / update / escalate |
 | Reporting logic         | Does the change affect reconciliation to trusted outputs? | No action / test / update / escalate |
 
-## Currency update log
+## 7.3 Currency update log
 
 | Date | Asset / artefact                                            | Change | User impact                   | Owner | Status                        |
 |------|-------------------------------------------------------------|--------|-------------------------------|-------|-------------------------------|
 |      | Metric / dimension / caveat / metadata / guidance / runbook |        | None / internal / user-facing |       | Open / updated / communicated |
 
-## Human review prompt
+## 7.4 Human review prompt
 
 Purpose: capture judgement-based checks that automation will not reliably detect.
 
@@ -466,7 +546,7 @@ Purpose: capture judgement-based checks that automation will not reliably detect
 | Does the anomaly reflect a real business movement or data issue? |             |
 | Should user guidance or support material be updated?             |             |
 
-## User check-in guide
+## 7.5 User check-in guide
 
 Purpose: validate interpretation and usefulness with users.
 
@@ -480,7 +560,7 @@ Purpose: validate interpretation and usefulness with users.
 
 This can be done through structured focus groups, but informal check-ins with representatives of key user groups are often enough.
 
-## BAU regression check trigger
+## 7.6 BAU regression check trigger
 
 | Trigger                             | Regression needed?                         |
 |-------------------------------------|--------------------------------------------|
@@ -490,7 +570,7 @@ This can be done through structured focus groups, but informal check-ins with re
 | Access-rule change                  | Yes                                        |
 | Documentation-only wording change   | Only if user-facing interpretation changes |
 
-## Evidence to retain
+## 7.7 Evidence to retain
 
 - Automated BAU check results.
 
@@ -506,9 +586,9 @@ This can be done through structured focus groups, but informal check-ins with re
 
 - Updated guidance, caveats, metadata or support material.
 
-# Activity 7: Manage the run / fix / improve / expand backlog and capacity
+# 8 Activity 7: Manage the run / fix / improve / expand backlog and capacity
 
-## Backlog classification guide
+## 8.1 Backlog classification guide
 
 Purpose: separate different types of work before prioritisation.
 
@@ -522,13 +602,13 @@ Purpose: separate different types of work before prioritisation.
 | Constrain | Reduce scope, usage or access to protect trust or cost     | Governance decision     |
 | Defer     | Useful but not justified or resourced now                  | Roadmap / later review  |
 
-## Run / fix / improve / expand backlog
+## 8.2 Run / fix / improve / expand backlog
 
 | Item | Source                                                       | Type                                                        | Owner | Priority            | Capacity need | Decision                       |
 |------|--------------------------------------------------------------|-------------------------------------------------------------|-------|---------------------|---------------|--------------------------------|
 |      | Monitoring / incident / feedback / governance / user request | Run / fix / optimise / improve / expand / constrain / defer |       | High / medium / low |               | Do / defer / reject / escalate |
 
-## Ownership and dependency check
+## 8.3 Ownership and dependency check
 
 | Question                                                                                | Answer             |
 |-----------------------------------------------------------------------------------------|--------------------|
@@ -539,7 +619,7 @@ Purpose: separate different types of work before prioritisation.
 | Does it require controlled change and deployment?                                       |                    |
 | Does it require expansion approval?                                                     |                    |
 
-## Adjacent-needs routing log
+## 8.4 Adjacent-needs routing log
 
 Purpose: capture needs revealed by T2D without absorbing them automatically.
 
@@ -547,7 +627,7 @@ Purpose: capture needs revealed by T2D without absorbing them automatically.
 |-----------------|------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|-------|----------|
 |                 | User feedback / unsupported questions / support pattern / workflow gap | Current T2D / new T2D / dashboard / data fix / semantic work / workflow change / other product |       |          |
 
-## Capacity view
+## 8.5 Capacity view
 
 | Capacity area         | Current demand | Available capacity | Gap / risk |
 |-----------------------|----------------|--------------------|------------|
@@ -560,7 +640,7 @@ Purpose: capture needs revealed by T2D without absorbing them automatically.
 | Platform              |                |                    |            |
 | Governance / security |                |                    |            |
 
-## Prioritisation questions
+## 8.6 Prioritisation questions
 
 - Is this needed to keep the current release safe and trusted?
 
@@ -574,7 +654,7 @@ Purpose: capture needs revealed by T2D without absorbing them automatically.
 
 - What happens if the item is not done now?
 
-## Evidence to retain
+## 8.7 Evidence to retain
 
 - Classified backlog.
 
@@ -588,9 +668,9 @@ Purpose: capture needs revealed by T2D without absorbing them automatically.
 
 - Prioritisation and decision notes.
 
-# Activity 8: Control service development, regression testing and version deployment
+# 9 Activity 8: Control service development, regression testing and version deployment
 
-## Change intake record
+## 9.1 Change intake record
 
 Purpose: confirm that each change has an approved route before development starts.
 
@@ -598,7 +678,7 @@ Purpose: confirm that each change has an approved route before development start
 |--------|-------------------------------------------|--------------------------------------------------|--------------------------------|-------|--------------------------------|
 |        | Backlog / incident / governance / hot fix | Code / prompt / model / UI / config / monitoring | Backlog / governance / hot fix |       | Proposed / approved / rejected |
 
-## Change impact checklist
+## 9.2 Change impact checklist
 
 | Impact area    | Question                                                                |
 |----------------|-------------------------------------------------------------------------|
@@ -610,7 +690,7 @@ Purpose: confirm that each change has an approved route before development start
 | Auditability   | Are traces, logs and versions still captured?                           |
 | Users          | Does the change need release notes or user communication?               |
 
-## Model review record
+## 9.3 Model review record
 
 Purpose: assess whether model, routing or inference changes are justified.
 
@@ -618,7 +698,7 @@ Purpose: assess whether model, routing or inference changes are justified.
 |---------------------------------------------------------------|--------------------------------------------------|------------------------------------------------------------|-------------------------------------|-----------------------------|
 | New model / smaller model / specialist model / routing change | Quality / cost / latency / reliability / control | Behaviour change / weaker reasoning / refusals / grounding | Evaluation / regression / cost test | Use / reject / test further |
 
-## Regression checklist
+## 9.4 Regression checklist
 
 | Test area                   | Required? | Result      |
 |-----------------------------|-----------|-------------|
@@ -630,7 +710,7 @@ Purpose: assess whether model, routing or inference changes are justified.
 | Cost and latency            | Yes / No  | Pass / fail |
 | Logging and traceability    | Yes / No  | Pass / fail |
 
-## Version and release record
+## 9.5 Version and release record
 
 | Item                   | Detail                                                        |
 |------------------------|---------------------------------------------------------------|
@@ -642,7 +722,7 @@ Purpose: assess whether model, routing or inference changes are justified.
 | Release approver       |                                                               |
 | Release date           |                                                               |
 
-## Post-release review
+## 9.6 Post-release review
 
 | Signal  | Review question                        | Action                          |
 |---------|----------------------------------------|---------------------------------|
@@ -652,7 +732,7 @@ Purpose: assess whether model, routing or inference changes are justified.
 | Support | Did support tickets increase?          | Update guidance / fix           |
 | Users   | Did users notice unexpected behaviour? | Communicate / roll back         |
 
-## Evidence to retain
+## 9.7 Evidence to retain
 
 - Change intake record.
 
@@ -670,9 +750,9 @@ Purpose: assess whether model, routing or inference changes are justified.
 
 - Rollback or constraint decision, if used.
 
-# Activity 9: Drive controlled adoption and responsible use within approved scope
+# 10 Activity 9: Drive controlled adoption and responsible use within approved scope
 
-## User onboarding checklist
+## 10.1 User onboarding checklist
 
 Purpose: confirm that approved users understand how to use the service responsibly.
 
@@ -685,7 +765,7 @@ Purpose: confirm that approved users understand how to use the service responsib
 | Feedback        | Is the feedback route clear and usable?                           |        |
 | Usage boundary  | Do users know where outputs can and cannot be reused?             |        |
 
-## Representative user check-in guide
+## 10.2 Representative user check-in guide
 
 Purpose: capture adoption and interpretation signals that logs may not reveal.
 
@@ -698,13 +778,13 @@ Purpose: capture adoption and interpretation signals that logs may not reveal.
 | Misuse risk  | Are outputs being used outside the intended workflow?     |
 | Unmet needs  | What repeated needs are not covered by the current scope? |
 
-## Responsible-use issue log
+## 10.3 Responsible-use issue log
 
 | Date | User group | Issue                                                                        | Risk                | Action                                |
 |------|------------|------------------------------------------------------------------------------|---------------------|---------------------------------------|
 |      |            | Over-trust / caveat misunderstanding / unsupported use / inappropriate reuse | Low / medium / high | Guidance / fix / constrain / escalate |
 
-## Adoption signal summary
+## 10.4 Adoption signal summary
 
 | Signal                         | Interpretation                                | Action                                   |
 |--------------------------------|-----------------------------------------------|------------------------------------------|
@@ -714,7 +794,7 @@ Purpose: capture adoption and interpretation signals that logs may not reveal.
 | Repeated unsupported questions | Adjacent need or scope gap                    | Route to backlog or separate initiative  |
 | High support load              | Guidance or usability issue                   | Improve support material or product flow |
 
-## Scope reminder template
+## 10.5 Scope reminder template
 
 | Item                       | Content |
 |----------------------------|---------|
@@ -724,7 +804,7 @@ Purpose: capture adoption and interpretation signals that logs may not reveal.
 | When to verify or escalate |         |
 | Where to give feedback     |         |
 
-## Evidence to retain
+## 10.6 Evidence to retain
 
 - Onboarding checklist.
 
@@ -738,9 +818,9 @@ Purpose: capture adoption and interpretation signals that logs may not reveal.
 
 - Requests routed to backlog, expansion or adjacent-needs log.
 
-# Activity 10: Manage lifecycle, retirement and decommissioning readiness
+# 11 Activity 10: Manage lifecycle, retirement and decommissioning readiness
 
-## Lifecycle review checklist
+## 11.1 Lifecycle review checklist
 
 Purpose: assess whether the service, or part of it, still has a justified role.
 
@@ -754,7 +834,7 @@ Purpose: assess whether the service, or part of it, still has a justified role.
 | Replacement | Has another tool, report, workflow or product replaced the need?    |
 | Foundation  | Are data, semantic and metadata foundations still maintained?       |
 
-## Lifecycle action guide
+## 11.2 Lifecycle action guide
 
 | Action       | When appropriate                                                        |
 |--------------|-------------------------------------------------------------------------|
@@ -764,7 +844,7 @@ Purpose: assess whether the service, or part of it, still has a justified role.
 | Retire part  | A user group, metric, question type or domain is no longer justified.   |
 | Decommission | The service is replaced, unsupported, too costly or no longer valuable. |
 
-## Retirement or decommissioning decision record
+## 11.3 Retirement or decommissioning decision record
 
 | Item                                | Decision                                                                          |
 |-------------------------------------|-----------------------------------------------------------------------------------|
@@ -777,7 +857,7 @@ Purpose: assess whether the service, or part of it, still has a justified role.
 | Access changes needed?              | Yes / No                                                                          |
 | Data, logs or audit actions needed? | Yes / No                                                                          |
 
-## Decommissioning action checklist
+## 11.4 Decommissioning action checklist
 
 | Area         | Action                                                |
 |--------------|-------------------------------------------------------|
@@ -790,7 +870,7 @@ Purpose: assess whether the service, or part of it, still has a justified role.
 | Logs / audit | Retain required evidence under policy.                |
 | Cost         | Stop avoidable run, model, storage or platform costs. |
 
-## Evidence to retain
+## 11.5 Evidence to retain
 
 - Lifecycle review notes.
 

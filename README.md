@@ -3,37 +3,68 @@
 > Talk-to-Data is not a chatbot connected to a database. It is a governed decision
 > interface over trusted data — and the hard part was never making a model produce an
 > answer. It is making sure every answer is grounded in the right definition, the right
-> data, the right permissions, and the right level of confidence.
+> data, the right permissions and the right level of confidence — while staying useful
+> enough to actually get adopted within its designed scope.
 
 This repository is a practitioner's blueprint for delivering enterprise Talk-to-Data (T2D)
-as a *governed analytics product*, together with a working reference implementation of the
-patterns it describes.
+as a *governed analytics product*, paired with a reference implementation of the patterns it
+describes.
 
 The failure mode it is built to prevent is specific: a system that returns **fluent, plausible
 and wrong** answers. In an enterprise context that is not a minor limitation — it is a trust,
-governance and adoption failure. Fluency is not evidence of correctness, and most of the
-delivery work in T2D sits *around* the model, not in it.
+governance and adoption failure. Fluency is not evidence of correctness, and most of the delivery
+work in T2D sits *around* the model, not in it.
 
-## The reference implementation
+The opposite failure matters just as much. A system so cautious that it refuses or caveats
+everything is safe and useless, and it will not be adopted. The goal is a capability that stays
+useful inside a *deliberately designed* scope — not one that maximises caution at the expense of
+value, and not one that maximises coverage at the expense of trust.
 
-The blueprint is not only prose. <!-- TODO: link your code repo --> **[`t2d-engine`](https://github.com/your-handle/t2d-engine)**
-implements the core patterns the documents argue for:
+## How a question becomes a governed answer
 
-- **Deterministic query validation** — writes, drops, unrestricted joins, missing row limits and
-  forbidden tables are blocked *before* any query reaches execution, not reviewed after.
-- **Metadata grounding** — queries are constrained to approved metric definitions, not inferred
-  from the user's wording.
-- **Safe failure** — the system clarifies, caveats, refuses or escalates rather than guessing.
-- **Evaluation harness** — golden questions with expected answers and safe-failure cases, scored
-  and reproducible.
-
-<!-- TODO: replace with your real command + a one-line result, e.g. -->
-```bash
-make eval        # runs the golden-question suite and prints a scorecard
+```mermaid
+flowchart TD
+    Q["User question"] --> I["Interpret intent and scope"]
+    I --> G["Retrieve and ground in approved metadata (Phase 3 artefacts)"]
+    G --> GEN["Generate query, constrained to approved definitions"]
+    GEN --> V{"Deterministic validation: safe SQL, and within the user's access rights?"}
+    V -- "fails" --> SF["Safe failure: clarify, caveat, refuse or escalate"]
+    V -- "passes" --> X["Execute under user identity (table, column and row access enforced)"]
+    X --> R["Interpret results"]
+    R --> A{"Answer grounded and confident enough?"}
+    A -- "no" --> SF
+    A -- "yes" --> ANS["Answer with definition and caveats"]
+    ANS --> U(["User"])
+    SF --> U
+    L[("Logging, tracing and feedback")]
+    I -.-> L
+    G -.-> L
+    Q -.-> L
+    V -.-> L
+    X -.-> L
+    ANS -.-> L
+    SF -.-> L
+    L --> E["Evaluation and quality-monitoring loop"]
 ```
 
-Each claim in the blueprint maps to where it is implemented — see
-[`t2d-engine/README`](https://github.com/your-handle/t2d-engine) for the claim-to-code table.
+## The reference implementation (in active development)
+
+The blueprint is not only prose. A reference implementation is being built to demonstrate the
+patterns the documents argue for, using OpenAI, Python, SQL, Azure, Terraform and Docker. It will
+be published in this repository. What it sets out to demonstrate:
+
+- **Access-aware querying** — results are filtered to the tables, columns and rows each user is
+  permitted to see, enforced in the query and execution path, not requested in the prompt.
+- **Deterministic query validation** — writes, drops, unrestricted joins, missing row limits and
+  forbidden tables are blocked *before* execution, not reviewed after.
+- **Metadata grounding** — queries are constrained to approved metric definitions, rather than
+  inferred from the user's wording.
+- **Safe failure** — the system clarifies, caveats, refuses or escalates instead of guessing.
+- **Evaluation harness** — roughly 70 golden questions, with expected answers and safe-failure
+  cases, across ~20 tables and ~30 governed views.
+
+When the code is public, each claim above will map to where it is implemented, so the blueprint and
+the build can be checked against each other.
 
 ## What "governed" means in practice
 
@@ -52,7 +83,7 @@ reconstructing one:
 | Caveat | Current month provisional; refunds may lag up to 48h |
 
 A user asking *"net revenue last month by region"* gets the approved definition, their permitted
-regions only, and the provisional-month caveat — or a refusal if they ask for something outside
+regions only, and the provisional-month caveat — or a refusal if the question falls outside
 approved scope. That control surface, not the language model, is the product.
 
 ## How to read this
@@ -64,30 +95,33 @@ approved scope. That control surface, not the language model, is the product.
 | Going deep | [`docs/phases/`](docs/phases) | the nine-phase delivery journey, end to end |
 | Building one | [`docs/annexes/`](docs/annexes) | templates, scorecards, registers, worked examples to adapt |
 
-The phase model is delivery *logic*, not a fixed waterfall — phases run light for a POC, deepen
-for an MVP, and formalise before pilot or production. The discipline is to avoid carrying POC
+Prefer a formatted document? PDF versions of every document are in [`docs/pdf/`](docs/pdf/).
+
+The phase model is delivery *logic*, not a fixed waterfall — phases run light for a POC, deepen for
+an MVP, and formalise before pilot or production. The discipline is to avoid carrying POC
 assumptions into production without revalidating them.
 
 ## The nine phases
 
 | Phase | Focus | What it decides |
 |---|---|---|
-| 1 | Framing | Is T2D the right response to a real business need, and is it bounded and owned? |
-| 2 | Data & semantic readiness | Which questions can be answered safely, and which need remediation, caveats or deferral? |
-| 3 | Governed data foundation | The approved queryable layer: metric logic, joins, filters, access controls, caveats, quality checks |
-| 4 | Design architecture | How a question becomes a governed answer: grounding, model use, tool boundaries, validation, safe failure |
-| 5 | Prototype / MVP build | A bounded, observable, testable build that generates evidence before formal validation |
-| 6 | Validation, assurance & remediation | Is it safe, reliable and evidenced enough for controlled user testing? |
-| 7 | Controlled pilot & user testing | Does it hold up with real users, real questions and real operating conditions? |
-| 8 | Production readiness & release | Resilience, support, monitoring, access, governance, ownership — and the release decision |
-| 9 | Operate, adopt & improve | Run it as a live product: feedback, regression testing, cost control, semantic updates |
+| 1 | [Framing](docs/phases/phase_1_framing.md) | Is T2D the right response to a real business need, and is it bounded and owned? |
+| 2 | [Data & semantic readiness](docs/phases/phase_2_data_semantic_readiness.md) | Which questions can be answered safely, and which need remediation, caveats or deferral? |
+| 3 | [Governed data foundation](docs/phases/phase_3_governed_data_foundation.md) | The approved queryable layer: metric logic, joins, filters, access controls, caveats, quality checks |
+| 4 | [Design architecture](docs/phases/phase_4_design_architecture.md) | How a question becomes a governed answer: grounding, model use, tool boundaries, validation, safe failure |
+| 5 | [Prototype / MVP build](docs/phases/phase_5_prototype_mvp_build.md) | A bounded, observable, testable build that generates evidence before formal validation |
+| 6 | [Validation, assurance & remediation](docs/phases/phase_6_validation_assurance_remediation.md) | Is it safe, reliable and evidenced enough for controlled user testing? |
+| 7 | [Controlled pilot & user testing](docs/phases/phase_7_controlled_pilot.md) | Does it hold up with real users, real questions and real operating conditions? |
+| 8 | [Production readiness & release](docs/phases/phase_8_production_readiness.md) | Resilience, support, monitoring, access, governance, ownership — and the release decision |
+| 9 | [Operate, adopt & improve](docs/phases/phase_9_operate_adopt_improve.md) | Run it as a live product: feedback, regression testing, cost control, semantic updates |
 
 Each phase has a main guide (delivery logic, decisions, risks, required outputs, handover) and an
 annex pack (practical material to adapt, not follow mechanically).
 
-> **Status:** <!-- TODO: set this to what you are actually publishing. You have all nine; if you
-> are staging the release, say "Phases 1–5 published; 6–9 in review" and remove the rows you are
-> not shipping yet. Do not claim "coming soon" for material that exists. -->
+## Status
+
+- **Blueprint (all nine phases + annexes):** published.
+- **Reference implementation:** in active development; will be published in this repository.
 
 ## Repository structure
 
@@ -96,15 +130,23 @@ docs/
   master.md            Strategic overview: logic, risks, gates, operating model
   phases/              The nine phase guides
   annexes/             Templates, checklists, registers, worked examples
+  pdf/                 Formatted PDF versions of every document
 ```
 
 ## Who wrote this
 
-<!-- TODO: one or two real sentences in your own voice. State an opinion you'd defend. Example: -->
-**[Your name].** I wrote this after seeing T2D initiatives stall for reasons that had nothing to
-do with the model. My view is that most should be stopped — or sent back to a dashboard — at the
-framing stage, and that the willingness *not* to proceed is the most underrated delivery skill in
-this space. Feedback and disagreement welcome.
+I'm **Daniel Brule** — a data and AI delivery leader based in London, with around 15 years across
+the field: first as a software engineer (Thomson Reuters, Criteo), then leading customer-facing
+data and AI delivery in consulting (PwC, AlixPartners, Ekimetrics) across private equity, financial
+services and regulated environments, and now building governed GenAI systems hands-on.
+
+This blueprint distils that delivery experience and applies it to what I am currently learning
+building Talk-to-Data systems. The judgment and the practitioner notes throughout are mine, drawn
+from 15 years of getting data and analytics into production and adopted. The drafting was
+AI-assisted — deliberately, because it is the same AI-assisted delivery workflow the blueprint
+advocates.
+
+Feedback and disagreement are welcome. LinkedIn: <https://www.linkedin.com/in/danielbrule/>
 
 ## Scope and status
 
@@ -113,4 +155,4 @@ selection framework. Cost, effort and timeline figures are illustrative planning
 benchmarks. Security, privacy and regulatory requirements should be reviewed by the appropriate
 specialists for each organisation.
 
-<!-- TODO: add a LICENSE file and reference it here, e.g. "Licensed under CC BY 4.0." -->
+

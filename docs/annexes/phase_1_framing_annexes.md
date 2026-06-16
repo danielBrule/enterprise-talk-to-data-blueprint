@@ -1,12 +1,52 @@
-# 
+**Table of contents**
 
-# How to use this annex pack
+- [1 How to use this annex pack](#1-how-to-use-this-annex-pack)
+- [2 Activity question banks](#2-activity-question-banks)
+  - [2.1 Business framing](#21-business-framing)
+  - [2.2 User and workflow discovery](#22-user-and-workflow-discovery)
+  - [2.3 Initial data landscape scan](#23-initial-data-landscape-scan)
+  - [2.4 Initial semantic framing](#24-initial-semantic-framing)
+  - [2.5 Security and governance framing](#25-security-and-governance-framing)
+  - [2.6 Solution architecture framing](#26-solution-architecture-framing)
+  - [2.7 Delivery planning and MVP boundary](#27-delivery-planning-and-mvp-boundary)
+  - [2.8 Evaluation design framing](#28-evaluation-design-framing)
+  - [2.9 Operating model framing](#29-operating-model-framing)
+- [3 Activity output templates](#3-activity-output-templates)
+  - [3.1 Business framing](#31-business-framing)
+  - [3.2 User and workflow discovery](#32-user-and-workflow-discovery)
+  - [3.3 Initial data landscape scan](#33-initial-data-landscape-scan)
+  - [3.4 Initial semantic framing](#34-initial-semantic-framing)
+  - [3.5 Security and governance framing](#35-security-and-governance-framing)
+  - [3.6 Solution architecture framing](#36-solution-architecture-framing)
+  - [3.7 Delivery planning and MVP boundary](#37-delivery-planning-and-mvp-boundary)
+  - [3.8 Evaluation design framing](#38-evaluation-design-framing)
+  - [3.9 Operating model framing](#39-operating-model-framing)
+- [4 Activity scorecards](#4-activity-scorecards)
+  - [4.1 Business framing scorecard](#41-business-framing-scorecard)
+  - [4.2 User and workflow discovery scorecard](#42-user-and-workflow-discovery-scorecard)
+  - [4.3 Initial data landscape scan scorecard](#43-initial-data-landscape-scan-scorecard)
+  - [4.4 Initial semantic framing scorecard](#44-initial-semantic-framing-scorecard)
+  - [4.5 Security and governance framing scorecard](#45-security-and-governance-framing-scorecard)
+  - [4.6 Solution architecture framing scorecard](#46-solution-architecture-framing-scorecard)
+  - [4.7 Delivery planning and MVP boundary](#47-delivery-planning-and-mvp-boundary)
+  - [4.8 Evaluation design framing scorecard](#48-evaluation-design-framing-scorecard)
+  - [4.9 Operating model framing scorecard](#49-operating-model-framing-scorecard)
+- [5 Overall phase readiness scorecard](#5-overall-phase-readiness-scorecard)
+- [6 Risk, decision, assumption and dependency logs](#6-risk-decision-assumption-and-dependency-logs)
+  - [6.1 Risk log](#61-risk-log)
+  - [6.2 Decision log](#62-decision-log)
+  - [6.3 Assumption log](#63-assumption-log)
+  - [6.4 Dependency log](#64-dependency-log)
+
+---
+
+# 1 How to use this annex pack
 
 This annex pack contains detailed tools and templates supporting the Phase 1 Framing Guide. It is intended for facilitation, documentation and project delivery. The main guide explains the framing logic; this annex provides the reusable working material.
 
-# Activity question banks
+# 2 Activity question banks
 
-## Business framing
+## 2.1 Business framing
 
 | Area                | Questions                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -22,7 +62,7 @@ This annex pack contains detailed tools and templates supporting the Phase 1 Fra
 | Success             | What decisions will be improved? What time, cost, quality or risk benefit is expected?                                                              |
 | Failure impact      | What would a harmful or unacceptable answer look like?                                                                                              |
 
-## User and workflow discovery
+## 2.2 User and workflow discovery
 
 | Area                     | Questions                                                                                                                      |
 |--------------------------|--------------------------------------------------------------------------------------------------------------------------------|
@@ -42,7 +82,7 @@ This annex pack contains detailed tools and templates supporting the Phase 1 Fra
 | Human review             | When should the assistant answer directly, ask clarification, escalate to an analyst or refuse?                                |
 | Error tolerance          | What level of error is acceptable by question type? Which answers require validation before being shown?                       |
 
-## Initial data landscape scan
+## 2.3 Initial data landscape scan
 
 | Area                     | Questions                                                                                                                      |
 |--------------------------|--------------------------------------------------------------------------------------------------------------------------------|
@@ -58,7 +98,7 @@ This annex pack contains detailed tools and templates supporting the Phase 1 Fra
 | Existing semantic assets | Are there existing BI models, certified datasets, dbt models, cubes or semantic layers that can be reused rather than rebuilt? |
 | Data change risk         | Are source systems, tables, metrics or ownership expected to change during the delivery timeline?                              |
 
-## Initial semantic framing
+## 2.4 Initial semantic framing
 
 | Area                     | Questions                                                                                                                      |
 |--------------------------|--------------------------------------------------------------------------------------------------------------------------------|
@@ -73,7 +113,7 @@ This annex pack contains detailed tools and templates supporting the Phase 1 Fra
 | Ambiguity                | Which terms require clarification before answering?                                                                            |
 | Certified answer sources | Which dashboards, reports, SQL queries or finance packs are considered official?                                               |
 
-## Security and governance framing
+## 2.5 Security and governance framing
 
 | Area                  | Questions                                                                                                                       |
 |-----------------------|---------------------------------------------------------------------------------------------------------------------------------|
@@ -89,7 +129,7 @@ This annex pack contains detailed tools and templates supporting the Phase 1 Fra
 | Audit                 | Who can review past questions, SQL, answers and access events? At what cadence and for what purpose?                            |
 | Retention             | How long should prompts, SQL, results and feedback be retained? What must be redacted or excluded?                              |
 
-## Solution architecture framing
+## 2.6 Solution architecture framing
 
 | Area                         | Questions                                                                                                                                                                            |
 |------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -110,7 +150,7 @@ This annex pack contains detailed tools and templates supporting the Phase 1 Fra
 | Observability                | Where are latency, cost, token usage, errors, SQL, feedback, quality and security events logged?                                                                                     |
 | Non-functional requirements  | What latency, scalability, reliability, cost, auditability and maintainability requirements apply?                                                                                   |
 
-## Delivery planning and MVP boundary
+## 2.7 Delivery planning and MVP boundary
 
 | Area            | Questions                                                                                                                           |
 |-----------------|-------------------------------------------------------------------------------------------------------------------------------------|
@@ -125,7 +165,7 @@ This annex pack contains detailed tools and templates supporting the Phase 1 Fra
 | Dependencies    | Which data, access, architecture, evaluation or governance dependencies are critical?                                               |
 | Delivery method | Will delivery follow agile, phased gates, discovery sprint, POC, pilot or another approach?                                         |
 
-## Evaluation design framing
+## 2.8 Evaluation design framing
 
 | Area                   | Questions                                                                                                                              |
 |------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
@@ -141,7 +181,7 @@ This annex pack contains detailed tools and templates supporting the Phase 1 Fra
 | Evaluation ownership   | Who owns evaluation after launch: product, analytics, QA, SMEs, data governance or platform team?                                      |
 | Failure taxonomy       | Are failures due to intent, metadata retrieval, SQL generation, semantic mismatch, data quality, permissions, UX or model explanation? |
 
-## Operating model framing
+## 2.9 Operating model framing
 
 | Area                   | Questions                                                                                  |
 |------------------------|--------------------------------------------------------------------------------------------|
@@ -158,13 +198,11 @@ This annex pack contains detailed tools and templates supporting the Phase 1 Fra
 | Workforce impact       | How will T2D affect analysts, reporting teams and business users?                          |
 | Continuous improvement | How will new questions, failed answers, semantic gaps and user feedback be prioritised?    |
 
-# 
-
-# Activity output templates
+# 3 Activity output templates
 
 These columns are illustrative examples only. They are intended to show the expected structure and level of detail.
 
-## Business framing
+## 3.1 Business framing
 
 | Item                 | Description                                         | Owner<sup>1</sup>       | Status<sup>1</sup> | Notes<sup>1</sup>                              |
 |----------------------|-----------------------------------------------------|-------------------------|--------------------|------------------------------------------------|
@@ -176,7 +214,7 @@ These columns are illustrative examples only. They are intended to show the expe
 | Governance route     | Decision forums and approval gates                  | Delivery lead           | Draft / agreed     | Include pilot and go-live approval             |
 | Budget envelope      | Funding for discovery, MVP and run costs            | Sponsor / finance       | Draft / agreed     | Include data, AI, platform and support costs   |
 
-## User and workflow discovery
+## 3.2 User and workflow discovery
 
 | User group          | Workflow / decision         | Current process                           | Priority questions                                            | Frequency        | Pain point               | Expected answer format    | Trust requirement                 | MVP relevance |
 |---------------------|-----------------------------|-------------------------------------------|---------------------------------------------------------------|------------------|--------------------------|---------------------------|-----------------------------------|---------------|
@@ -185,7 +223,7 @@ These columns are illustrative examples only. They are intended to show the expe
 | Analysts            | Exploratory analysis        | SQL, BI, Excel                            | Root-cause, variance, drill-downs                             | Daily / weekly   | Manual query effort      | SQL, table, export        | SQL visibility, lineage           | Medium        |
 | Operations managers | Service or backlog review   | Dashboard and spreadsheets                | Backlog, delays, location variance                            | Daily / weekly   | Limited self-service     | KPI, table, chart         | Freshness, definitions            | Medium        |
 
-## Initial data landscape scan
+## 3.3 Initial data landscape scan
 
 | Priority question area | Candidate source / report           | System         | Owner               | Trusted status    | Coverage                  | Freshness             | Known issue                   | Step 2 validation needed                 |
 |------------------------|-------------------------------------|----------------|---------------------|-------------------|---------------------------|-----------------------|-------------------------------|------------------------------------------|
@@ -194,7 +232,7 @@ These columns are illustrative examples only. They are intended to show the expe
 | Customer spend         | Revenue mart + customer master      | Warehouse      | Data / Sales Ops    | Partially trusted | Customer, month           | Daily                 | Customer duplicates           | Validate joins and customer hierarchy    |
 | Churn                  | CRM + billing                       | CRM / Billing  | Sales Ops / Finance | Unknown           | Customer, segment, month  | Unknown               | No agreed definition          | Confirm definition and source ownership  |
 
-## Initial semantic framing
+## 3.4 Initial semantic framing
 
 | Metric / term | Possible meaning                                | Default framing assumption                           | Source of truth candidate   | Owner            | Ambiguity risk | Step 2 validation needed              |
 |---------------|-------------------------------------------------|------------------------------------------------------|-----------------------------|------------------|----------------|---------------------------------------|
@@ -203,7 +241,7 @@ These columns are illustrative examples only. They are intended to show the expe
 | Churn         | No spend, cancelled contract, lost account      | Not agreed                                           | CRM + billing               | Sales Ops        | High           | Define churn and ownership            |
 | Pipeline      | Open opportunities, weighted pipeline, forecast | Sales pipeline by approved CRM stage                 | Sales BI dashboard          | Sales Ops        | Medium         | Confirm stage logic and exclusions    |
 
-## Security and governance framing
+## 3.5 Security and governance framing
 
 | Area             | Initial assumption                                                               | Risk level | Owner                    | Validation needed               | Decision required |
 |------------------|----------------------------------------------------------------------------------|------------|--------------------------|---------------------------------|-------------------|
@@ -214,7 +252,7 @@ These columns are illustrative examples only. They are intended to show the expe
 | SQL visibility   | Analysts only for MVP                                                            | Medium     | Product owner / security | Confirm user groups             | Yes               |
 | Logging          | Log user, question, retrieved context, generated SQL, result status and feedback | Medium     | Platform owner           | Confirm retention and redaction | Yes               |
 
-## Solution architecture framing
+## 3.6 Solution architecture framing
 
 | Area           | Initial architecture assumption                              | Constraint / dependency             | Owner                   | Validation needed                    | MVP implication             |
 |----------------|--------------------------------------------------------------|-------------------------------------|-------------------------|--------------------------------------|-----------------------------|
@@ -225,7 +263,7 @@ These columns are illustrative examples only. They are intended to show the expe
 | Observability  | Log prompts, SQL, result status, errors, feedback and cost   | Logging tools and policy            | Platform owner          | Confirm retention and redaction      | Required for safe MVP       |
 | Deployment     | Use approved enterprise deployment pattern                   | Architecture approval               | Platform architect      | Confirm environment path             | Defines timeline            |
 
-## Delivery planning and MVP boundary
+## 3.7 Delivery planning and MVP boundary
 
 | Workstream   | Key activity                            | Owner              | Dependency          | Indicative timing | MVP criticality | Notes                     |
 |--------------|-----------------------------------------|--------------------|---------------------|-------------------|-----------------|---------------------------|
@@ -237,7 +275,7 @@ These columns are illustrative examples only. They are intended to show the expe
 | Evaluation   | Create golden question plan             | AI architect / QA  | Question backlog    | Week 1–2          | Medium          | Required before pilot     |
 | Delivery     | Build MVP roadmap and backlog           | Delivery lead      | All workstreams     | Week 1            | High            | Phase-gate input          |
 
-## Evaluation design framing
+## 3.8 Evaluation design framing
 
 | Evaluation item      | Definition                                           | Owner                            | MVP expectation                  | Evidence needed                                 |
 |----------------------|------------------------------------------------------|----------------------------------|----------------------------------|-------------------------------------------------|
@@ -248,7 +286,7 @@ These columns are illustrative examples only. They are intended to show the expe
 | Operational metrics  | Latency, cost, error rate and timeout thresholds     | Platform owner                   | Indicative targets               | Monitoring plan                                 |
 | Feedback model       | User feedback categories and triage route            | Product owner                    | Defined for pilot                | Feedback workflow                               |
 
-## Operating model framing
+## 3.9 Operating model framing
 
 | Ownership area | Proposed owner                  | Responsibility                                         | MVP need           | Open question             |
 |----------------|---------------------------------|--------------------------------------------------------|--------------------|---------------------------|
@@ -261,9 +299,9 @@ These columns are illustrative examples only. They are intended to show the expe
 | Evaluation     | QA / analytics / SMEs           | Golden questions, tests and thresholds                 | Required           | Confirm ongoing owner     |
 | Support        | Product / BI / platform support | Issue triage and user support                          | Required for pilot | Confirm escalation route  |
 
-# Activity scorecards
+# 4 Activity scorecards
 
-## Business framing scorecard
+## 4.1 Business framing scorecard
 
 | Criterion         | Green                                 | Amber                               | Red                        |
 |-------------------|---------------------------------------|-------------------------------------|----------------------------|
@@ -274,7 +312,7 @@ These columns are illustrative examples only. They are intended to show the expe
 | Success criteria  | Measurable outcomes defined           | Outcomes qualitative only           | No success criteria        |
 | Budget envelope   | Budget range and approval route clear | Budget assumption only              | No funding view            |
 
-## User and workflow discovery scorecard
+## 4.2 User and workflow discovery scorecard
 
 | Criterion           | Green                                   | Amber                            | Red                            |
 |---------------------|-----------------------------------------|----------------------------------|--------------------------------|
@@ -285,7 +323,7 @@ These columns are illustrative examples only. They are intended to show the expe
 | Output expectations | Answer format and trust needs clear     | Some uncertainty remains         | Expectations undefined         |
 | Human review needs  | Escalation and refusal cases identified | Some review needs unclear        | No control model               |
 
-## Initial data landscape scan scorecard
+## 4.3 Initial data landscape scan scorecard
 
 | Criterion         | Green                                                 | Amber                                 | Red                           |
 |-------------------|-------------------------------------------------------|---------------------------------------|-------------------------------|
@@ -296,7 +334,7 @@ These columns are illustrative examples only. They are intended to show the expe
 | Freshness         | Freshness likely adequate                             | Freshness uncertain                   | Freshness likely unsuitable   |
 | Known data risks  | Key risks captured for Step 2                         | Some risks captured                   | Risks unknown                 |
 
-## Initial semantic framing scorecard
+## 4.4 Initial semantic framing scorecard
 
 | Criterion         | Green                                        | Amber                                    | Red                    |
 |-------------------|----------------------------------------------|------------------------------------------|------------------------|
@@ -307,7 +345,7 @@ These columns are illustrative examples only. They are intended to show the expe
 | Certified sources | Candidate official sources identified        | Multiple sources compete                 | No source of truth     |
 | Semantic risk     | Material risks visible for Step 2            | Some risks captured                      | Semantic risk unknown  |
 
-## Security and governance framing scorecard
+## 4.5 Security and governance framing scorecard
 
 | Criterion              | Green                                 | Amber                             | Red                    |
 |------------------------|---------------------------------------|-----------------------------------|------------------------|
@@ -318,7 +356,7 @@ These columns are illustrative examples only. They are intended to show the expe
 | Exposure controls      | High-level controls agreed            | Some controls unresolved          | No safe exposure model |
 | Approval route         | Security and risk owners engaged      | Owners identified but not engaged | No approval path       |
 
-## Solution architecture framing scorecard
+## 4.6 Solution architecture framing scorecard
 
 | Criterion           | Green                                               | Amber                   | Red                      |
 |---------------------|-----------------------------------------------------|-------------------------|--------------------------|
@@ -329,7 +367,7 @@ These columns are illustrative examples only. They are intended to show the expe
 | Deployment route    | Environments and release route known                | Some governance pending | No deployment path       |
 | Non-functional view | Latency, cost, reliability and audit needs captured | Partial view            | Not assessed             |
 
-## Delivery planning and MVP boundary
+## 4.7 Delivery planning and MVP boundary
 
 | Criterion        | Green                                    | Amber                            | Red                        |
 |------------------|------------------------------------------|----------------------------------|----------------------------|
@@ -340,7 +378,7 @@ These columns are illustrative examples only. They are intended to show the expe
 | Backlog          | Initial backlog structured               | Backlog incomplete               | No delivery backlog        |
 | Governance gates | Decision points clear                    | Some gates unclear               | No approval path           |
 
-## Evaluation design framing scorecard
+## 4.8 Evaluation design framing scorecard
 
 | Criterion           | Green                             | Amber                  | Red                    |
 |---------------------|-----------------------------------|------------------------|------------------------|
@@ -351,7 +389,7 @@ These columns are illustrative examples only. They are intended to show the expe
 | Regression approach | Rerun approach defined            | Manual approach only   | No regression plan     |
 | Feedback loop       | Feedback capture and triage clear | Partial feedback route | No feedback process    |
 
-## Operating model framing scorecard
+## 4.9 Operating model framing scorecard
 
 | Criterion           | Green                                       | Amber                         | Red                   |
 |---------------------|---------------------------------------------|-------------------------------|-----------------------|
@@ -363,7 +401,7 @@ These columns are illustrative examples only. They are intended to show the expe
 | Support model       | Triage and escalation model defined         | Informal support only         | No support route      |
 | Adoption approach   | Training and communication approach defined | Adoption assumptions only     | No adoption plan      |
 
-# Overall phase readiness scorecard
+# 5 Overall phase readiness scorecard
 
 | Readiness area                    | Rating              | Evidence                                                | Key risk                          | Action required                     | Owner                   |
 |-----------------------------------|---------------------|---------------------------------------------------------|-----------------------------------|-------------------------------------|-------------------------|
@@ -388,11 +426,9 @@ Suggested rating logic:
 | Red    | Not ready; material blocker exists                       |
 | Grey   | Not assessed yet                                         |
 
-# 
+# 6 Risk, decision, assumption and dependency logs
 
-# Risk, decision, assumption and dependency logs
-
-## Risk log
+## 6.1 Risk log
 
 | Risk                                                                       | Impact                                                 | Likelihood | Mitigation                                                                      | Owner                   | Status |
 |----------------------------------------------------------------------------|--------------------------------------------------------|------------|---------------------------------------------------------------------------------|-------------------------|--------|
@@ -407,7 +443,7 @@ Suggested rating logic:
 | Evaluation approach is left too late                                       | Cannot prove correctness or safety                     | Medium     | Define golden question plan during framing                                      | AI architect / QA       | Open   |
 | Operating model is unclear                                                 | Prototype cannot transition to live service            | Medium     | Define ownership and support assumptions before build                           | Product owner           | Open   |
 
-## Decision log
+## 6.2 Decision log
 
 | Decision                                   | Options                                                                        | Recommended option                                                      | Decision owner           | Due date       | Status |
 |--------------------------------------------|--------------------------------------------------------------------------------|-------------------------------------------------------------------------|--------------------------|----------------|--------|
@@ -420,7 +456,7 @@ Suggested rating logic:
 | What budget is available?                  | Discovery only / MVP / pilot / production / run                                | Confirm budget across delivery and run                                  | Sponsor / finance        | End of framing | Open   |
 | Should T2D proceed to Step 2?              | Proceed / pause / re-scope / stop                                              | Proceed only if value, scope, ownership and feasibility are sufficient  | Sponsor                  | End of framing | Open   |
 
-## Assumption log
+## 6.3 Assumption log
 
 | Assumption                                                            | Impact if wrong                      | Validation method                     | Owner              | Status      |
 |-----------------------------------------------------------------------|--------------------------------------|---------------------------------------|--------------------|-------------|
@@ -434,7 +470,7 @@ Suggested rating logic:
 | Budget can cover delivery and run costs                               | MVP may not be sustainable           | Finance review                        | Sponsor            | To validate |
 | Product and support ownership can be assigned                         | Capability may not scale after pilot | Operating model review                | Delivery lead      | To validate |
 
-## Dependency log
+## 6.4 Dependency log
 
 | Dependency                                   | Needed by                            | Owner                   | Due date       | Status | Impact if delayed                    |
 |----------------------------------------------|--------------------------------------|-------------------------|----------------|--------|--------------------------------------|

@@ -1,6 +1,109 @@
-# 
+**Table of contents**
 
-# How to use this annex pack
+- [1 How to use this annex pack](#1-how-to-use-this-annex-pack)
+- [2 Foundation tests, logs, cost and evidence controls](#2-foundation-tests-logs-cost-and-evidence-controls)
+  - [2.1 Testing controls](#21-testing-controls)
+    - [2.1.1 Testing principles](#211-testing-principles)
+    - [2.1.2 Test type definitions](#212-test-type-definitions)
+    - [2.1.3 Example testing technologies](#213-example-testing-technologies)
+  - [2.2 Logging controls](#22-logging-controls)
+    - [2.2.1 Logging principles](#221-logging-principles)
+    - [2.2.2 Log type definitions](#222-log-type-definitions)
+    - [2.2.3 Example logging technologies](#223-example-logging-technologies)
+  - [2.3 Cost controls](#23-cost-controls)
+    - [2.3.1 Cost principles](#231-cost-principles)
+    - [2.3.2 Cost layer definitions](#232-cost-layer-definitions)
+    - [2.3.3 Example cost technologies](#233-example-cost-technologies)
+- [3 Versioning and change control for foundation artefacts](#3-versioning-and-change-control-for-foundation-artefacts)
+- [4 Recommended register technology by delivery stage](#4-recommended-register-technology-by-delivery-stage)
+- [5 Activities](#5-activities)
+  - [5.1 Confirm governed asset scope](#51-confirm-governed-asset-scope)
+    - [5.1.1 Build scope summary](#511-build-scope-summary)
+    - [5.1.2 Included question list](#512-included-question-list)
+    - [5.1.3 Scope decision categories](#513-scope-decision-categories)
+    - [5.1.4 Final scope check](#514-final-scope-check)
+  - [5.2 Confirm implementation pattern and technology route](#52-confirm-implementation-pattern-and-technology-route)
+    - [5.2.1 Delivery organisation and sprint setup](#521-delivery-organisation-and-sprint-setup)
+    - [5.2.2 Example technology routes](#522-example-technology-routes)
+    - [5.2.3 Implementation patterns](#523-implementation-patterns)
+    - [5.2.4 Pattern comparison](#524-pattern-comparison)
+    - [5.2.5 Technology decision checklist](#525-technology-decision-checklist)
+  - [5.3 Curated queryable asset register](#53-curated-queryable-asset-register)
+    - [5.3.1 Asset register](#531-asset-register)
+    - [5.3.2 Example register entry](#532-example-register-entry)
+    - [5.3.3 Asset exclusion log](#533-asset-exclusion-log)
+    - [5.3.4 Final asset check](#534-final-asset-check)
+  - [5.4 Metric implementation card](#54-metric-implementation-card)
+    - [5.4.1 Metric implementation card](#541-metric-implementation-card)
+    - [5.4.2 Concrete implementation example](#542-concrete-implementation-example)
+    - [5.4.3 Example implementation logic](#543-example-implementation-logic)
+    - [5.4.4 Metric validation check](#544-metric-validation-check)
+    - [5.4.5 Metric registry](#545-metric-registry)
+      - [5.4.5.1 Metric registry structure](#5451-metric-registry-structure)
+      - [5.4.5.2 Example metric registry entry](#5452-example-metric-registry-entry)
+      - [5.4.5.3 Possible implementation options](#5453-possible-implementation-options)
+      - [5.4.5.4 Recommended approach by delivery stage](#5454-recommended-approach-by-delivery-stage)
+      - [5.4.5.5 Minimum registry checks](#5455-minimum-registry-checks)
+  - [5.5 Dimension and hierarchy register](#55-dimension-and-hierarchy-register)
+    - [5.5.1 Dimension register structure](#551-dimension-register-structure)
+    - [5.5.2 Example dimension entry](#552-example-dimension-entry)
+    - [5.5.3 Example implementation](#553-example-implementation)
+      - [5.5.3.1 Dimension table](#5531-dimension-table)
+      - [5.5.3.2 Curated asset using the dimension](#5532-curated-asset-using-the-dimension)
+      - [5.5.3.3 Semantic / metadata example](#5533-semantic-metadata-example)
+    - [5.5.4 Compatibility matrix](#554-compatibility-matrix)
+    - [5.5.5 Minimum dimension checks](#555-minimum-dimension-checks)
+  - [5.6 Implement join, grain and aggregation register](#56-implement-join-grain-and-aggregation-register)
+    - [5.6.1 Grain register](#561-grain-register)
+    - [5.6.2 Approved join register](#562-approved-join-register)
+      - [5.6.2.1 Example](#5621-example)
+    - [5.6.3 Restricted or excluded join examples](#563-restricted-or-excluded-join-examples)
+    - [5.6.4 Aggregation rule register](#564-aggregation-rule-register)
+      - [5.6.4.1 Example](#5641-example)
+    - [5.6.5 Automated test examples](#565-automated-test-examples)
+    - [5.6.6 Minimum checks before approval](#566-minimum-checks-before-approval)
+  - [5.7 Implement standard filter and caveat register](#57-implement-standard-filter-and-caveat-register)
+    - [5.7.1 Filter register](#571-filter-register)
+    - [5.7.2 Example filter entry](#572-example-filter-entry)
+    - [5.7.3 Caveat register](#573-caveat-register)
+    - [5.7.4 Example caveat entry](#574-example-caveat-entry)
+    - [5.7.5 Common clarification patterns](#575-common-clarification-patterns)
+    - [5.7.6 Automated test examples](#576-automated-test-examples)
+    - [5.7.7 Minimum checks before approval](#577-minimum-checks-before-approval)
+  - [5.8 Security and exposure control register](#58-security-and-exposure-control-register)
+    - [5.8.1 User group and access matrix](#581-user-group-and-access-matrix)
+      - [5.8.1.1 Example user group and access matrix](#5811-example-user-group-and-access-matrix)
+    - [5.8.2 Security control register](#582-security-control-register)
+      - [5.8.2.1 Example security control entries](#5821-example-security-control-entries)
+        - [5.8.2.1.1 Example 1 — Regional row-level access](#58211-example-1-regional-row-level-access)
+        - [5.8.2.1.2 Example 2 — Customer-level suppression](#58212-example-2-customer-level-suppression)
+      - [5.8.2.2 Exposure-risk examples](#5822-exposure-risk-examples)
+    - [5.8.3 Security validation checks](#583-security-validation-checks)
+    - [5.8.4 Minimum checks before approval](#584-minimum-checks-before-approval)
+  - [5.9 Quality, performance, freshness, performance and cost controls](#59-quality-performance-freshness-performance-and-cost-controls)
+    - [5.9.1 Quality control register](#591-quality-control-register)
+      - [5.9.1.1 Example quality control entry](#5911-example-quality-control-entry)
+    - [5.9.2 Freshness control register](#592-freshness-control-register)
+      - [5.9.2.1 Example freshness control entry](#5921-example-freshness-control-entry)
+    - [5.9.3 Performance control register](#593-performance-control-register)
+      - [5.9.3.1 Example performance control entry](#5931-example-performance-control-entry)
+    - [5.9.4 Cost reporting by meaningful layer](#594-cost-reporting-by-meaningful-layer)
+    - [5.9.5 Cost scenario template](#595-cost-scenario-template)
+    - [5.9.6 Cost threshold register](#596-cost-threshold-register)
+      - [5.9.6.1 Example cost threshold entry](#5961-example-cost-threshold-entry)
+    - [5.9.7 Automated control examples](#597-automated-control-examples)
+    - [5.9.8 Minimum checks before approval](#598-minimum-checks-before-approval)
+  - [5.10 Governed foundation handover checklist](#510-governed-foundation-handover-checklist)
+    - [5.10.1 Governed foundation pack contents](#5101-governed-foundation-pack-contents)
+    - [5.10.2 Handover checklist](#5102-handover-checklist)
+    - [5.10.3 Downstream handover matrix](#5103-downstream-handover-matrix)
+    - [5.10.4 Known limitations and remediation backlog](#5104-known-limitations-and-remediation-backlog)
+    - [5.10.5 Support and escalation route](#5105-support-and-escalation-route)
+    - [5.10.6 Final handover decision](#5106-final-handover-decision)
+
+---
+
+# 1 How to use this annex pack
 
 This annex pack contains example tools, templates and checklists supporting the **Phase 3 Governed Data Foundation Guide**. It is intended as practical inspiration for facilitation, documentation and delivery, not as a mandatory to-do list.
 
@@ -8,11 +111,11 @@ The main guide explains the delivery logic and decisions required during Phase 3
 
 Teams should use only the templates that add value. For a narrow POC, many annex items may be simplified or skipped. For an MVP, pilot or production path, more of the material may be needed to support traceability, testing, security, cost control, ownership and operational handover.
 
-# Foundation tests, logs, cost and evidence controls
+# 2 Foundation tests, logs, cost and evidence controls
 
-## Testing controls
+## 2.1 Testing controls
 
-### Testing principles
+### 2.1.1 Testing principles
 
 | Principle               | Meaning                                                                                                      |
 |-------------------------|--------------------------------------------------------------------------------------------------------------|
@@ -22,7 +125,7 @@ Teams should use only the templates that add value. For a narrow POC, many annex
 | Keep evidence           | Test results should be centrally stored and linked to the asset, metric, dimension or rule they validate.    |
 | Re-test on change       | Changes to assets, metrics, joins, filters or security rules should trigger regression tests.                |
 
-### Test type definitions
+### 2.1.2 Test type definitions
 
 | Test type                  | Description                                                        | Where to use                            |
 |----------------------------|--------------------------------------------------------------------|-----------------------------------------|
@@ -41,7 +144,7 @@ Teams should use only the templates that add value. For a narrow POC, many annex
 | Cost test                  | Checks whether queries, refreshes or tests stay within thresholds. | Scaling and run-cost control.           |
 | Regression test            | Confirms existing outputs still work after changes.                | Any foundation change.                  |
 
-### Example testing technologies
+### 2.1.3 Example testing technologies
 
 | Area                           | Example technologies                                                                            |
 |--------------------------------|-------------------------------------------------------------------------------------------------|
@@ -51,9 +154,9 @@ Teams should use only the templates that add value. For a narrow POC, many annex
 | Warehouse-native checks        | Snowflake tasks, BigQuery scheduled queries, Databricks SQL, Redshift/Synapse checks.           |
 | Test result centralisation     | CI/CD dashboards, dbt artifacts, metadata tables, data catalogues, observability tools.         |
 
-## Logging controls
+## 2.2 Logging controls
 
-### Logging principles
+### 2.2.1 Logging principles
 
 | Principle             | Meaning                                                                                          |
 |-----------------------|--------------------------------------------------------------------------------------------------|
@@ -63,7 +166,7 @@ Teams should use only the templates that add value. For a narrow POC, many annex
 | Alert by severity     | Not every log needs escalation; critical failures and cost spikes should notify the right owner. |
 | Define retention      | Logs should be retained long enough to support audit, debugging and improvement.                 |
 
-### Log type definitions
+### 2.2.2 Log type definitions
 
 | Log type       | Description                                                                      | Where to use                    |
 |----------------|----------------------------------------------------------------------------------|---------------------------------|
@@ -77,7 +180,7 @@ Teams should use only the templates that add value. For a narrow POC, many annex
 | Alert log      | Records triggered alerts, recipients, actions and resolution status.             | Support and operations.         |
 | Incident log   | Records production issues, impact, owner, resolution and follow-up.              | Pilot and production operation. |
 
-### Example logging technologies
+### 2.2.3 Example logging technologies
 
 | Area                      | Example technologies                                                                            |
 |---------------------------|-------------------------------------------------------------------------------------------------|
@@ -89,9 +192,9 @@ Teams should use only the templates that add value. For a narrow POC, many annex
 | CI/CD logs                | GitHub Actions, GitLab CI, Azure DevOps, Jenkins.                                               |
 | Metadata / catalogue logs | DataHub, Collibra, Alation, OpenMetadata, Microsoft Purview.                                    |
 
-## Cost controls
+## 2.3 Cost controls
 
-### Cost principles
+### 2.3.1 Cost principles
 
 | Principle                   | Meaning                                                                                               |
 |-----------------------------|-------------------------------------------------------------------------------------------------------|
@@ -102,7 +205,7 @@ Teams should use only the templates that add value. For a narrow POC, many annex
 | Set thresholds and alerts   | Cost spikes should trigger review before they become normalised.                                      |
 | Review before scaling       | POC cost patterns should inform MVP, pilot and production sizing.                                     |
 
-### Cost layer definitions
+### 2.3.2 Cost layer definitions
 
 | Cost layer             | Description                                                      | Example indicators                                            |
 |------------------------|------------------------------------------------------------------|---------------------------------------------------------------|
@@ -117,7 +220,7 @@ Teams should use only the templates that add value. For a narrow POC, many annex
 | Security and audit     | Cost of policy enforcement, audit retention and reviews.         | Audit log volume, access review effort.                       |
 | Operations             | Cost of support, remediation and change management.              | Incidents, manual fixes, owner review time.                   |
 
-### Example cost technologies
+### 2.3.3 Example cost technologies
 
 | Area                        | Example technologies                                                                              |
 |-----------------------------|---------------------------------------------------------------------------------------------------|
@@ -127,7 +230,7 @@ Teams should use only the templates that add value. For a narrow POC, many annex
 | Observability cost views    | Datadog cost monitoring, Grafana dashboards, platform-native metrics.                             |
 | Custom reporting            | Cost metadata tables, tagged workloads, scheduled cost reports, BI dashboards.                    |
 
-# Versioning and change control for foundation artefacts
+# 3 Versioning and change control for foundation artefacts
 
 Foundation artefacts should be versioned because T2D answers depend on the definitions, assets, rules and controls that were active when the answer was produced. Metrics, dimensions, joins, filters, caveats, security rules and cost thresholds may all change over time.
 
@@ -148,7 +251,7 @@ Versioning should apply to both the business definition and the technical implem
 
 For a POC, a simple version number and change note may be enough. For MVP or pilot, changes should normally be reviewed, tested and traceable through the agreed deployment route.
 
-# Recommended register technology by delivery stage
+# 4 Recommended register technology by delivery stage
 
 | Stage      | Recommended register technology                                                                                      | Why                                                            |
 |------------|----------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------|
@@ -169,11 +272,11 @@ For a POC, a simple version number and change note may be enough. For MVP or pil
 | **Data catalogue**                | Enterprise governance and ownership      | Good for lineage, stewardship, discoverability          | Often not structured enough for runtime T2D use |
 | **Metadata API/service**          | Mature production environment            | Controlled, auditable, scalable                         | Higher build and operating effort               |
 
-# Activities
+# 5 Activities
 
-## Confirm governed asset scope
+## 5.1 Confirm governed asset scope
 
-### Build scope summary
+### 5.1.1 Build scope summary
 
 | Item                | Description                                           |
 |---------------------|-------------------------------------------------------|
@@ -190,14 +293,14 @@ For a POC, a simple version number and change note may be enough. For MVP or pil
 | Version             | Current version of the scope logic                    |
 | Last update         | Last update of the scope logic                        |
 
-### Included question list
+### 5.1.2 Included question list
 
 | Priority question                     | Included? | Source asset        | Metric / dimension dependency   | Caveat                     | Owner              |
 |---------------------------------------|-----------|---------------------|---------------------------------|----------------------------|--------------------|
 | Example: Revenue by region last month | Yes       | Sales mart          | Net revenue, region, order date | Current month provisional  | Finance analytics  |
 | Example: Margin by product            | Deferred  | Sales + cost models | Gross margin, product hierarchy | Cost allocation unresolved | Commercial finance |
 
-### Scope decision categories
+### 5.1.3 Scope decision categories
 
 | Category            | Meaning                                                             |
 |---------------------|---------------------------------------------------------------------|
@@ -207,7 +310,7 @@ For a POC, a simple version number and change note may be enough. For MVP or pil
 | Defer               | Potentially useful later, but not needed for the current stage.     |
 | Exclude             | Not suitable for this T2D scope or delivery stage.                  |
 
-### Final scope check
+### 5.1.4 Final scope check
 
 Before build starts, the team should be able to answer:
 
@@ -223,9 +326,9 @@ Before build starts, the team should be able to answer:
 
 - What new risks were discovered during build-scope confirmation?
 
-## Confirm implementation pattern and technology route
+## 5.2 Confirm implementation pattern and technology route
 
-### Delivery organisation and sprint setup
+### 5.2.1 Delivery organisation and sprint setup
 
 | Area               | Guidance                                                                                                                    |
 |--------------------|-----------------------------------------------------------------------------------------------------------------------------|
@@ -236,7 +339,7 @@ Before build starts, the team should be able to answer:
 | Environment setup  | Use code-based environments where possible so developers can build and test safely.                                         |
 | Definition of done | Asset is implemented, tested, documented, owned, versioned and ready for downstream build/evaluation.                       |
 
-### Example technology routes
+### 5.2.2 Example technology routes
 
 | Route                         | Example                                                                                      |
 |-------------------------------|----------------------------------------------------------------------------------------------|
@@ -246,7 +349,7 @@ Before build starts, the team should be able to answer:
 | API-led foundation            | Controlled service endpoints for approved metrics or sensitive queries.                      |
 | Hybrid foundation             | dbt models plus semantic-layer definitions plus materialised tables for high-volume queries. |
 
-### Implementation patterns 
+### 5.2.3 Implementation patterns
 
 | Term                   | Definition                                                                                                                                                                                             |
 |------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -257,7 +360,7 @@ Before build starts, the team should be able to answer:
 | Controlled APIs        | Approved service endpoints that expose specific data or calculations through managed logic, permissions and audit controls, rather than allowing open-ended SQL access.                                |
 | Hybrid pattern         | A combined foundation approach using more than one pattern, such as semantic-layer definitions over curated views, or APIs for sensitive calculations and materialised tables for high-volume metrics. |
 
-### Pattern comparison
+### 5.2.4 Pattern comparison
 
 | Pattern                | Typical use                       | Strengths                                    | Trade-offs                               |
 |------------------------|-----------------------------------|----------------------------------------------|------------------------------------------|
@@ -268,7 +371,7 @@ Before build starts, the team should be able to answer:
 | Controlled APIs        | Sensitive or constrained logic    | Strong control, auditability and permissions | Less flexible for exploration            |
 | Hybrid pattern         | Mixed enterprise environments     | Pragmatic and adaptable                      | Needs clear ownership and standards      |
 
-### Technology decision checklist
+### 5.2.5 Technology decision checklist
 
 | Decision area       | Key question                                          |
 |---------------------|-------------------------------------------------------|
@@ -281,9 +384,9 @@ Before build starts, the team should be able to answer:
 | Monitoring          | How will freshness, failures and cost be tracked?     |
 | Ownership           | Who owns the platform and foundation assets?          |
 
-## Curated queryable asset register
+## 5.3 Curated queryable asset register
 
-### Asset register
+### 5.3.1 Asset register
 
 | Field               | Description                                                                         |
 |---------------------|-------------------------------------------------------------------------------------|
@@ -308,7 +411,7 @@ Before build starts, the team should be able to answer:
 | Version             | Current version of the asset                                                        |
 | Last update         | Last update of the asset                                                            |
 
-### Example register entry
+### 5.3.2 Example register entry
 
 | Field               | Example                                                              |
 |---------------------|----------------------------------------------------------------------|
@@ -329,7 +432,7 @@ Before build starts, the team should be able to answer:
 | Excluded fields     | Customer name, customer email, raw discount approval notes.          |
 | Maintenance route   | Changes reviewed through analytics engineering backlog.              |
 
-### Asset exclusion log
+### 5.3.3 Asset exclusion log
 
 | Excluded asset / field  | Reason for exclusion                           | Owner                 | Revisit condition                                         |
 |-------------------------|------------------------------------------------|-----------------------|-----------------------------------------------------------|
@@ -337,7 +440,7 @@ Before build starts, the team should be able to answer:
 | Discount approval notes | Free-text sensitive content.                   | Commercial operations | Revisit only after sensitivity review.                    |
 | Legacy sales report     | Definition conflicts with approved sales mart. | Finance analytics     | Revisit if reconciliation is completed.                   |
 
-### Final asset check
+### 5.3.4 Final asset check
 
 Before an asset is approved for T2D use, confirm:
 
@@ -355,9 +458,9 @@ Before an asset is approved for T2D use, confirm:
 
 - The maintenance route is known.
 
-## Metric implementation card
+## 5.4 Metric implementation card
 
-### Metric implementation card
+### 5.4.1 Metric implementation card
 
 | Field               | Description                                                |
 |---------------------|------------------------------------------------------------|
@@ -381,7 +484,7 @@ Before an asset is approved for T2D use, confirm:
 | Version             | Current version of the metric logic.                       |
 | Change route        | How updates are reviewed, tested and released.             |
 
-### Concrete implementation example
+### 5.4.2 Concrete implementation example
 
 | Field               | Example                                                                                           |
 |---------------------|---------------------------------------------------------------------------------------------------|
@@ -405,7 +508,7 @@ Before an asset is approved for T2D use, confirm:
 | Version             | v1.0                                                                                              |
 | Change route        | Changes reviewed by Finance Analytics and deployed through analytics engineering release process. |
 
-### Example implementation logic
+### 5.4.3 Example implementation logic
 
 Below is a simplified example of how the metric might be implemented in a curated SQL view or transformation model.
 
@@ -429,7 +532,7 @@ WHERE order_status = 'completed'
 
 For T2D, the assistant should query the implemented net_revenue field or approved metric object. It should not recreate the calculation from memory or infer exclusions from the user’s wording.
 
-### Metric validation check
+### 5.4.4 Metric validation check
 
 | Check                                   | Example evidence                                          |
 |-----------------------------------------|-----------------------------------------------------------|
@@ -442,9 +545,9 @@ For T2D, the assistant should query the implemented net_revenue field or approve
 | Owner and contact named                 | Finance owner and analytics engineering contact assigned. |
 | Change route defined                    | Versioned release through analytics engineering process.  |
 
-### Metric registry
+### 5.4.5 Metric registry
 
-#### Metric registry structure
+#### 5.4.5.1 Metric registry structure
 
 | Field                    | Description                                                                     |
 |--------------------------|---------------------------------------------------------------------------------|
@@ -470,7 +573,7 @@ For T2D, the assistant should query the implemented net_revenue field or approve
 | Last updated             | Date of last approved update.                                                   |
 | Retrieval use            | Whether the assistant can use this entry for routing, grounding or explanation. |
 
-#### Example metric registry entry
+#### 5.4.5.2 Example metric registry entry
 
 | Field                    | Example                                                                          |
 |--------------------------|----------------------------------------------------------------------------------|
@@ -496,7 +599,7 @@ For T2D, the assistant should query the implemented net_revenue field or approve
 | Last updated             | 2026-05-14                                                                       |
 | Retrieval use            | Routing, grounding and answer explanation.                                       |
 
-#### Possible implementation options
+#### 5.4.5.3 Possible implementation options
 
 | Implementation option              | How it works                                                                 | Strengths                                                                          | Trade-offs                                                                          |
 |------------------------------------|------------------------------------------------------------------------------|------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
@@ -508,7 +611,7 @@ For T2D, the assistant should query the implemented net_revenue field or approve
 | Custom metadata table              | Registry stored in a governed database table.                                | Queryable by T2D; easy to integrate with orchestration and retrieval.              | Requires ownership, UI or process for updates.                                      |
 | API-backed registry                | Metrics exposed through an approved metadata or metric API.                  | Strong control, auditability and integration.                                      | More engineering effort; usually too heavy for early POC.                           |
 
-#### Recommended approach by delivery stage
+#### 5.4.5.4 Recommended approach by delivery stage
 
 | Delivery stage | Recommended approach                                                                                                    |
 |----------------|-------------------------------------------------------------------------------------------------------------------------|
@@ -517,7 +620,7 @@ For T2D, the assistant should query the implemented net_revenue field or approve
 | Pilot          | Registry linked to implemented logic, testing, ownership and change control.                                            |
 | Production     | Governed, versioned, auditable registry integrated with catalogue, semantic layer, CI/CD and monitoring where possible. |
 
-#### Minimum registry checks
+#### 5.4.5.5 Minimum registry checks
 
 Before a metric is made available to T2D, confirm:
 
@@ -539,11 +642,11 @@ Before a metric is made available to T2D, confirm:
 
 - The entry is usable by the assistant for routing, grounding or explanation.
 
-## Dimension and hierarchy register
+## 5.5 Dimension and hierarchy register
 
 This annex provides a practical template for documenting the dimensions and hierarchies that the T2D system is allowed to use.
 
-### Dimension register structure
+### 5.5.1 Dimension register structure
 
 | Field                 | Description                                                                     |
 |-----------------------|---------------------------------------------------------------------------------|
@@ -571,7 +674,7 @@ This annex provides a practical template for documenting the dimensions and hier
 | Retrieval use         | Whether the assistant can use this entry for routing, grounding or explanation. |
 | Security implications | Access, masking or inference risks linked to this dimension.                    |
 
-### Example dimension entry
+### 5.5.2 Example dimension entry
 
 | Field               | Example                                                                                               |
 |---------------------|-------------------------------------------------------------------------------------------------------|
@@ -598,9 +701,9 @@ This annex provides a practical template for documenting the dimensions and hier
 | Change route        | Changes reviewed by Commercial Operations and deployed through analytics engineering release process. |
 | Retrieval use       | Routing, grounding and answer explanation.                                                            |
 
-### Example implementation
+### 5.5.3 Example implementation
 
-#### Dimension table
+#### 5.5.3.1 Dimension table
 
 ```sql
 CREATE TABLE dim_region (
@@ -616,7 +719,7 @@ CREATE TABLE dim_region (
 );
 ```
 
-#### Curated asset using the dimension
+#### 5.5.3.2 Curated asset using the dimension
 
 ```sql
 CREATE VIEW vw_t2d_sales_order_line AS
@@ -638,7 +741,7 @@ WHERE sol.order_status = 'completed'
   AND sol.is_test_order = false;
 ```
 
-#### Semantic / metadata example
+#### 5.5.3.3 Semantic / metadata example
 
 **Yaml**
 
@@ -677,7 +780,7 @@ retrieval_use:
   - answer_explanation
 ```
 
-### Compatibility matrix
+### 5.5.4 Compatibility matrix
 
 | Dimension        | Valid metrics                                  | Invalid metrics        | Notes                                               |
 |------------------|------------------------------------------------|------------------------|-----------------------------------------------------|
@@ -686,7 +789,7 @@ retrieval_use:
 | Customer segment | Net revenue, order count, churn                | Statutory revenue      | Segment assignment refreshed monthly.               |
 | Legal entity     | Statutory revenue, cost, balance sheet metrics | Commercial net revenue | Use finance reporting hierarchy only.               |
 
-### Minimum dimension checks
+### 5.5.5 Minimum dimension checks
 
 Before a dimension is made available to T2D, confirm:
 
@@ -710,9 +813,9 @@ Before a dimension is made available to T2D, confirm:
 
 - The assistant can use the entry for routing, grounding or explanation where appropriate.
 
-## Implement join, grain and aggregation register
+## 5.6 Implement join, grain and aggregation register
 
-### Grain register
+### 5.6.1 Grain register
 
 | Field               | Description                                            |
 |---------------------|--------------------------------------------------------|
@@ -746,7 +849,7 @@ Before a dimension is made available to T2D, confirm:
 | Validation test     | order_line_id is unique and not null.                 |
 | Caveats             | Refunds may be updated after the original order date. |
 
-### Approved join register
+### 5.6.2 Approved join register
 
 | Field                 | Description                                                 |
 |-----------------------|-------------------------------------------------------------|
@@ -765,7 +868,7 @@ Before a dimension is made available to T2D, confirm:
 | Version               | Current version of the join                                 |
 | Last update           | Last update of the join                                     |
 
-#### Example
+#### 5.6.2.1 Example
 
 | Field                 | Example                                                       |
 |-----------------------|---------------------------------------------------------------|
@@ -782,7 +885,7 @@ Before a dimension is made available to T2D, confirm:
 | Owner                 | Commercial operations                                         |
 | Test evidence         | Join does not increase order-line row count.                  |
 
-### Restricted or excluded join examples
+### 5.6.3 Restricted or excluded join examples
 
 | Join                                   | Status       | Reason                                               | Required action                               |
 |----------------------------------------|--------------|------------------------------------------------------|-----------------------------------------------|
@@ -791,7 +894,7 @@ Before a dimension is made available to T2D, confirm:
 | Sales order line to raw discount notes | Excluded     | Free-text field may contain sensitive information.   | Do not expose to T2D.                         |
 | Customer to multiple active segments   | Under review | Many-to-many relationship can duplicate revenue.     | Resolve segment rule or create bridge logic.  |
 
-### Aggregation rule register
+### 5.6.4 Aggregation rule register
 
 | Field                 | Description                                         |
 |-----------------------|-----------------------------------------------------|
@@ -807,7 +910,7 @@ Before a dimension is made available to T2D, confirm:
 | Version               | Current version of the aggregation rule             |
 | Last update           | Last update of the aggregation rule                 |
 
-#### Example
+#### 5.6.4.1 Example
 
 | Field                 | Example                                                    |
 |-----------------------|------------------------------------------------------------|
@@ -821,7 +924,7 @@ Before a dimension is made available to T2D, confirm:
 | Caveats               | Current month is provisional; refunds may lag by 48 hours. |
 | Validation evidence   | Monthly totals reconcile to Commercial Sales Dashboard.    |
 
-### Automated test examples
+### 5.6.5 Automated test examples
 
 | Test                            | Purpose                                        | Example                                                                     |
 |---------------------------------|------------------------------------------------|-----------------------------------------------------------------------------|
@@ -833,7 +936,7 @@ Before a dimension is made available to T2D, confirm:
 | Minimum group test              | Confirms small groups are suppressed.          | No result returned for groups below threshold.                              |
 | Security join test              | Confirms access rules survive joins.           | User restricted to Region A cannot infer Region B after joining dimensions. |
 
-### Minimum checks before approval
+### 5.6.6 Minimum checks before approval
 
 Before a join, grain or aggregation rule is approved for T2D use, confirm:
 
@@ -857,9 +960,9 @@ Before a join, grain or aggregation rule is approved for T2D use, confirm:
 
 - Caveats and limitations are available to the assistant where relevant.
 
-## Implement standard filter and caveat register
+## 5.7 Implement standard filter and caveat register
 
-### Filter register
+### 5.7.1 Filter register
 
 | Field               | Description                                                       |
 |---------------------|-------------------------------------------------------------------|
@@ -878,7 +981,7 @@ Before a join, grain or aggregation rule is approved for T2D use, confirm:
 | Last updated        | Date of last approved change.                                     |
 | Change route        | How updates are reviewed, tested and released.                    |
 
-### Example filter entry
+### 5.7.2 Example filter entry
 
 | Field               | Example                                                                                   |
 |---------------------|-------------------------------------------------------------------------------------------|
@@ -897,7 +1000,7 @@ Before a join, grain or aggregation rule is approved for T2D use, confirm:
 | Last updated        | 2026-05-14                                                                                |
 | Change route        | Reviewed by Finance Analytics and deployed through analytics engineering release process. |
 
-### Caveat register
+### 5.7.3 Caveat register
 
 | Field               | Description                                                                                 |
 |---------------------|---------------------------------------------------------------------------------------------|
@@ -916,7 +1019,7 @@ Before a join, grain or aggregation rule is approved for T2D use, confirm:
 | Last updated        | Date of last approved change.                                                               |
 | Change route        | How updates are reviewed, tested and released.                                              |
 
-### Example caveat entry
+### 5.7.4 Example caveat entry
 
 | Field               | Example                                                                        |
 |---------------------|--------------------------------------------------------------------------------|
@@ -935,7 +1038,7 @@ Before a join, grain or aggregation rule is approved for T2D use, confirm:
 | Last updated        | 2026-05-14                                                                     |
 | Change route        | Reviewed by Finance Analytics during month-end process updates.                |
 
-### Common clarification patterns
+### 5.7.5 Common clarification patterns
 
 Clarification rules cannot be exhaustive. The aim is to define common ambiguity patterns and default behaviours, not to anticipate every possible user question. For MVP or pilot, the team should monitor real user questions, review ambiguous cases and update the filter, caveat and clarification rules over time.
 
@@ -947,7 +1050,7 @@ Clarification rules cannot be exhaustive. The aim is to define common ambiguity 
 | “Show revenue for this month.”     | Current month is provisional.              | Answer with current-month caveat.                                               |
 | “Show customers with low revenue.” | Potentially exposes customer-level detail. | Check security rules and aggregation thresholds before answering.               |
 
-### Automated test examples
+### 5.7.6 Automated test examples
 
 | Test                         | Purpose                                                 | Example                                                                                |
 |------------------------------|---------------------------------------------------------|----------------------------------------------------------------------------------------|
@@ -959,7 +1062,7 @@ Clarification rules cannot be exhaustive. The aim is to define common ambiguity 
 | Cross-asset consistency test | Confirms same rule is applied across assets.            | Test orders are excluded from all sales metrics.                                       |
 | Regression test              | Confirms filter behaviour does not change unexpectedly. | Existing priority questions still apply approved exclusions after release.             |
 
-### Minimum checks before approval
+### 5.7.7 Minimum checks before approval
 
 Before a filter or caveat is made available to T2D, confirm:
 
@@ -983,9 +1086,9 @@ Before a filter or caveat is made available to T2D, confirm:
 
 - Automated tests exist where appropriate.
 
-## Security and exposure control register
+## 5.8 Security and exposure control register
 
-### User group and access matrix
+### 5.8.1 User group and access matrix
 
 | Field               | Description                                                                                        |
 |---------------------|----------------------------------------------------------------------------------------------------|
@@ -1004,7 +1107,7 @@ Before a filter or caveat is made available to T2D, confirm:
 | Version             | Current approved version.                                                                          |
 | Last updated        | Date of last approved change.                                                                      |
 
-#### Example user group and access matrix
+#### 5.8.1.1 Example user group and access matrix
 
 | Field               | Example                                                         |
 |---------------------|-----------------------------------------------------------------|
@@ -1023,7 +1126,7 @@ Before a filter or caveat is made available to T2D, confirm:
 | Version             | v1.0                                                            |
 | Last updated        | 2026-05-14                                                      |
 
-### Security control register
+### 5.8.2 Security control register
 
 | Field               | Description                                                                          |
 |---------------------|--------------------------------------------------------------------------------------|
@@ -1045,9 +1148,9 @@ Before a filter or caveat is made available to T2D, confirm:
 | Last updated        | Date of last approved change.                                                        |
 | Change route        | How updates are reviewed, tested and released.                                       |
 
-#### Example security control entries
+#### 5.8.2.1 Example security control entries
 
-##### Example 1 — Regional row-level access
+##### 5.8.2.1.1 Example 1 — Regional row-level access
 
 | Field               | Example                                                                     |
 |---------------------|-----------------------------------------------------------------------------|
@@ -1069,7 +1172,7 @@ Before a filter or caveat is made available to T2D, confirm:
 | Last updated        | 2026-05-14                                                                  |
 | Change route        | Reviewed by data governance and deployed through platform access process.   |
 
-##### Example 2 — Customer-level suppression
+##### 5.8.2.1.2 Example 2 — Customer-level suppression
 
 | Field               | Example                                                               |
 |---------------------|-----------------------------------------------------------------------|
@@ -1091,7 +1194,7 @@ Before a filter or caveat is made available to T2D, confirm:
 | Last updated        | 2026-05-14                                                            |
 | Change route        | Threshold changes reviewed by privacy, governance and data owner.     |
 
-#### Exposure-risk examples
+#### 5.8.2.2 Exposure-risk examples
 
 | Exposure pattern       | Example                                                         | Risk                                                        | Required response                                                 |
 |------------------------|-----------------------------------------------------------------|-------------------------------------------------------------|-------------------------------------------------------------------|
@@ -1104,7 +1207,7 @@ Before a filter or caveat is made available to T2D, confirm:
 | Metadata leakage       | Metric or caveat text reveals sensitive business context        | User learns restricted information from retrieved metadata. | Classify and restrict metadata access.                            |
 | Stale group mapping    | User changes territory but old mapping remains active           | User may see data for the wrong region.                     | Link to master user / territory view and refresh access mappings. |
 
-### Security validation checks
+### 5.8.3 Security validation checks
 
 | Check                      | Purpose                                                                             | Example                                                        |
 |----------------------------|-------------------------------------------------------------------------------------|----------------------------------------------------------------|
@@ -1119,7 +1222,7 @@ Before a filter or caveat is made available to T2D, confirm:
 | Repeated-query test        | Checks whether users can infer sensitive values through follow-up questions.        | Overlapping filters do not reveal single-customer values.      |
 | Audit log test             | Confirms sensitive access events are logged.                                        | Denied access and suppressed results are recorded.             |
 
-### Minimum checks before approval
+### 5.8.4 Minimum checks before approval
 
 Before a security or exposure control is approved for T2D use, confirm:
 
@@ -1145,9 +1248,9 @@ Before a security or exposure control is approved for T2D use, confirm:
 
 - Open security assumptions are handed over to security and governance validation.
 
-## Quality, performance, freshness, performance and cost controls
+## 5.9 Quality, performance, freshness, performance and cost controls
 
-### Quality control register
+### 5.9.1 Quality control register
 
 | Field               | Description                                                                     |
 |---------------------|---------------------------------------------------------------------------------|
@@ -1167,7 +1270,7 @@ Before a security or exposure control is approved for T2D use, confirm:
 | Last updated        | Date of last approved change.                                                   |
 | Change route        | How updates are reviewed, tested and released.                                  |
 
-#### Example quality control entry
+#### 5.9.1.1 Example quality control entry
 
 | Field               | Example                                                                                           |
 |---------------------|---------------------------------------------------------------------------------------------------|
@@ -1187,7 +1290,7 @@ Before a security or exposure control is approved for T2D use, confirm:
 | Last updated        | 2026-05-14                                                                                        |
 | Change route        | Reviewed through analytics engineering release process.                                           |
 
-### Freshness control register
+### 5.9.2 Freshness control register
 
 | Field               | Description                                           |
 |---------------------|-------------------------------------------------------|
@@ -1204,7 +1307,7 @@ Before a security or exposure control is approved for T2D use, confirm:
 | Version             | Current approved version.                             |
 | Last updated        | Date of last approved change.                         |
 
-#### Example freshness control entry
+#### 5.9.2.1 Example freshness control entry
 
 | Field               | Example                                                                              |
 |---------------------|--------------------------------------------------------------------------------------|
@@ -1221,7 +1324,7 @@ Before a security or exposure control is approved for T2D use, confirm:
 | Version             | v1.0                                                                                 |
 | Last updated        | 2026-05-14                                                                           |
 
-### Performance control register
+### 5.9.3 Performance control register
 
 | Field                  | Description                                                           |
 |------------------------|-----------------------------------------------------------------------|
@@ -1237,7 +1340,7 @@ Before a security or exposure control is approved for T2D use, confirm:
 | Version                | Current approved version.                                             |
 | Last updated           | Date of last approved change.                                         |
 
-#### Example performance control entry
+#### 5.9.3.1 Example performance control entry
 
 | Field                  | Example                                                                 |
 |------------------------|-------------------------------------------------------------------------|
@@ -1253,7 +1356,7 @@ Before a security or exposure control is approved for T2D use, confirm:
 | Version                | v1.0                                                                    |
 | Last updated           | 2026-05-14                                                              |
 
-### Cost reporting by meaningful layer
+### 5.9.4 Cost reporting by meaningful layer
 
 Cost reporting should separate infrastructure consumption from support effort. This avoids hiding the true cost of the governed foundation inside one platform total.
 
@@ -1270,7 +1373,7 @@ Cost reporting should separate infrastructure consumption from support effort. T
 | T2D usage              | Mixed          | User questions, tool calls, generated queries, retries, failed queries, model/API costs where relevant.     |
 | Support and operations | Support        | Incident handling, access requests, metric changes, caveat updates, quality remediation, owner review time. |
 
-### Cost scenario template
+### 5.9.5 Cost scenario template
 
 | Scenario            | Usage assumption                                                             | Infrastructure cost drivers                                                              | Support cost drivers                                                         | Key risk                                                           |
 |---------------------|------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|--------------------------------------------------------------------|
@@ -1278,7 +1381,7 @@ Cost reporting should separate infrastructure consumption from support effort. T
 | Expected MVP        | Target users, agreed priority questions, regular refresh and repeated usage. | Scheduled refresh, materialised assets, automated tests, query execution, monitoring.    | Access requests, issue triage, metric updates, user feedback handling.       | Costs grow if queries are inefficient or support model is unclear. |
 | Higher-volume pilot | More users, more questions, stronger monitoring and security expectations.   | Higher concurrency, larger refresh jobs, regression testing, log retention, cost alerts. | More incidents, change requests, governance reviews and operational support. | Foundation may need optimisation, caching or scope reduction.      |
 
-### Cost threshold register
+### 5.9.6 Cost threshold register
 
 | Field                | Description                                                                             |
 |----------------------|-----------------------------------------------------------------------------------------|
@@ -1294,9 +1397,7 @@ Cost reporting should separate infrastructure consumption from support effort. T
 | Version              | Current approved version.                                                               |
 | Last updated         | Date of last approved change.                                                           |
 
-#### 
-
-#### Example cost threshold entry
+#### 5.9.6.1 Example cost threshold entry
 
 | Field                | Example                                                                           |
 |----------------------|-----------------------------------------------------------------------------------|
@@ -1312,7 +1413,7 @@ Cost reporting should separate infrastructure consumption from support effort. T
 | Version              | v1.0                                                                              |
 | Last updated         | 2026-05-14                                                                        |
 
-### Automated control examples
+### 5.9.7 Automated control examples
 
 | Area           | Example automated controls                                                                                    |
 |----------------|---------------------------------------------------------------------------------------------------------------|
@@ -1323,7 +1424,7 @@ Cost reporting should separate infrastructure consumption from support effort. T
 | Cost           | Alert on expensive queries, storage growth, high refresh cost, excessive test runs or monitoring cost spikes. |
 | Support        | Track recurring incidents, repeated access issues, unresolved quality failures and manual remediation effort. |
 
-### Minimum checks before approval
+### 5.9.8 Minimum checks before approval
 
 Before quality, freshness, performance or cost controls are accepted, confirm:
 
@@ -1347,9 +1448,9 @@ Before quality, freshness, performance or cost controls are accepted, confirm:
 
 - Version, review frequency and change route are recorded.
 
-## Governed foundation handover checklist
+## 5.10 Governed foundation handover checklist
 
-### Governed foundation pack contents
+### 5.10.1 Governed foundation pack contents
 
 | Area                       | What to include                                                                         |
 |----------------------------|-----------------------------------------------------------------------------------------|
@@ -1367,7 +1468,7 @@ Before quality, freshness, performance or cost controls are accepted, confirm:
 | Change control             | Versioning, release route, rollback route and communication process.                    |
 | Backlog                    | Deferred items, remediation actions, known risks and future foundation improvements.    |
 
-### Handover checklist
+### 5.10.2 Handover checklist
 
 | Check                                                             | Status                           | Owner | Notes |
 |-------------------------------------------------------------------|----------------------------------|-------|-------|
@@ -1388,7 +1489,7 @@ Before quality, freshness, performance or cost controls are accepted, confirm:
 | Change-control and release route are agreed.                      | Not started / In progress / Done |       |       |
 | Deferred items and remediation backlog are documented.            | Not started / In progress / Done |       |       |
 
-### Downstream handover matrix
+### 5.10.3 Downstream handover matrix
 
 | Receiving area                 | What they need from Phase 3                                                                                           |
 |--------------------------------|-----------------------------------------------------------------------------------------------------------------------|
@@ -1399,7 +1500,7 @@ Before quality, freshness, performance or cost controls are accepted, confirm:
 | Adoption                       | User-facing scope, supported questions, caveats, exclusions and escalation route.                                     |
 | Operations                     | Owners, contacts, logs, alerts, quality checks, cost tracking, support route and change-control process.              |
 
-### Known limitations and remediation backlog
+### 5.10.4 Known limitations and remediation backlog
 
 | Item                      | Type                | Impact                                                  | Owner              | Target action                                  | Priority |
 |---------------------------|---------------------|---------------------------------------------------------|--------------------|------------------------------------------------|----------|
@@ -1408,7 +1509,7 @@ Before quality, freshness, performance or cost controls are accepted, confirm:
 | Current-month revenue     | Caveat              | Figures may change after late adjustments.              | Finance analytics  | Surface provisional-period caveat.             | Medium   |
 | Product hierarchy history | Data limitation     | Historic comparisons may shift after hierarchy changes. | Product operations | Add hierarchy effective dating.                | Medium   |
 
-### Support and escalation route
+### 5.10.5 Support and escalation route
 
 | Issue type                  | First-line owner          | Escalation owner              | Example trigger                                      |
 |-----------------------------|---------------------------|-------------------------------|------------------------------------------------------|
@@ -1420,7 +1521,7 @@ Before quality, freshness, performance or cost controls are accepted, confirm:
 | Cost spike                  | Platform owner            | Product owner / finance owner | Query or refresh cost exceeds threshold.             |
 | User feedback               | Product owner             | Business sponsor              | Repeated confusion or unsupported questions.         |
 
-### Final handover decision
+### 5.10.6 Final handover decision
 
 | Question                                                   | Answer                              |
 |------------------------------------------------------------|-------------------------------------|

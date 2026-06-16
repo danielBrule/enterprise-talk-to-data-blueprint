@@ -1,4 +1,49 @@
-# Executive summary
+**Table of contents**
+
+- [1 Executive summary](#1-executive-summary)
+- [2 Phase overview](#2-phase-overview)
+  - [2.1 Objective](#21-objective)
+  - [2.2 Scope of the phase](#22-scope-of-the-phase)
+  - [2.3 What this phase does not do](#23-what-this-phase-does-not-do)
+  - [2.4 Expected duration and level of effort](#24-expected-duration-and-level-of-effort)
+  - [2.5 Main participants and decision owners](#25-main-participants-and-decision-owners)
+- [3 Readiness decision and delivery implications](#3-readiness-decision-and-delivery-implications)
+  - [3.1 Possible Phase 4 outcomes](#31-possible-phase-4-outcomes)
+  - [3.2 Minimum conditions to proceed](#32-minimum-conditions-to-proceed)
+  - [3.3 Common reasons to narrow, refine, redesign or pause](#33-common-reasons-to-narrow-refine-redesign-or-pause)
+  - [3.4 How Phase 4 shapes later phases](#34-how-phase-4-shapes-later-phases)
+- [4 Orchestration design activities overview](#4-orchestration-design-activities-overview)
+  - [4.1 End-to-end orchestration flow](#41-end-to-end-orchestration-flow)
+  - [4.2 Activity sequence](#42-activity-sequence)
+  - [4.3 Activity logic](#43-activity-logic)
+  - [4.4 Delivery-depth expectations](#44-delivery-depth-expectations)
+  - [4.5 Practitioner note](#45-practitioner-note)
+- [5 Core orchestration design activities](#5-core-orchestration-design-activities)
+  - [5.1 Confirm orchestration principles and constraints](#51-confirm-orchestration-principles-and-constraints)
+  - [5.2 Define question-to-answer flow](#52-define-question-to-answer-flow)
+  - [5.3 Design metadata retrieval and grounding](#53-design-metadata-retrieval-and-grounding)
+  - [5.4 Define model, prompt and routing strategy](#54-define-model-prompt-and-routing-strategy)
+  - [5.5 Define tool boundaries and execution hand-off](#55-define-tool-boundaries-and-execution-hand-off)
+  - [5.6 Design query generation and validation](#56-design-query-generation-and-validation)
+  - [5.7 Design answer generation and safe failure](#57-design-answer-generation-and-safe-failure)
+  - [5.8 Design multi-turn conversation handling](#58-design-multi-turn-conversation-handling)
+  - [5.9 Design model and orchestration evaluation](#59-design-model-and-orchestration-evaluation)
+  - [5.10 Design quality monitoring and improvement loop](#510-design-quality-monitoring-and-improvement-loop)
+  - [5.11 Define orchestration governance and change control](#511-define-orchestration-governance-and-change-control)
+- [6 Orchestration design decision pack](#6-orchestration-design-decision-pack)
+  - [6.1 Orchestration design pack](#61-orchestration-design-pack)
+  - [6.2 Output quality test](#62-output-quality-test)
+- [7 Exit criteria and handover](#7-exit-criteria-and-handover)
+  - [7.1 Required exit outputs](#71-required-exit-outputs)
+  - [7.2 Handover to later phases](#72-handover-to-later-phases)
+  - [7.3 Exit decision wording](#73-exit-decision-wording)
+  - [7.4 Practitioner note](#74-practitioner-note)
+- [8 Key risks and failure modes](#8-key-risks-and-failure-modes)
+  - [8.1 Practitioner note](#81-practitioner-note)
+
+---
+
+# 1 Executive summary
 
 Phase 4 designs the GenAI orchestration layer that turns a user question into a governed Talk-to-Data answer. It does not design the user interface, rebuild the data foundation or define the full enterprise architecture. Its scope is the runtime flow from question interpretation through metadata grounding, model use, tool calls, query generation, validation, execution hand-off, answer generation, follow-up handling, evaluation and quality monitoring.
 
@@ -17,13 +62,13 @@ The main evidence before progressing is an approved orchestration design, model 
 **  
 **
 
-# Phase overview
+# 2 Phase overview
 
 Phase 4 designs the GenAI orchestration layer for the scoped Talk-to-Data capability. It defines how the system moves from a user question to a governed answer, using the foundation artefacts created in Phase 3.
 
 The focus is the runtime flow between the user question, model, metadata, tools, queryable data layer and final answer. For a POC, the design may be lightweight, but the main orchestration choices should still be explicit. For an MVP, pilot or production path, model use, tool boundaries, validation, logging, conversation state, evaluation and quality monitoring must be clear enough to guide build and assurance.
 
-## Objective
+## 2.1 Objective
 
 The objective of Phase 4 is to define the orchestration design required to turn governed data foundations into safe conversational answers. It should confirm:
 
@@ -45,7 +90,7 @@ The objective of Phase 4 is to define the orchestration design required to turn 
 
 The output is an approved orchestration design and governance model that can guide bounded prototype build, evaluation, security review and later production planning.
 
-## Scope of the phase
+## 2.2 Scope of the phase
 
 Phase 4 remains bounded to the agreed T2D orchestration scope. It does not design the full UI, rebuild the data foundation or define the full enterprise architecture.
 
@@ -55,13 +100,13 @@ The phase should confirm the minimum metadata contract required from Phase 3. If
 
 The phase also sets the model-pattern, cost and evaluation assumptions that will guide prototype build and later model comparison.
 
-## What this phase does not do
+## 2.3 What this phase does not do
 
 Phase 4 does not build the prototype. Its role is to define the orchestration design that Phase 5 will implement in a bounded way. It also does not create the governed data foundation; that is the purpose of Phase 3. However, it may identify gaps in foundation artefacts that need to be resolved before they can support runtime orchestration.
 
 Phase 4 does not design the full user interface either. It may define interaction assumptions, such as support for follow-up questions, clarification, refusals, feedback capture or source visibility, but detailed UX design sits outside this phase.
 
-## Expected duration and level of effort
+## 2.4 Expected duration and level of effort
 
 The effort required depends on delivery maturity, risk and technical complexity.
 
@@ -71,7 +116,7 @@ The phase is complete when the team has enough design clarity to build a bounded
 
 Some Phase 5 work may start early, such as scaffolding or test harnesses, but it should not lock in core orchestration decisions before Phase 4 approval.
 
-## Main participants and decision owners
+## 2.5 Main participants and decision owners
 
 Phase 4 requires AI, data, governance and business input but it should not be owned by the model engineer alone, because the key decisions concern governed metadata, access, validation, observability and business trust.
 
@@ -88,13 +133,13 @@ Phase 4 requires AI, data, governance and business input but it should not be ow
 
 A T2D system should not proceed to prototype build without clear accountability for model behaviour, metadata grounding, tool boundaries, validation, answer quality and monitoring.
 
-# Readiness decision and delivery implications
+# 3 Readiness decision and delivery implications
 
 Phase 4 should not end with an informal view that the architecture “looks sensible”. It should end with a clear decision on whether the orchestration design is strong enough to support bounded prototype build.
 
 The decision should be based on the approved flow, model and tool boundaries, metadata contract, validation approach, conversation-handling rules, logging requirements and evaluation design. The aim is to avoid entering prototype build while critical runtime decisions are still being improvised.
 
-## Possible Phase 4 outcomes
+## 3.1 Possible Phase 4 outcomes
 
 Phase 4 should end with one of five outcomes:
 
@@ -108,7 +153,7 @@ Phase 4 should end with one of five outcomes:
 
 A proceed decision is not approval for production. It means the design is credible enough to build and test a bounded end-to-end prototype.
 
-## Minimum conditions to proceed
+## 3.2 Minimum conditions to proceed
 
 Phase 4 should not progress to prototype build unless the team can confirm:
 
@@ -136,7 +181,7 @@ Phase 4 should not progress to prototype build unless the team can confirm:
 
 The standard does not need to be production-grade for a POC, but the design should be explicit enough that the prototype tests the intended pattern rather than inventing it during build.
 
-## Common reasons to narrow, refine, redesign or pause
+## 3.3 Common reasons to narrow, refine, redesign or pause
 
 Common reasons to avoid moving forward unchanged include:
 
@@ -160,7 +205,7 @@ Common reasons to avoid moving forward unchanged include:
 
 The right response is not always to stop. In many cases, the better decision is to narrow the question set, restrict tools, simplify conversation handling, strengthen metadata, add validation or defer unsupported interactions.
 
-## How Phase 4 shapes later phases
+## 3.4 How Phase 4 shapes later phases
 
 Phase 4 sets the build constraints for Phase 5. It should tell the prototype team what flow to implement, which tools are allowed, what metadata is required, which validation checks are mandatory, how conversations should behave, what evidence must be captured, and how orchestration changes will be governed after the prototype.
 
@@ -170,15 +215,38 @@ A strong Phase 4 does not remove all uncertainty. It makes the uncertainty testa
 
 Phase 4 should also make clear which operational scaffolding Phase 5 must implement early, including logging, tracing, prompt and model versioning, cost and latency capture, basic deployment discipline and governance controls.
 
-# Orchestration design activities overview
+# 4 Orchestration design activities overview
 
 Phase 4 should translate the orchestration decision into a clear design path. The activities are ordered from principles and flow design through metadata grounding, model and tool choices, validation, answer behaviour, conversation handling, evaluation, monitoring and governance.
 
-## End-to-end orchestration flow
+## 4.1 End-to-end orchestration flow
 
 The flow below shows how Phase 4 connects a user question to a governed answer. It is not a full technical architecture diagram; it is the orchestration logic that the detailed design should validate. It can be simplified depending on project scope and delivery stage.
 
-## Activity sequence
+```mermaid
+flowchart TD
+    Q["User question"] --> I["Interpret intent and scope"]
+    I --> G["Retrieve and ground in approved metadata (Phase 3 artefacts)"]
+    G --> GEN["Generate query, constrained to approved definitions"]
+    GEN --> V{"Deterministic validation: safe SQL, and within the user's access rights?"}
+    V -- "fails" --> SF["Safe failure: clarify, caveat, refuse or escalate"]
+    V -- "passes" --> X["Execute under user identity (table, column and row access enforced)"]
+    X --> R["Interpret results"]
+    R --> A{"Answer grounded and confident enough?"}
+    A -- "no" --> SF
+    A -- "yes" --> ANS["Answer with definition and caveats"]
+    ANS --> U(["User"])
+    SF --> U
+    L[("Logging, tracing and feedback")]
+    Q -.-> L
+    V -.-> L
+    X -.-> L
+    ANS -.-> L
+    SF -.-> L
+    L --> E["Evaluation and quality-monitoring loop"]
+```
+
+## 4.2 Activity sequence
 
 | Activity                                                   | Main question                                       | Main output                                                |
 |------------------------------------------------------------|-----------------------------------------------------|------------------------------------------------------------|
@@ -194,7 +262,7 @@ The flow below shows how Phase 4 connects a user question to a governed answer. 
 | **10. Design quality monitoring and improvement loop**     | How will quality be tracked after build?            | Feedback, monitoring and improvement design.               |
 | **11. Define orchestration governance and change control** | Who owns changes to models, prompts and tools?      | Governance and change-control model.                       |
 
-## Activity logic
+## 4.3 Activity logic
 
 The activities should not be treated as independent workstreams. Decisions made in one area affect the others.
 
@@ -202,7 +270,7 @@ Metadata retrieval shapes prompt design and query generation. Tool boundaries af
 
 The key discipline is to avoid designing around a single happy path. Phase 4 should explicitly cover ambiguity, unsupported questions, unsafe joins, missing metadata, permission failures, high-cost queries, slow responses, uncertain results and user corrections.
 
-## Delivery-depth expectations
+## 4.4 Delivery-depth expectations
 
 | Output                    | POC                         | MVP / pilot                | Production path                      |
 |---------------------------|-----------------------------|----------------------------|--------------------------------------|
@@ -216,19 +284,19 @@ The key discipline is to avoid designing around a single happy path. Phase 4 sho
 | Quality monitoring        | Basic feedback capture      | Usage and failure tracking | Operational quality dashboard        |
 | Governance model          | Named owners                | Change approvals           | Formal operating control             |
 
-## Practitioner note
+## 4.5 Practitioner note
 
 The first orchestration flow can be simple, but it should not be brittle. Phase 4 should design modular steps for metadata retrieval, model routing, validation, execution, answer generation, logging and feedback, so later changes can be made without redesigning the whole system.
 
 The first design will not be perfect. Evaluation, monitoring and governance should therefore be linked from the start, so the team can see when the system is drifting, which part of the flow needs improvement, and who is authorised to approve the change.
 
-# Core orchestration design activities
+# 5 Core orchestration design activities
 
 The activities in this chapter define the design decisions required before building a bounded T2D prototype. They should be applied proportionately: a POC may need lightweight decisions and simple artefacts, while an MVP, pilot or production path requires stronger evidence, clearer ownership and more formal controls.
 
 The aim is not to design a perfect architecture on paper. It is to define a controlled orchestration pattern that can be built, tested, monitored and improved. Each activity should produce enough evidence to guide Phase 5 build without leaving critical model, metadata, tool, validation, security or governance decisions to be improvised during implementation.
 
-## Confirm orchestration principles and constraints
+## 5.1 Confirm orchestration principles and constraints
 
 **Purpose:** Define the non-negotiable design rules for the orchestration layer before model, tool, validation and monitoring choices are made.
 
@@ -292,7 +360,7 @@ The aim is not to design a perfect architecture on paper. It is to define a cont
 
 **Note 3:** Cost is an architectural constraint, not only a commercial concern. A design that relies on the strongest model, broad retrieval and unrestricted queries for every question is not a scalable T2D pattern.
 
-## Define question-to-answer flow
+## 5.2 Define question-to-answer flow
 
 **Purpose:** Define the end-to-end flow that turns a user question into a governed answer, including clarification, validation, execution and response behaviour.
 
@@ -342,7 +410,7 @@ The aim is not to design a perfect architecture on paper. It is to define a cont
 
 The flow should start from the business question, not from the model call. A good T2D flow makes clear how the system protects the user from confident wrong answers, not only how it generates a response.
 
-## Design metadata retrieval and grounding
+## 5.3 Design metadata retrieval and grounding
 
 **Purpose:** Define how the orchestration layer retrieves and applies governed metadata before query generation, validation and answer generation.
 
@@ -394,7 +462,7 @@ The flow should start from the business question, not from the model call. A goo
 
 Metadata retrieval is often a good place to use smaller, embedded or cheaper models, because the task can be constrained and evaluated. However, retrieval errors can corrupt the whole flow. The design should favour the simplest model pattern that reliably retrieves the right governed context, not the cheapest one that appears to work in a demo.
 
-## Define model, prompt and routing strategy
+## 5.4 Define model, prompt and routing strategy
 
 **Purpose:** Define which models are used for each orchestration task, how prompts are controlled, and when the flow should route between models, tools or deterministic rules.
 
@@ -454,7 +522,7 @@ Metadata retrieval is often a good place to use smaller, embedded or cheaper mod
 
 Model strategy should be task-led, not provider-led. In a T2D system, smaller or embedded models may be enough for routing and metadata ranking, while stronger models may be justified for complex query generation or answer synthesis. The right design is usually a controlled mix, not one model doing everything.
 
-## Define tool boundaries and execution hand-off
+## 5.5 Define tool boundaries and execution hand-off
 
 **Purpose:** Define which tools the orchestration layer can call, what each tool is allowed to do, and how execution is handed off safely.
 
@@ -508,7 +576,7 @@ Model strategy should be task-led, not provider-led. In a T2D system, smaller or
 
 Typical T2D tools include metadata retrieval, query planning, SQL/query validation, query execution, permission checking, result checking, logging/tracing and user feedback capture. Keep each tool narrow, explicit and logged; avoid one broad “data tool” that can retrieve, generate, validate and execute without clear boundaries.
 
-## Design query generation and validation
+## 5.6 Design query generation and validation
 
 **Purpose:** Define how queries or tool calls are generated, checked and controlled before execution.
 
@@ -570,7 +638,7 @@ Typical T2D tools include metadata retrieval, query planning, SQL/query validati
 
 **Note 2:** Query runtime cannot always be predicted exactly, but the system should still use dry runs, explain plans, scan estimates, timeouts and cost thresholds where available. A T2D system should not allow open-ended analytical queries to run unchecked.
 
-## Design answer generation and safe failure
+## 5.7 Design answer generation and safe failure
 
 **Purpose:** Define how query results are turned into user-facing answers, including caveats, assumptions, refusals, clarifications and escalation.
 
@@ -626,7 +694,7 @@ Typical T2D tools include metadata retrieval, query planning, SQL/query validati
 
 **Note 2:** If a confidence signal is shown, it should use a simple scale and wording that non-expert users can understand. Low-confidence answers should trigger clarification, refusal or escalation, not a weak answer with a disclaimer.
 
-## Design multi-turn conversation handling
+## 5.8 Design multi-turn conversation handling
 
 **Purpose:** Define how follow-up questions reuse context, trigger clarification, require new queries or safely end the conversation.
 
@@ -682,7 +750,7 @@ Typical T2D tools include metadata retrieval, query planning, SQL/query validati
 
 **Note 2:** Multi-turn handling is also where costs can increase sharply. Each follow-up may trigger context review, metadata retrieval, model calls, validation, re-querying and answer generation. The design should decide when to reuse prior results, when to re-query, and when to stop or clarify rather than repeatedly expanding the conversation.
 
-## Design model and orchestration evaluation
+## 5.9 Design model and orchestration evaluation
 
 **Purpose:** Define how the model choices and orchestration flow will be tested before and after prototype build.
 
@@ -736,7 +804,7 @@ Typical T2D tools include metadata retrieval, query planning, SQL/query validati
 
 Evaluation should test the orchestration, not only the model. A fluent answer is not enough: the system must retrieve the right metadata, generate or avoid queries appropriately, validate safely, preserve caveats, handle follow-ups and refuse when required. Model choice should be based on evidence across quality, safety, cost and latency, not preference or provider familiarity.
 
-## Design quality monitoring and improvement loop
+## 5.10 Design quality monitoring and improvement loop
 
 **Purpose:** Define how answer quality, usage, failures, feedback and drift will be monitored after build, and how improvement actions will be governed.
 
@@ -790,7 +858,7 @@ Evaluation should test the orchestration, not only the model. A fluent answer is
 
 Quality monitoring is not only operational reporting. It is the mechanism that tells the team when the orchestration design needs to evolve. Feedback, failed validations, refusals, repeated clarifications, cost spikes, latency issues and regression failures should feed a governed improvement loop, not disappear into disconnected logs.
 
-## Define orchestration governance and change control
+## 5.11 Define orchestration governance and change control
 
 **Purpose**
 
@@ -846,11 +914,11 @@ Define how changes to the orchestration layer will be owned, approved, tested an
 
 A T2D system will change often: prompts, models, metadata, validation rules, tools and thresholds will all evolve. Governance should make change safe, not slow every improvement. The goal is a clear route for approving, testing, releasing and rolling back orchestration changes without weakening trust or control.
 
-# Orchestration design decision pack
+# 6 Orchestration design decision pack
 
 Phase 4 should produce a clear orchestration design pack that can guide bounded prototype build, evaluation, security review and later production planning. The pack should be detailed enough to avoid improvising critical runtime decisions during Phase 5, but not so detailed that it becomes a full production architecture document.
 
-## Orchestration design pack
+## 6.1 Orchestration design pack
 
 The main output of Phase 4 is an orchestration design pack. It should include:
 
@@ -871,7 +939,7 @@ The main output of Phase 4 is an orchestration design pack. It should include:
 
 For a POC, the pack may be lightweight. For an MVP, pilot or production path, it should be versioned, reviewed and strong enough to support security validation, regression testing and operational handover.
 
-## Output quality test
+## 6.2 Output quality test
 
 Before Phase 4 closes, the team should test whether the design is usable by asking:
 
@@ -895,11 +963,11 @@ Before Phase 4 closes, the team should test whether the design is usable by aski
 
 If the answer is no to several of these questions, Phase 4 should not be treated as complete. The team should refine the design, narrow the scope or route unresolved issues back to the appropriate owner.
 
-# Exit criteria and handover
+# 7 Exit criteria and handover
 
 Phase 4 should close with an explicit decision on whether the orchestration design is ready for bounded prototype build. The exit decision should be based on design evidence, not on confidence that issues can be solved later.
 
-## Required exit outputs
+## 7.1 Required exit outputs
 
 The required exit output is the orchestration design decision pack described in [Section 6](#orchestration-design-decision-pack), completed to the standard required for the delivery stage.
 
@@ -907,7 +975,7 @@ The exit decision should confirm whether the design can proceed, proceed with co
 
 *Note: Detailed UX design sits outside Phase 4, but Phase 4 must define the interaction behaviours that affect orchestration safety.*
 
-## Handover to later phases
+## 7.2 Handover to later phases
 
 | Handover area             | What Phase 4 should provide                                                        |
 |---------------------------|------------------------------------------------------------------------------------|
@@ -923,7 +991,7 @@ Some Phase 5 work may start before all Phase 4 details are complete, especially 
 
 For Phase 5, the handover should include the intended orchestration flow, model/task assumptions, metadata contract, validation points, tool boundaries, logging requirements, cost and latency assumptions, governance rules and agreed prototype simplifications.
 
-## Exit decision wording
+## 7.3 Exit decision wording
 
 The exit decision should be stated clearly. Suggested wording:
 
@@ -937,11 +1005,11 @@ The exit decision should be stated clearly. Suggested wording:
 
 A proceed decision does not mean the design is production-ready. It means the orchestration is clear enough to build, test and learn from a bounded prototype.
 
-## Practitioner note
+## 7.4 Practitioner note
 
 The handover from Phase 4 to Phase 5 should protect the prototype from becoming the architecture. A prototype can simplify the design, but it should not bypass the core controls: governed metadata, bounded tools, query validation, safe-failure behaviour, logging, evaluation and change control.
 
-# Key risks and failure modes
+# 8 Key risks and failure modes
 
 Phase 4 risks usually appear later as impressive prototypes that cannot be trusted, explained, secured, evaluated or operated. The main failure modes are:
 
@@ -958,6 +1026,6 @@ Phase 4 risks usually appear later as impressive prototypes that cannot be trust
 | Unclear governance       | Prompt, model, tool or validation changes can happen without ownership, testing or rollback.   |
 | Prototype lock-in        | Phase 5 hard-codes shortcuts that become difficult to replace later.                           |
 
-## Practitioner note
+## 8.1 Practitioner note
 
 The most dangerous Phase 4 failure is not choosing the wrong model. It is designing a flow where the model has too much discretion, the tools are too broad, the metadata is too weak, and the team cannot explain why an answer was produced. A good Phase 4 makes those risks visible before the prototype makes them look acceptable.
