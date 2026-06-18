@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 
 from ..core.config import API_PREFIX, API_VERSION
+from ..models.talk_to_data import AskRequest, AskResponse
 from ..services.article_service import get_article, list_articles
 from ..services.contributor_service import get_contributor, list_contributors
 from ..services.ingestion_error_service import list_ingestion_errors
@@ -10,6 +11,7 @@ from ..services.metadata_service import (
     get_metrics_metadata,
     get_glossary_metadata,
 )
+from ..services.talk_to_data_pipeline import TalkToDataPipeline
 from ..services.view_selection_service import ViewSelectionService
 from ..validators import (
     ArticleResponse,
@@ -90,6 +92,19 @@ async def select_views(question: str = Query(...)):
     """Select relevant views for a given question."""
     service = ViewSelectionService()
     return await service.select_views(question)
+
+
+@router.post("/ask", response_model=AskResponse, tags=["talk-to-data"])
+async def ask(request: AskRequest) -> AskResponse:
+    """
+    Answer a natural language analytics question.
+
+    Returns a grounded answer, caveats, and a full trace of every pipeline
+    stage. When the question is out of scope, unsafe, or unanswerable,
+    the response is refused with an explicit reason — never a silent failure.
+    """
+    pipeline = TalkToDataPipeline()
+    return await pipeline.run(request)
 
 
 @router.get("/version", tags=["analytics"])

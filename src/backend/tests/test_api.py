@@ -99,3 +99,118 @@ def test_select_views_endpoint(monkeypatch):
     assert data["question"] == "Which articles have the most comments"
     assert "analytics.vw_article_engagement" in data["selected_views"]
     assert len(data["reason"]) > 0
+
+
+# ── /ask endpoint tests ────────────────────────────────────────────────────────
+
+def test_ask_endpoint_returns_answer(monkeypatch):
+    """A well-formed answerable question returns an answer with a trace."""
+    from backend.app.services.talk_to_data_pipeline import TalkToDataPipeline
+    from backend.app.models.talk_to_data import AskRequest, AskResponse
+    from backend.app.models.trace import TraceRecord
+
+    async def mock_run(self, request: AskRequest) -> AskResponse:
+        trace = TraceRecord(
+            question=request.question,
+            answerable=True,
+            intent="article_engagement",
+            selected_views=["analytics.vw_article_engagement"],
+            generated_sql="SELECT TOP 10 article_id FROM analytics.vw_article_engagement",
+            executed_sql="SELECT TOP 10 article_id FROM analytics.vw_article_engagement",
+            execution_status="success",
+            row_count=10,
+            answer="Article A has the most comments.",
+            caveats=["Sentiment is averaged"],
+        )
+        return AskResponse(
+            answer="Article A has the most comments.",
+            caveats=["Sentiment is averaged"],
+            refused=False,
+            trace=trace,
+        )
+
+    monkeypatch.setattr(TalkToDataPipeline, "run", mock_run)
+    response = client.post(
+        "/api/v0/ask",
+        json={"question": "Which articles have the most comments?"},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["refused"] is False
+    assert data["answer"] == "Article A has the most comments."
+    assert data["caveats"]
+    assert "trace" in data
+    trace = data["trace"]
+    assert trace["question"] == "Which articles have the most comments?"
+    assert trace["execution_status"] == "success"
+    assert trace["answerable"] is True
+    assert "Access context" in trace["access_enforcement_note"]
+
+
+def test_ask_endpoint_returns_refusal(monkeypatch):
+    """An out-of-scope question returns refused=True with a refusal reason and trace."""
+    from backend.app.services.talk_to_data_pipeline import TalkToDataPipeline
+    from backend.app.models.talk_to_data import AskRequest, AskResponse
+    from backend.app.models.trace import TraceRecord
+
+    async def mock_run(self, request: AskRequest) -> AskResponse:
+        trace = TraceRecord(
+            question=request.question,
+            answerable=False,
+            intent="unknown",
+            execution_status="refused",
+            refusal_reason="This question requires forecasting, which is not supported.",
+        )
+        return AskResponse(
+            refused=True,
+            refusal_reason="This question requires forecasting, which is not supported.",
+            trace=trace,
+        )
+
+    monkeypatch.setattr(TalkToDataPipeline, "run", mock_run)
+    response = client.post(
+        "/api/v0/ask",
+        json={"question": "What will engagement look like next year?"},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["refused"] is True
+    assert "forecasting" in data["refusal_reason"]
+    assert data["answer"] is None
+    trace = data["trace"]
+    assert trace["answerable"] is False
+    assert trace["execution_status"] == "refused"
+
+
+def test_ask_endpoint_with_user_context(monkeypatch):
+    """user_context is captured in the trace."""
+    from backend.app.services.talk_to_data_pipeline import TalkToDataPipeline
+    from backend.app.models.talk_to_data import AskRequest, AskResponse
+    from backend.app.models.trace import TraceRecord
+
+    async def mock_run(self, request: AskRequest) -> AskResponse:
+        trace = TraceRecord(
+            question=request.question,
+            user_context=request.user_context,
+            answerable=False,
+            execution_status="refused",
+            refusal_reason="out of scope",
+        )
+        return AskResponse(refused=True, refusal_reason="out of scope", trace=trace)
+
+    monkeypatch.setattr(TalkToDataPipeline, "run", mock_run)
+    response = client.post(
+        "/api/v0/ask",
+        json={"question": "test", "user_context": "role=analyst"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["trace"]["user_context"] == "role=analyst"
+
+
+def test_ask_endpoint_missing_question_returns_422():
+    """Request body without 'question' field should return HTTP 422."""
+    response = client.post("/api/v0/ask", json={})
+    assert response.status_code == 422
