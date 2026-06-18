@@ -1,0 +1,452 @@
+"""
+Golden-question evaluation runner.
+
+Fast mode (default): runs stages 1-5 (intent → view selection → metadata →
+SQL generation → SQL validation) for every golden question. No database
+execution required. Produces a full TraceRecord per question.
+
+Reuses the same Stage implementations as TalkToDataPipeline. The runner
+diverges only in how it handles stage failures: intent refusal stops evaluation
+for that question (a positive question must be answerable), but failures in
+later stages are recorded as eval failures and execution continues so all
+checks can be accumulated.
+
+Checks per positive question:
+  - intent classified as answerable
+  - expected view appears in selected_views
+  - expected view referenced in generated SQL
+  - required metric / measure columns present in generated SQL
+  - required GROUP BY columns present when expected SQL has GROUP BY
+  - required filter / date terms present when expected SQL has WHERE
+  - SQL validation passes
+
+Negative cases:
+  - Out-of-scope questions must be refused (intent not answerable)
+  - Synthetic unsafe SQL patterns must fail validate_query
+"""
+
+import re
+import time
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+from ..core.logger import logger
+from ..core.sql_safety import SQLSafetyError, validate_query
+from ..models.pipeline_context import PipelineContext
+from ..models.trace import TraceRecord, ValidationResult
+from ..stages.intent import IntentService, IntentStage
+from ..stages.view_selection import ViewSelectionService, ViewSelectionStage
+from ..stages.metadata import MetadataStage
+from ..stages.sql_generation import SQLGenerationService, SQLGenerationStage
+from ..stages.sql_validation import SQLValidationStage
+from ..stages.base import build_latency, Refusal
+
+_GOLDEN_QUESTIONS_PATH = (
+    Path(__file__).resolve().parents[3] / "metadata" / "example_questions" / "golden_questions.yml"
+)
+
+# Questions that must be refused — not answerable from the approved views
+NEGATIVE_QUESTIONS = [
+    {
+        "question": "What will article engagement look like next quarter?",
+        "expect": "refused",
+        "reason": "Requires forecasting — not supported",
+    },
+    {
+        "question": "Why do some articles generate more comments than others?",
+        "expect": "refused",
+        "reason": "Requires causal explanation — not supported",
+    },
+    {
+        "question": "Show me the stock price for articles published today",
+        "expect": "refused",
+        "reason": "Requires external financial data — not in approved views",
+    },
+]
+
+# SQL patterns that must fail validate_query — confirms the validator blocks them
+NEGATIVE_SQL_PATTERNS = [
+    ("INSERT INTO analytics.vw_article_engagement VALUES (1)", "INSERT not allowed"),
+    ("DROP TABLE analytics.vw_article_engagement", "DDL not allowed"),
+    ("SELECT * FROM dbo.core_articles", "Raw dbo.* table access not allowed"),
+    ("SELECT * FROM analytics.vw_article_engagement", "Missing TOP/LIMIT clause"),
+    ("UPDATE analytics.vw_article_engagement SET comment_count = 0", "DML not allowed"),
+    ("SELECT TOP 501 * FROM analytics.vw_article_engagement", "Exceeds row limit"),
+    (
+        "SELECT TOP 10 article_id FROM analytics.vw_article_engagement; SELECT TOP 5 keyword_id FROM analytics.vw_keyword_engagement",
+        "Multi-statement query not allowed",
+    ),
+]
+
+
+@dataclass
+class GoldenEvalRecord:
+    question: str
+    expected_view: str
+    expected_sql: str
+    case_type: str = "positive"  # "positive" | "negative_question" | "negative_sql"
+
+    # Per-check results (None = not applicable)
+    intent_answerable: bool | None = None
+    view_match: bool | None = None
+    view_in_sql: bool | None = None
+    metric_present: bool | None = None
+    grouping_present: bool | None = None
+    filter_present: bool | None = None
+    validation_pass: bool | None = None
+
+    # Outcome
+    status: str = "pending"  # "pass" | "partial" | "fail" | "error"
+    failure_reasons: list[str] = field(default_factory=list)
+
+    # Artefacts
+    generated_sql: str | None = None
+    trace: TraceRecord | None = None
+    latency_ms: float | None = None
+
+
+@dataclass
+class EvaluationReport:
+    total: int
+    passed: int
+    partial: int
+    failed: int
+    errors: int
+    records: list[GoldenEvalRecord]
+    access_enforcement_note: str = (
+        "Access context is captured but not enforced in this MVP."
+    )
+
+    @property
+    def pass_rate(self) -> float:
+        return self.passed / self.total if self.total > 0 else 0.0
+
+    def summary_lines(self) -> list[str]:
+        return [
+            f"Evaluation complete — {self.total} cases",
+            f"  Pass:    {self.passed}",
+            f"  Partial: {self.partial}",
+            f"  Fail:    {self.failed}",
+            f"  Error:   {self.errors}",
+            f"  Pass rate: {self.pass_rate:.0%}",
+            f"  Note: {self.access_enforcement_note}",
+        ]
+
+    def print_summary(self) -> None:
+        for line in self.summary_lines():
+            print(line)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "total": self.total,
+            "passed": self.passed,
+            "partial": self.partial,
+            "failed": self.failed,
+            "errors": self.errors,
+            "pass_rate": self.pass_rate,
+            "access_enforcement_note": self.access_enforcement_note,
+            "records": [
+                {
+                    "question": r.question,
+                    "case_type": r.case_type,
+                    "status": r.status,
+                    "expected_view": r.expected_view,
+                    "generated_sql": r.generated_sql,
+                    "expected_sql": r.expected_sql,
+                    "checks": {
+                        "intent_answerable": r.intent_answerable,
+                        "view_match": r.view_match,
+                        "view_in_sql": r.view_in_sql,
+                        "metric_present": r.metric_present,
+                        "grouping_present": r.grouping_present,
+                        "filter_present": r.filter_present,
+                        "validation_pass": r.validation_pass,
+                    },
+                    "failure_reasons": r.failure_reasons,
+                    "latency_ms": r.latency_ms,
+                    "trace_id": r.trace.trace_id if r.trace else None,
+                }
+                for r in self.records
+            ],
+        }
+
+
+def _extract_select_columns(sql_upper: str) -> list[str]:
+    """Extract bare column/alias names from the SELECT clause."""
+    select_match = re.search(r"\bSELECT\b(?:\s+TOP\s+\d+)?\s+(.*?)\s+\bFROM\b", sql_upper, re.DOTALL)
+    if not select_match:
+        return []
+    cols_raw = select_match.group(1)
+    cols = []
+    for part in cols_raw.split(","):
+        part = part.strip()
+        if " AS " in part:
+            cols.append(part.split(" AS ")[-1].strip())
+        else:
+            cols.append(part.split()[-1] if part.split() else "")
+    return [c for c in cols if c and c not in ("*",)]
+
+
+def _extract_group_by_columns(sql_upper: str) -> list[str]:
+    match = re.search(r"\bGROUP\s+BY\s+(.*?)(?:\bORDER\b|\bHAVING\b|\bFETCH\b|$)", sql_upper, re.DOTALL)
+    if not match:
+        return []
+    return [c.strip() for c in match.group(1).split(",") if c.strip()]
+
+
+def _extract_filter_terms(sql_upper: str) -> list[str]:
+    """Return significant tokens from the WHERE clause."""
+    match = re.search(r"\bWHERE\b(.*?)(?:\bGROUP\b|\bORDER\b|\bFETCH\b|$)", sql_upper, re.DOTALL)
+    if not match:
+        return []
+    where_text = match.group(1)
+    tokens = re.findall(r"'[^']*'|\b[A-Z_][A-Z0-9_]{2,}\b|-?\d+(?:\.\d+)?", where_text)
+    _SQL_WORDS = {"AND", "OR", "NOT", "NULL", "BETWEEN", "LIKE", "IS", "IN", "EXISTS"}
+    return [t for t in tokens if t not in _SQL_WORDS]
+
+
+def _make_ctx(question: str) -> PipelineContext:
+    return PipelineContext(
+        question=question,
+        user_context=None,
+        trace=TraceRecord(question=question),
+        latency={},
+        pipeline_start=time.perf_counter(),
+    )
+
+
+class GoldenRunner:
+    def __init__(
+        self,
+        intent_service: IntentService | None = None,
+        view_selection_service: ViewSelectionService | None = None,
+        sql_generation_service: SQLGenerationService | None = None,
+        golden_questions_path: Path | None = None,
+    ):
+        # Exposed as attributes so tests can inject mocks via runner.<service>.method = AsyncMock(...)
+        self.intent_service = intent_service or IntentService()
+        self.view_selection_service = view_selection_service or ViewSelectionService()
+        self.sql_generation_service = sql_generation_service or SQLGenerationService()
+        self.golden_questions_path = golden_questions_path or _GOLDEN_QUESTIONS_PATH
+
+        self._intent_stage = IntentStage(self.intent_service)
+        self._view_selection_stage = ViewSelectionStage(self.view_selection_service)
+        self._metadata_stage = MetadataStage()
+        self._sql_generation_stage = SQLGenerationStage(self.sql_generation_service)
+        self._validation_stage = SQLValidationStage()
+
+    def _load_golden_questions(self) -> list[dict]:
+        with open(self.golden_questions_path, "r") as f:
+            return yaml.safe_load(f) or []
+
+    async def run_question(self, q: dict) -> GoldenEvalRecord:
+        """Run one positive golden question through stages 1-5 (fast mode, no DB)."""
+        record = GoldenEvalRecord(
+            question=q["natural_language_question"],
+            expected_view=q.get("expected_view", ""),
+            expected_sql=q.get("expected_sql", ""),
+            case_type="positive",
+        )
+        ctx = _make_ctx(record.question)
+
+        # Stage 1 — stop if refused; positive questions must be answerable
+        outcome = await self._intent_stage.run(ctx)
+        record.intent_answerable = ctx.trace.answerable
+        if isinstance(outcome, Refusal):
+            record.failure_reasons.append(f"Intent: {outcome.reason}")
+            record.status = "fail"
+            record.trace = ctx.trace
+            record.latency_ms = ctx.trace.latency_ms.total_ms
+            return record
+
+        # Stages 2-5 — run all, accumulate eval failures rather than stopping
+        await self._view_selection_stage.run(ctx)
+        await self._metadata_stage.run(ctx)
+        await self._sql_generation_stage.run(ctx)
+        await self._validation_stage.run(ctx)
+
+        # ── Checks ────────────────────────────────────────────────────────────
+
+        record.view_match = record.expected_view in (ctx.selected_views or [])
+        if not record.view_match:
+            record.failure_reasons.append(
+                f"View: expected '{record.expected_view}', got {ctx.selected_views}"
+            )
+
+        record.generated_sql = ctx.sql
+
+        if ctx.trace.validation_result:
+            record.validation_pass = ctx.trace.validation_result.passed
+            if not record.validation_pass:
+                record.failure_reasons.append(f"Validation: {ctx.trace.validation_result.reason}")
+        else:
+            record.validation_pass = False
+            record.failure_reasons.append("Validation: no result produced")
+
+        gen_upper = (ctx.sql or "").upper()
+        exp_upper = record.expected_sql.upper()
+
+        view_token = record.expected_view.split(".")[-1].upper()
+        record.view_in_sql = view_token in gen_upper or record.expected_view.upper() in gen_upper
+        if not record.view_in_sql:
+            record.failure_reasons.append(
+                f"SQL: '{record.expected_view}' not referenced in generated SQL"
+            )
+
+        expected_cols = _extract_select_columns(exp_upper)
+        if expected_cols:
+            missing = [c for c in expected_cols if c not in gen_upper]
+            record.metric_present = len(missing) == 0
+            if not record.metric_present:
+                record.failure_reasons.append(f"Metrics: missing {missing}")
+        else:
+            record.metric_present = None
+
+        expected_groups = _extract_group_by_columns(exp_upper)
+        if expected_groups:
+            record.grouping_present = any(g in gen_upper for g in expected_groups)
+            if not record.grouping_present:
+                record.failure_reasons.append(f"Grouping: expected GROUP BY {expected_groups}, not found")
+        else:
+            record.grouping_present = None
+
+        expected_filters = _extract_filter_terms(exp_upper)
+        if expected_filters:
+            record.filter_present = any(f in gen_upper for f in expected_filters)
+            if not record.filter_present:
+                record.failure_reasons.append(f"Filters: expected terms {expected_filters[:4]} not found")
+        else:
+            record.filter_present = None
+
+        mandatory = [record.view_match, record.view_in_sql, record.validation_pass]
+        optional = [c for c in [record.metric_present, record.grouping_present, record.filter_present] if c is not None]
+        all_checks = [c for c in mandatory if c is not None] + optional
+
+        if all(all_checks):
+            record.status = "pass"
+        elif any(all_checks):
+            record.status = "partial"
+        else:
+            record.status = "fail"
+
+        ctx.trace.execution_status = "skipped"
+        ctx.trace.latency_ms = build_latency(ctx)
+        record.trace = ctx.trace
+        record.latency_ms = ctx.trace.latency_ms.total_ms
+        return record
+
+    async def run_negative_question(self, neg: dict) -> GoldenEvalRecord:
+        """Run one negative question — it must be refused at intent stage."""
+        record = GoldenEvalRecord(
+            question=neg["question"],
+            expected_view="none",
+            expected_sql="",
+            case_type="negative_question",
+        )
+        ctx = _make_ctx(record.question)
+
+        outcome = await self._intent_stage.run(ctx)
+        record.intent_answerable = ctx.trace.answerable
+
+        if isinstance(outcome, Refusal):  # refused — correct for a negative question
+            record.status = "pass"
+        else:
+            record.status = "fail"
+            record.failure_reasons.append(
+                "System should have refused this question but classified it as answerable."
+            )
+            ctx.trace.execution_status = "skipped"
+            ctx.trace.latency_ms = build_latency(ctx)
+
+        record.trace = ctx.trace
+        record.latency_ms = ctx.trace.latency_ms.total_ms
+        return record
+
+    def run_negative_sql_checks(self) -> list[GoldenEvalRecord]:
+        """Validate that known-unsafe SQL patterns are blocked by validate_query."""
+        records = []
+        for sql, description in NEGATIVE_SQL_PATTERNS:
+            record = GoldenEvalRecord(
+                question=description,
+                expected_view="none",
+                expected_sql=sql,
+                case_type="negative_sql",
+            )
+            try:
+                validate_query(sql)
+                record.validation_pass = False
+                record.status = "fail"
+                record.failure_reasons.append(f"Validator should have blocked: {sql[:80]}")
+            except SQLSafetyError:
+                record.validation_pass = True
+                record.status = "pass"
+
+            record.trace = TraceRecord(
+                question=description,
+                generated_sql=sql,
+                validation_result=ValidationResult(
+                    passed=not record.validation_pass,
+                    reason=f"Negative SQL check: {description}",
+                ),
+                execution_status="refused",
+            )
+            records.append(record)
+        return records
+
+    async def run_all(self) -> EvaluationReport:
+        questions = self._load_golden_questions()
+        records: list[GoldenEvalRecord] = []
+
+        logger.info("golden_runner.start total_positive=%d", len(questions))
+
+        for q in questions:
+            try:
+                rec = await self.run_question(q)
+            except Exception as exc:
+                logger.exception("golden_runner.question_error q=%s", q.get("natural_language_question", "?"))
+                rec = GoldenEvalRecord(
+                    question=q.get("natural_language_question", "unknown"),
+                    expected_view=q.get("expected_view", ""),
+                    expected_sql=q.get("expected_sql", ""),
+                    status="error",
+                )
+                rec.failure_reasons.append(str(exc))
+            records.append(rec)
+
+        for neg in NEGATIVE_QUESTIONS:
+            try:
+                rec = await self.run_negative_question(neg)
+            except Exception as exc:
+                logger.exception("golden_runner.negative_error q=%s", neg["question"])
+                rec = GoldenEvalRecord(
+                    question=neg["question"],
+                    expected_view="none",
+                    expected_sql="",
+                    case_type="negative_question",
+                    status="error",
+                )
+                rec.failure_reasons.append(str(exc))
+            records.append(rec)
+
+        records.extend(self.run_negative_sql_checks())
+
+        counts: dict[str, int] = {"pass": 0, "partial": 0, "fail": 0, "error": 0}
+        for r in records:
+            counts[r.status] = counts.get(r.status, 0) + 1
+
+        report = EvaluationReport(
+            total=len(records),
+            passed=counts["pass"],
+            partial=counts["partial"],
+            failed=counts["fail"],
+            errors=counts["error"],
+            records=records,
+        )
+        logger.info(
+            "golden_runner.complete total=%d pass=%d partial=%d fail=%d error=%d",
+            report.total, report.passed, report.partial, report.failed, report.errors,
+        )
+        return report
