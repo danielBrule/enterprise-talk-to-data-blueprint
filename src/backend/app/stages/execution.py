@@ -22,6 +22,8 @@ class ExecutionStage(Stage):
             return None
         except Exception as exc:
             ctx.latency["execution_ms"] = (time.perf_counter() - t0) * 1000
+            # "failed" (infrastructure error) not "refused" (user-facing rejection) —
+            # constructed directly rather than via refuse() to preserve this distinction.
             ctx.trace.execution_status = "failed"
             ctx.trace.error = str(exc)
             reason = "Query execution failed — the database may be unavailable."

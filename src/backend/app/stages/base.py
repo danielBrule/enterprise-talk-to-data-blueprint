@@ -33,10 +33,15 @@ class Success:
     trace: TraceRecord
 
 
+# None → stage passed, continue; Refusal → pipeline stops with user-facing reason;
+# Success → pipeline complete (returned only by AnswerStage).
 StageOutcome = Refusal | Success | None
 
 
 def refuse(ctx: PipelineContext, reason: str) -> Refusal:
+    # Stamps trace as "refused" (user-facing rejection) and freezes latency.
+    # Stages that represent infrastructure failures (e.g. ExecutionStage) construct
+    # Refusal directly to set execution_status="failed" rather than "refused".
     ctx.trace.refusal_reason = reason
     ctx.trace.execution_status = "refused"
     ctx.trace.latency_ms = build_latency(ctx)

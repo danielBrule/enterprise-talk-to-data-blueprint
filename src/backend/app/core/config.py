@@ -61,6 +61,8 @@ class Settings:
         )
 
     def get_azure_openai_deployment(self, task: str | None = None) -> str:
+        # No default fallback — each task must be explicitly configured via its own env var.
+        # An empty string here surfaces as a ValueError in LLMService.generate_response.
         if task == "schema_retrieval":
             return self.azure_openai_schema_retrieval_deployment
         if task == "sql_generation":

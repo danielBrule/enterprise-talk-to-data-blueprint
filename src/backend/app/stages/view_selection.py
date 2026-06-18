@@ -91,6 +91,8 @@ class ViewSelectionStage(Stage):
         ctx.trace.view_selection_reason = result.get("reason")
         ctx.selected_views = selected_views
 
+        # Below 0.4 the LLM's view selection is unreliable enough that downstream SQL
+        # generation would likely produce a wrong or nonsensical query.
         if confidence < 0.4:
             return refuse(
                 ctx,

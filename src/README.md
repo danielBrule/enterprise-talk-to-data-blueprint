@@ -1,204 +1,164 @@
-# Newspaper Talk to Data
+# Enterprise Talk to Data
 
-A scaffold for a "talk to data" solution focused on newspaper analytics.
-The repository includes a backend API, frontend shell, SQL artifacts, metadata, evaluation assets, and infrastructure scaffolding.
+A natural-language-to-SQL pipeline for newspaper analytics. Users ask plain-English questions; the system classifies intent, selects the right database views, generates and validates SQL, executes it, and returns a natural-language answer — all through a single `/ask` endpoint.
 
-## Python Environment Setup
+## How it works
 
-A project-specific Python environment is created in `.venv`.
-
-### Create the virtual environment
-
-```powershell
-cd newspaper-talk-to-data
-python -m venv .venv
+```
+POST /api/v0/ask  {"question": "Which articles had the most comments last week?"}
 ```
 
-### Activate the environment (PowerShell)
+The request passes through 7 sequential stages. Each stage either passes control to the next (`None`), stops the pipeline with a user-facing refusal (`Refusal`), or — in the final stage — returns the answer (`Success`).
 
-```powershell
-cd newspaper-talk-to-data
-.\.venv\Scripts\Activate.ps1
+| # | Stage | LLM | Refuses when |
+|---|---|---|---|
+| 1 | **Intent** | schema_retrieval | question is out of scope, off-domain, or requires external data |
+| 2 | **View selection** | schema_retrieval | confidence < 0.4, or no relevant view identified |
+| 3 | **Metadata** | — | no schema/metrics metadata found for the selected views |
+| 4 | **SQL generation** | sql_generation | LLM returns no query or unparseable JSON |
+| 5 | **SQL validation** | — | query violates safety rules (see below) |
+| 6 | **Execution** | — | database unavailable or query errors |
+| 7 | **Answer** | summary | never refuses — falls back to row count if LLM unavailable |
+
+**SQL safety rules (stage 5):** SELECT only · `analytics.*` views only · no DDL/DML · no multi-statement · `TOP`/`LIMIT` required (max 500 rows).
+
+## Repository layout
+
 ```
-
-### Install dependencies
-
-Once dependencies are added, install them from `pyproject.toml` or a requirements file.
-
-```powershell
-pip install -U pip
-pip install -r requirements.txt
+src/
+  backend/
+    app/
+      api/           — FastAPI routes (/ask, /metadata/*, /articles, …)
+      core/          — config, logger, SQL safety validator
+      db/            — Azure SQL connection and query execution
+      evaluation/    — golden runner: replays curated questions, checks answerability
+      models/        — Pydantic API models, PipelineContext, TraceRecord
+      prompts/       — versioned prompt builders (intent, view selection, SQL gen, answer)
+      services/      — LLMService (Azure OpenAI), metadata loader, pipeline composer
+      stages/        — one file per pipeline step: service + stage + result type
+    tests/
+      integration/   — endpoint smoke tests (requires running server)
+      test_*.py      — unit tests (87 tests, no external dependencies)
+  metadata/
+    schema_descriptions/  — column-level view documentation (YAML)
+    metrics/              — view purpose, business meaning, limitations (YAML)
+    glossary/             — domain term definitions (YAML)
+    example_questions/    — golden questions for evaluation
+  sql/               — view DDL and security scripts
+  infra/             — Terraform modules for Azure deployment
 ```
-
-## Repository Layout
-
-- `backend/` - backend API, core logic, services, prompts, validation, and database code
-- `frontend/` - frontend source code
-- `sql/` - SQL views, security scripts, and tests
-- `metadata/` - glossary, metrics, schema descriptions, and example questions
-- `evaluations/` - benchmark questions and expected SQL/results
-- `infra/` - infrastructure definitions, including Terraform
-- `docs/` - documentation
-
-## Core Services
-
-### View Selection Service
-
-Intelligently selects the most relevant database views for natural language questions using Azure OpenAI LLM.
-
-**Flow:**
-```
-Question → Metadata Context → LLM View Selection → Selected Views + Reasoning
-```
-
-**API Endpoint:** `POST /api/v0/metadata/select-views`
-
-**Example:**
-```bash
-curl -X POST "http://localhost:8000/api/v0/metadata/select-views?question=Which+articles+had+the+most+comments"
-```
-
-**Response:**
-```json
-{
-  "question": "Which articles had the most comments?",
-  "selected_views": ["analytics.vw_article_engagement"],
-  "reason": "Question refers to articles and comment volume."
-}
-```
-
-For more details, see [View Selection Service Documentation](docs/VIEW_SELECTION_SERVICE.md).
-
-## Testing
-
-### Unit Tests
-
-Run all unit tests in the `backend/tests/` directory:
-
-```powershell
-pytest backend/tests/ -v
-```
-
-Run specific test:
-```powershell
-pytest backend/tests/test_services.py::test_view_selection_service -v
-```
-
-**Test Coverage:**
-- Article, keyword, contributor, ingestion error services
-- View selection service with LLM integration
-- Fallback behavior when LLM is not configured
-- Error handling for invalid responses
-
-### Integration Tests
-
-Test all API endpoints with a running server:
-
-```powershell
-python backend/tests/integration/test_integration_endpoints.py
-```
-
-This script:
-1. Starts the backend server
-2. Tests all endpoints including the new view selection endpoint
-3. Reports results
-
-**Note:** Integration tests require the server to be available and are run separately from unit tests.
 
 ## Configuration
 
-This repo includes a reusable Terraform module structure for Azure deployment.
-The Terraform configuration supports environment-specific deployments for `dev` and `prod`.
+Copy `.env.example` to `.env` and fill in:
 
-### Included resources
-- Azure Resource Group: `rg-lefigaro-talk2data-<env>`
-- Azure OpenAI account: `openai-lefigaro-<env>`
-- OpenAI deployments:
-  - `talk2data-gpt41mini-schema-retrieval`
-  - `talk2data-gpt41mini-sql-generation`
-  - `talk2data-gpt41mini-summary`
+```env
+# Azure SQL
+AZURE_SQL_SERVER=
+AZURE_SQL_DATABASE=
+AZURE_SQL_USERNAME=
+AZURE_SQL_PASSWORD=
 
-### Terraform layout
-- `infra/terraform/` — root module and provider configuration
-- `infra/terraform/modules/resource_group/` — reusable RG module
-- `infra/terraform/modules/openai/` — reusable OpenAI account + deployment module
-- `infra/terraform/envs/dev/terraform.tfvars` — dev input values
-- `infra/terraform/envs/prod/terraform.tfvars` — prod input values
-
-### Run Terraform
-Use the Makefile wrapper from the repository root:
-
-```powershell
-make infra-init
-make infra-apply ENV=dev
+# Azure OpenAI — one endpoint, three task-specific deployments (no shared default)
+AZURE_OPENAI_ENDPOINT=
+AZURE_OPENAI_API_KEY=
+AZURE_OPENAI_API_VERSION=2024-02-01
+AZURE_OPENAI_SCHEMA_RETRIEVAL_DEPLOYMENT=   # intent + view selection (lightweight model)
+AZURE_OPENAI_SQL_GENERATION_DEPLOYMENT=     # SQL generation (reasoning-capable model)
+AZURE_OPENAI_SUMMARY_DEPLOYMENT=            # answer generation (instruction-following model)
 ```
 
-For production, point to the prod tfvars file:
+Three separate deployments are required — the pipeline uses different model tiers per task by design. Using the same deployment name for all three is valid for local development.
+
+If you provisioned infrastructure with Terraform, retrieve these values from its outputs:
 
 ```powershell
-make infra-apply ENV=prod
+terraform -chdir=src/infra/terraform output   # shows endpoint and deployment names
 ```
 
-## Azure SQL View Deployment
+## Running locally
 
-SQL view definitions are stored in `sql/views/` and use the `analytics` schema.
-
-### Local development
-
-1. Copy `.env.example` to `.env` and fill in your Azure SQL connection details:
-
-   ```powershell
-   copy .env.example .env
-   # Edit .env with your Azure SQL server, database, username, password
-   ```
-
-2. Deploy views:
-
-   ```powershell
-   cd newspaper-talk-to-data
-   make apply-sql-views
-   ```
-
-### Run the backend locally
-
-Start the backend API once your dependencies are installed and `.env` is configured:
+**Prerequisites:** Python 3.11+, `make` (`choco install make` on Windows).
 
 ```powershell
-cd newspaper-talk-to-data
+# 1. Create virtual environment and install dependencies
+make install
+
+# 2. Configure environment
+copy .env.example .env
+# Edit .env with Azure SQL and Azure OpenAI credentials
+
+# 3. Deploy SQL views to the database (first time or after view changes)
+make apply-sql-views
+
+# 4. Start the backend
 make start-backend
 ```
 
-Alternatively:
+The API is then available at `http://localhost:8000`.
 
-```powershell
-cd newspaper-talk-to-data
-.\.venv\Scripts\python.exe backend/main.py
+| URL | Description |
+|---|---|
+| `http://localhost:8000/docs` | Interactive Swagger UI |
+| `http://localhost:8000/api/v0/ask` | Main pipeline endpoint (POST) |
+| `http://localhost:8000/api/v0/metadata/views` | Schema descriptions |
+| `http://localhost:8000/api/v0/metadata/metrics` | Metrics metadata |
+| `http://localhost:8000/api/v0/metadata/glossary` | Domain glossary |
+
+**Example request:**
+
+```bash
+curl -X POST http://localhost:8000/api/v0/ask \
+  -H "Content-Type: application/json" \
+  -d '{"question": "Which articles had the most comments last week?"}'
 ```
 
-Then open FastAPI docs in your browser:
+## Testing
 
-- `http://localhost:8000/docs` — interactive Swagger UI
-- `http://localhost:8000/redoc` — ReDoc API docs
-- `http://localhost:8000/openapi.json` — raw OpenAPI schema
+```powershell
+make tests   # 87 unit tests, no external dependencies required
+make eval    # golden runner — requires a live .env with Azure OpenAI credentials
+```
 
-Example endpoints to test in the browser:
+The unit tests mock all external dependencies (LLM, database) and run fully offline.
 
-- `http://localhost:8000/api/v0/articles`
-- `http://localhost:8000/api/v0/keywords`
-- `http://localhost:8000/api/v0/contributors`
-- `http://localhost:8000/api/v0/errors`
-- `http://localhost:8000/api/v0/metadata/views` — view metadata
-- `http://localhost:8000/api/v0/metadata/select-views?question=<your-question>` — view selection (POST)
+The golden runner (`evaluation/golden_runner.py`) replays the questions in `metadata/example_questions/golden_questions.yml` through the intent and view-selection stages against a live LLM and asserts correct answerability and domain classification.
 
-### GitHub Actions / CI-CD
+## Infrastructure
 
-Add the following secrets to your GitHub repository settings:
-- `AZURE_SQL_SERVER`
-- `AZURE_SQL_DATABASE`
-- `AZURE_SQL_USERNAME`
-- `AZURE_SQL_PASSWORD`
+Terraform provisions the Azure resources needed to run the pipeline. **Azure SQL is not managed by Terraform** and must be provisioned separately.
 
-### Local development now, online later
+### Resources created
 
-For local development, keep working from the `newspaper-talk-to-data` folder and use the local `.venv`.
-When you are ready to run online, ensure the same SQL migration files in `sql/views/` are deployed to the Azure SQL instance using the GitHub Action or `make apply-sql-views`.
+| Resource | Name | Purpose |
+|---|---|---|
+| Resource Group | `rg-lefigaro-talk2data-{env}` | Container for all project resources |
+| Azure OpenAI account | `openai-lefigaro-{env}` | Cognitive Services endpoint (SKU S0) |
+| OpenAI deployment | `talk2data-gpt41mini-schema-retrieval` | Used by intent classification and view selection stages |
+| OpenAI deployment | `talk2data-gpt41mini-sql-generation` | Used by SQL generation stage |
+| OpenAI deployment | `talk2data-gpt41mini-summary` | Used by answer generation stage |
+
+Default model for all three deployments is `gpt-4.1-mini`. Override per deployment via Terraform variables (`schema_retrieval_model`, `sql_generation_model`, `summary_model`).
+
+### Deploying
+
+Create a tfvars file for your target environment:
+
+```
+src/infra/terraform/envs/dev/terraform.tfvars
+src/infra/terraform/envs/prod/terraform.tfvars
+```
+
+Required variables: `subscription_id`, `tenant_id`, `client_id`, `user_object_id`. Optional overrides: `location` (default `eastus`), `resource_group_name`, `openai_account_name`, model names.
+
+```powershell
+make infra-init          # terraform init
+make infra-apply ENV=dev  # deploy to dev
+make infra-apply ENV=prod # deploy to prod
+```
+
+After apply, retrieve the OpenAI endpoint and deployment names to populate your `.env`:
+
+```powershell
+terraform -chdir=src/infra/terraform output
+```
