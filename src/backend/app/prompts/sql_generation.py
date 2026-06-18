@@ -2,6 +2,17 @@ PROMPT_VERSION = "sql_gen_v1"
 
 
 def build_sql_generation_prompt(question: str, views_context: str) -> list[dict]:
+    """
+    Build the SQL generation prompt.
+
+    Expects:
+        question:      the user's natural language question
+        views_context: pre-formatted string produced by _build_views_context —
+                       one block per view with purpose, available columns, and limitations
+
+    Returns a two-message list (system + user) instructing the model to produce
+    a single JSON object {"sql": "<T-SQL SELECT TOP N statement>"}.
+    """
     system = (
         "You generate T-SQL SELECT statements for Azure SQL Server. "
         "You must only query the analytics views provided. "
@@ -29,7 +40,7 @@ use SELECT TOP 500.
 
 Respond with exactly this JSON:
 {{
-  "sql": "SELECT TOP 10 col1, col2 FROM analytics.vw_... ORDER BY col1 DESC"
+  "sql": "<SELECT TOP N col1, col2 FROM analytics.vw_name [WHERE ...] [ORDER BY ...]>"
 }}"""
     return [
         {"role": "system", "content": system},

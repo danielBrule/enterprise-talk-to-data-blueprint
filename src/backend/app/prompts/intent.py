@@ -35,10 +35,10 @@ ingestion_errors, or unknown.
 
 Respond with exactly this JSON:
 {{
-  "answerable": true,
-  "reason": "brief explanation",
-  "domain": "article_engagement",
-  "suggested_metrics": ["comment_count", "avg_comment_sentiment"]
+  "answerable": "<boolean>",
+  "reason": "<brief explanation of why the question is or is not answerable>",
+  "domain": "<article_engagement | keyword_engagement | contributor_behaviour | ingestion_errors | unknown>",
+  "suggested_metrics": ["<column_name_or_aggregate_expression>"]
 }}"""
     return [
         {"role": "system", "content": system},

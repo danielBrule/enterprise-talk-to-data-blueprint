@@ -31,8 +31,8 @@ Caveats from metadata:
 
 Respond with exactly this JSON:
 {{
-  "answer": "A concise factual answer grounded in the result above (under 100 words).",
-  "caveats": ["include all metadata caveats plus any you observe from the result"]
+  "answer": "<concise factual answer grounded in the result, under 100 words>",
+  "caveats": ["<caveat from metadata or observed from the result>"]
 }}"""
     return [
         {"role": "system", "content": system},
