@@ -1,5 +1,4 @@
-import pytest
-from fastapi.testclient import TestClient
+﻿from fastapi.testclient import TestClient
 
 from backend.app.main import app
 from backend.app.prompts.intent import _KNOWN_VIEWS
@@ -29,7 +28,6 @@ def test_metadata_glossary_endpoint():
     assert isinstance(response.json(), list)
 
 
-@pytest.mark.asyncio
 async def test_intent_prompt_views_match_metadata():
     """Catch drift between _KNOWN_VIEWS in the intent prompt and the metrics metadata files."""
     prompt_views = {v.strip() for v in _KNOWN_VIEWS.split(",")}

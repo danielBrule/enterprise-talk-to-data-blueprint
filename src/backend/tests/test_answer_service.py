@@ -1,5 +1,4 @@
-import json
-import pytest
+﻿import json
 from unittest.mock import AsyncMock, MagicMock
 
 import backend.app.stages.answer as answer_service_module
@@ -20,7 +19,6 @@ SAMPLE_METADATA = {
 }
 
 
-@pytest.mark.asyncio
 async def test_generate_answer(monkeypatch):
     mock_llm = MagicMock()
     mock_llm.generate_summary = AsyncMock(
@@ -45,7 +43,6 @@ async def test_generate_answer(monkeypatch):
     assert result.latency_ms >= 0
 
 
-@pytest.mark.asyncio
 async def test_generate_empty_results(monkeypatch):
     mock_llm = MagicMock()
     mock_llm.generate_summary = AsyncMock(
@@ -62,7 +59,6 @@ async def test_generate_empty_results(monkeypatch):
     assert "No results" in result.answer
 
 
-@pytest.mark.asyncio
 async def test_generate_collects_metadata_caveats(monkeypatch):
     """Metadata limitations must appear in the prompt even if LLM omits them."""
     mock_llm = MagicMock()
@@ -80,7 +76,6 @@ async def test_generate_collects_metadata_caveats(monkeypatch):
     assert result.caveats  # at least one caveat returned
 
 
-@pytest.mark.asyncio
 async def test_generate_bad_json_falls_back(monkeypatch):
     mock_llm = MagicMock()
     mock_llm.generate_summary = AsyncMock(return_value="not valid json")
@@ -94,7 +89,6 @@ async def test_generate_bad_json_falls_back(monkeypatch):
     assert result.prompt_version == PROMPT_VERSION
 
 
-@pytest.mark.asyncio
 async def test_generate_llm_unavailable(monkeypatch):
     monkeypatch.setattr(
         answer_service_module, "LLMService", MagicMock(side_effect=ValueError("no config"))

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for TalkToDataPipeline.
 
 All LLM calls and DB execution are mocked. Tests verify that:
@@ -9,7 +9,6 @@ All LLM calls and DB execution are mocked. Tests verify that:
 - The trace captures stage-level artefacts at every failure point.
 """
 import json
-import pytest
 from dataclasses import dataclass
 from unittest.mock import AsyncMock, MagicMock
 
@@ -85,7 +84,6 @@ def _build_pipeline(monkeypatch):
     return pipeline_module.TalkToDataPipeline()
 
 
-@pytest.mark.asyncio
 async def test_pipeline_happy_path(monkeypatch):
     pipeline = _build_pipeline(monkeypatch)
 
@@ -124,7 +122,6 @@ async def test_pipeline_happy_path(monkeypatch):
     assert "Access context is captured" in trace.access_enforcement_note
 
 
-@pytest.mark.asyncio
 async def test_pipeline_refused_at_intent(monkeypatch):
     pipeline = _build_pipeline(monkeypatch)
     pipeline.intent_service.classify = AsyncMock(return_value=_make_intent(False))
@@ -142,7 +139,6 @@ async def test_pipeline_refused_at_intent(monkeypatch):
     assert trace.latency_ms.total_ms is not None
 
 
-@pytest.mark.asyncio
 async def test_pipeline_refused_at_sql_validation(monkeypatch):
     pipeline = _build_pipeline(monkeypatch)
 
@@ -170,7 +166,6 @@ async def test_pipeline_refused_at_sql_validation(monkeypatch):
     mock_exec.assert_not_awaited()
 
 
-@pytest.mark.asyncio
 async def test_pipeline_refused_when_no_sql_generated(monkeypatch):
     pipeline = _build_pipeline(monkeypatch)
 
@@ -189,7 +184,6 @@ async def test_pipeline_refused_when_no_sql_generated(monkeypatch):
     assert "no query" in response.refusal_reason.lower()
 
 
-@pytest.mark.asyncio
 async def test_pipeline_refused_when_no_views_selected(monkeypatch):
     pipeline = _build_pipeline(monkeypatch)
 
@@ -206,7 +200,6 @@ async def test_pipeline_refused_when_no_views_selected(monkeypatch):
     assert "views" in response.refusal_reason.lower()
 
 
-@pytest.mark.asyncio
 async def test_pipeline_trace_has_user_context(monkeypatch):
     pipeline = _build_pipeline(monkeypatch)
 
@@ -219,7 +212,6 @@ async def test_pipeline_trace_has_user_context(monkeypatch):
     assert response.trace.user_context == "role=analyst; team=editorial"
 
 
-@pytest.mark.asyncio
 async def test_pipeline_refused_when_low_confidence(monkeypatch):
     pipeline = _build_pipeline(monkeypatch)
 
@@ -237,7 +229,6 @@ async def test_pipeline_refused_when_low_confidence(monkeypatch):
     assert response.trace.execution_status == "refused"
 
 
-@pytest.mark.asyncio
 async def test_pipeline_execution_failure_refuses(monkeypatch):
     pipeline = _build_pipeline(monkeypatch)
 

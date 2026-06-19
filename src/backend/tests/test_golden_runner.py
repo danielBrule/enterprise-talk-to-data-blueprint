@@ -1,8 +1,8 @@
-"""
+﻿"""
 Tests for GoldenRunner.
 
 All LLM calls are mocked. The metadata loader reads real YAML files from
-the repository (they are not mocked — we want to verify the actual metadata
+the repository (they are not mocked â€” we want to verify the actual metadata
 loads correctly). validate_query is the real deterministic implementation.
 """
 import json
@@ -10,7 +10,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 
 import backend.app.stages.intent as intent_module
 import backend.app.stages.sql_generation as sql_gen_module
@@ -57,7 +56,6 @@ def _build_runner(monkeypatch) -> GoldenRunner:
     return GoldenRunner()
 
 
-@pytest.mark.asyncio
 async def test_run_question_pass(monkeypatch):
     runner = _build_runner(monkeypatch)
 
@@ -93,7 +91,6 @@ async def test_run_question_pass(monkeypatch):
     assert "Access context is captured" in record.trace.access_enforcement_note
 
 
-@pytest.mark.asyncio
 async def test_run_question_wrong_view(monkeypatch):
     runner = _build_runner(monkeypatch)
 
@@ -122,7 +119,6 @@ async def test_run_question_wrong_view(monkeypatch):
     assert record.trace.selected_views == ["analytics.vw_keyword_engagement"]
 
 
-@pytest.mark.asyncio
 async def test_run_question_validation_fail(monkeypatch):
     runner = _build_runner(monkeypatch)
 
@@ -149,7 +145,6 @@ async def test_run_question_validation_fail(monkeypatch):
     assert record.trace.validation_result.passed is False
 
 
-@pytest.mark.asyncio
 async def test_run_negative_question_correctly_refused(monkeypatch):
     runner = _build_runner(monkeypatch)
     runner.intent_service.classify = AsyncMock(return_value=_make_intent(False))
@@ -167,7 +162,6 @@ async def test_run_negative_question_correctly_refused(monkeypatch):
     assert record.trace.execution_status == "refused"
 
 
-@pytest.mark.asyncio
 async def test_run_negative_question_not_refused_fails(monkeypatch):
     runner = _build_runner(monkeypatch)
     # LLM incorrectly says it's answerable
@@ -200,7 +194,6 @@ def test_negative_sql_checks_all_blocked():
         assert record.trace is not None
 
 
-@pytest.mark.asyncio
 async def test_run_all_returns_report(monkeypatch):
     runner = _build_runner(monkeypatch)
 

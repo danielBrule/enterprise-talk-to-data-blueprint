@@ -1,5 +1,4 @@
-import pytest
-from unittest.mock import MagicMock, AsyncMock
+﻿from unittest.mock import MagicMock, AsyncMock
 
 import backend.app.services.article_service as article_service
 import backend.app.services.contributor_service as contributor_service
@@ -15,7 +14,6 @@ def make_conn_mock(result):
     return mock_conn
 
 
-@pytest.mark.asyncio
 async def test_list_articles_uses_connection(monkeypatch):
     mock_execute = AsyncMock(return_value=[{"article_id": 1}])
     monkeypatch.setattr(article_service, "execute_query", mock_execute)
@@ -26,7 +24,6 @@ async def test_list_articles_uses_connection(monkeypatch):
     mock_execute.assert_awaited_once()
 
 
-@pytest.mark.asyncio
 async def test_get_article_returns_none_when_not_found(monkeypatch):
     mock_execute_query = AsyncMock(return_value=[])
 
@@ -42,7 +39,6 @@ async def test_get_article_returns_none_when_not_found(monkeypatch):
     mock_execute_query.assert_awaited_once()
 
 
-@pytest.mark.asyncio
 async def test_list_keywords_uses_connection(monkeypatch):
     mock_execute = AsyncMock(return_value=[{"keyword_id": 1}])
     monkeypatch.setattr(keyword_service, "execute_query", mock_execute)
@@ -53,7 +49,6 @@ async def test_list_keywords_uses_connection(monkeypatch):
     mock_execute.assert_awaited_once()
 
 
-@pytest.mark.asyncio
 async def test_list_contributors_uses_connection(monkeypatch):
     mock_execute_query = AsyncMock(return_value=[{"contributor_id": "c1"}])
 
@@ -69,7 +64,6 @@ async def test_list_contributors_uses_connection(monkeypatch):
     mock_execute_query.assert_awaited_once()
 
 
-@pytest.mark.asyncio
 async def test_list_ingestion_errors_uses_connection(monkeypatch):
     mock_conn = make_conn_mock([{"error_id": 1}])
     monkeypatch.setattr(ingestion_error_service, "get_connection", lambda: mock_conn)
@@ -85,7 +79,6 @@ async def test_list_ingestion_errors_uses_connection(monkeypatch):
     mock_conn.execute.assert_called_once()
 
 
-@pytest.mark.asyncio
 async def test_list_ingestion_errors_uses_connection(monkeypatch):
     mock_execute_query = AsyncMock(return_value=[{"error_id": "e1"}])
 
@@ -101,7 +94,6 @@ async def test_list_ingestion_errors_uses_connection(monkeypatch):
     mock_execute_query.assert_awaited_once()
 
 
-@pytest.mark.asyncio
 async def test_view_selection_service(monkeypatch):
     # Mock the metadata service
     mock_metrics = [
@@ -149,7 +141,6 @@ async def test_view_selection_service(monkeypatch):
     assert result == expected
 
 
-@pytest.mark.asyncio
 async def test_view_selection_fallback_when_llm_not_configured(monkeypatch):
     """Test that service gracefully handles missing LLM configuration."""
     mock_metrics = [
@@ -183,7 +174,6 @@ async def test_view_selection_fallback_when_llm_not_configured(monkeypatch):
     assert "LLM not configured" in result["reason"]
 
 
-@pytest.mark.asyncio
 async def test_view_selection_with_multiple_views(monkeypatch):
     """Test that service can select multiple views."""
     mock_metrics = [
@@ -224,7 +214,6 @@ async def test_view_selection_with_multiple_views(monkeypatch):
     assert "analytics.vw_keyword_engagement" in result["selected_views"]
 
 
-@pytest.mark.asyncio
 async def test_view_selection_invalid_json_response(monkeypatch):
     """Test that service handles invalid JSON from LLM gracefully."""
     mock_metrics = [
@@ -257,7 +246,6 @@ async def test_view_selection_invalid_json_response(monkeypatch):
     assert "Failed to parse" in result["reason"]
 
 
-@pytest.mark.asyncio
 async def test_view_selection_no_metrics_available(monkeypatch):
     """Test that service handles missing metrics gracefully."""
     monkeypatch.setattr(

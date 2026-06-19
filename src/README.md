@@ -78,10 +78,15 @@ terraform -chdir=src/infra/terraform output   # shows endpoint and deployment na
 
 ## Running locally
 
-**Prerequisites:** Python 3.11+, `make` (`choco install make` on Windows).
+**Prerequisites:** Python 3.12+, Poetry, `make` (`choco install make` on Windows).
+
+Install Poetry once:
+```powershell
+(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
+```
 
 ```powershell
-# 1. Create virtual environment and install dependencies
+# 1. Install all dependencies (creates .venv automatically)
 make install
 
 # 2. Configure environment

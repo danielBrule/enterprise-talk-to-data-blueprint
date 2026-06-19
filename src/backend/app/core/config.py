@@ -45,7 +45,7 @@ class Settings:
         self.azure_openai_api_key = os.getenv("AZURE_OPENAI_API_KEY", "")
         self.azure_openai_api_version = os.getenv(
             "AZURE_OPENAI_API_VERSION",
-            "2024-02-01",
+            "2024-06-01",
         )
         self.azure_openai_schema_retrieval_deployment = os.getenv(
             "AZURE_OPENAI_SCHEMA_RETRIEVAL_DEPLOYMENT",

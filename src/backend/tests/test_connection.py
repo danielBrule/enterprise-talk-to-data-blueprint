@@ -1,4 +1,4 @@
-import pytest
+﻿import pytest
 import asyncio
 from sqlalchemy import text
 from unittest.mock import MagicMock, AsyncMock
@@ -14,7 +14,6 @@ def test_get_connection_raises_without_database_url(monkeypatch):
         connection.get_connection()
 
 
-@pytest.mark.asyncio
 async def test_execute_query_logs_success(monkeypatch):
     # Mock Row class that has ._mapping attribute
     class MockRow:
@@ -35,7 +34,6 @@ async def test_execute_query_logs_success(monkeypatch):
     assert result == [{"article_id": 1}]
 
 
-@pytest.mark.asyncio
 async def test_execute_query_logs_failure(monkeypatch):
     mock_conn = MagicMock()
     mock_conn.__enter__.return_value = mock_conn

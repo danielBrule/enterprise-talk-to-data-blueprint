@@ -1,5 +1,4 @@
-import json
-import pytest
+﻿import json
 from unittest.mock import AsyncMock, MagicMock
 
 import backend.app.stages.intent as intent_service_module
@@ -7,7 +6,6 @@ from backend.app.stages.intent import IntentResult
 from backend.app.prompts.intent import PROMPT_VERSION
 
 
-@pytest.mark.asyncio
 async def test_classify_answerable(monkeypatch):
     mock_llm = MagicMock()
     mock_llm.generate_schema_retrieval = AsyncMock(
@@ -30,7 +28,6 @@ async def test_classify_answerable(monkeypatch):
     assert result.latency_ms >= 0
 
 
-@pytest.mark.asyncio
 async def test_classify_not_answerable(monkeypatch):
     mock_llm = MagicMock()
     mock_llm.generate_schema_retrieval = AsyncMock(
@@ -51,7 +48,6 @@ async def test_classify_not_answerable(monkeypatch):
     assert result.reason == "Requires external stock data"
 
 
-@pytest.mark.asyncio
 async def test_classify_llm_unavailable(monkeypatch):
     monkeypatch.setattr(
         intent_service_module, "LLMService", MagicMock(side_effect=ValueError("no config"))
@@ -65,7 +61,6 @@ async def test_classify_llm_unavailable(monkeypatch):
     assert "LLM not configured" in result.reason
 
 
-@pytest.mark.asyncio
 async def test_classify_bad_json_falls_back(monkeypatch):
     mock_llm = MagicMock()
     mock_llm.generate_schema_retrieval = AsyncMock(return_value="not valid json {{{")
@@ -79,7 +74,6 @@ async def test_classify_bad_json_falls_back(monkeypatch):
     assert "parse failed" in result.reason.lower()
 
 
-@pytest.mark.asyncio
 async def test_classify_prompt_version_in_result(monkeypatch):
     mock_llm = MagicMock()
     mock_llm.generate_schema_retrieval = AsyncMock(
@@ -98,7 +92,6 @@ async def test_classify_prompt_version_in_result(monkeypatch):
     assert result.prompt_version == PROMPT_VERSION
 
 
-@pytest.mark.asyncio
 async def test_classify_contributor_domain(monkeypatch):
     mock_llm = MagicMock()
     mock_llm.generate_schema_retrieval = AsyncMock(

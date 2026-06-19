@@ -1,5 +1,4 @@
-import json
-import pytest
+﻿import json
 from unittest.mock import AsyncMock, MagicMock
 
 import backend.app.stages.sql_generation as sql_gen_module
@@ -25,7 +24,6 @@ SAFE_SQL = (
 )
 
 
-@pytest.mark.asyncio
 async def test_generate_returns_sql(monkeypatch):
     mock_llm = MagicMock()
     mock_llm.generate_sql_generation = AsyncMock(return_value=json.dumps({"sql": SAFE_SQL}))
@@ -42,7 +40,6 @@ async def test_generate_returns_sql(monkeypatch):
     assert result.latency_ms >= 0
 
 
-@pytest.mark.asyncio
 async def test_generate_metadata_included_in_prompt(monkeypatch):
     """Verify that view name and column names are sent to the LLM."""
     mock_llm = MagicMock()
@@ -67,7 +64,6 @@ async def test_generate_metadata_included_in_prompt(monkeypatch):
     assert "comment_count" in prompt_text
 
 
-@pytest.mark.asyncio
 async def test_generate_strips_markdown_fences(monkeypatch):
     raw_response = "```json\n" + json.dumps({"sql": SAFE_SQL}) + "\n```"
     mock_llm = MagicMock()
@@ -80,7 +76,6 @@ async def test_generate_strips_markdown_fences(monkeypatch):
     assert result.sql == SAFE_SQL
 
 
-@pytest.mark.asyncio
 async def test_generate_bad_json_returns_empty(monkeypatch):
     mock_llm = MagicMock()
     mock_llm.generate_sql_generation = AsyncMock(return_value="not json")
@@ -93,7 +88,6 @@ async def test_generate_bad_json_returns_empty(monkeypatch):
     assert result.prompt_version == PROMPT_VERSION
 
 
-@pytest.mark.asyncio
 async def test_generate_llm_unavailable_returns_empty(monkeypatch):
     monkeypatch.setattr(
         sql_gen_module, "LLMService", MagicMock(side_effect=ValueError("no config"))
