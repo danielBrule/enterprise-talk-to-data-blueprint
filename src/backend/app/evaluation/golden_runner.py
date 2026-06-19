@@ -42,7 +42,9 @@ from ..stages.view_selection import ViewSelectionService, ViewSelectionStage
 from ..stages.metadata import MetadataStage
 from ..stages.sql_generation import SQLGenerationService, SQLGenerationStage
 from ..stages.sql_validation import SQLValidationStage
-from ..stages.base import build_latency, Refusal
+from ..stages.execution import ExecutionStage
+from ..stages.answer import AnswerService, AnswerStage
+from ..stages.base import build_latency, Refusal, Success
 
 _GOLDEN_QUESTIONS_PATH = (
     Path(__file__).resolve().parents[3] / "metadata" / "example_questions" / "golden_questions.yml"
@@ -104,6 +106,9 @@ class GoldenEvalRecord:
 
     # Artefacts
     generated_sql: str | None = None
+    execution_status: str | None = None  # "success" | "failed" | "skipped" (full mode only)
+    answer: str | None = None
+    answer_quality_pass: bool | None = None
     trace: TraceRecord | None = None
     latency_ms: float | None = None
 
@@ -164,7 +169,10 @@ class EvaluationReport:
                         "grouping_present": r.grouping_present,
                         "filter_present": r.filter_present,
                         "validation_pass": r.validation_pass,
+                        "execution_status": r.execution_status,
+                        "answer_quality": r.answer_quality_pass,
                     },
+                    "answer": r.answer,
                     "failure_reasons": r.failure_reasons,
                     "latency_ms": r.latency_ms,
                     "trace_id": r.trace.trace_id if r.trace else None,
@@ -208,6 +216,18 @@ def _extract_filter_terms(sql_upper: str) -> list[str]:
     return [t for t in tokens if t not in _SQL_WORDS]
 
 
+def _check_answer_quality(answer: str, rows: list[dict]) -> bool:
+    """Return True if the answer mentions at least one value from the result rows."""
+    if not answer or not rows:
+        return False
+    answer_lower = answer.lower()
+    for row in rows:
+        for value in row.values():
+            if value is not None and str(value).lower() in answer_lower:
+                return True
+    return False
+
+
 def _make_ctx(question: str) -> PipelineContext:
     return PipelineContext(
         question=question,
@@ -224,12 +244,14 @@ class GoldenRunner:
         intent_service: IntentService | None = None,
         view_selection_service: ViewSelectionService | None = None,
         sql_generation_service: SQLGenerationService | None = None,
+        answer_service: AnswerService | None = None,
         golden_questions_path: Path | None = None,
     ):
         # Exposed as attributes so tests can inject mocks via runner.<service>.method = AsyncMock(...)
         self.intent_service = intent_service or IntentService()
         self.view_selection_service = view_selection_service or ViewSelectionService()
         self.sql_generation_service = sql_generation_service or SQLGenerationService()
+        self.answer_service = answer_service or AnswerService()
         self.golden_questions_path = golden_questions_path or _GOLDEN_QUESTIONS_PATH
 
         self._intent_stage = IntentStage(self.intent_service)
@@ -237,13 +259,15 @@ class GoldenRunner:
         self._metadata_stage = MetadataStage()
         self._sql_generation_stage = SQLGenerationStage(self.sql_generation_service)
         self._validation_stage = SQLValidationStage()
+        self._execution_stage = ExecutionStage()
+        self._answer_stage = AnswerStage(self.answer_service)
 
     def _load_golden_questions(self) -> list[dict]:
         with open(self.golden_questions_path, "r") as f:
             return yaml.safe_load(f) or []
 
-    async def run_question(self, q: dict) -> GoldenEvalRecord:
-        """Run one positive golden question through stages 1-5 (fast mode, no DB)."""
+    async def run_question(self, q: dict, mode: str = "fast") -> GoldenEvalRecord:
+        """Run one positive golden question. Fast mode: stages 1-5 (no DB). Full mode: all 7 stages."""
         record = GoldenEvalRecord(
             question=q["natural_language_question"],
             expected_view=q.get("expected_view", ""),
@@ -321,18 +345,39 @@ class GoldenRunner:
         else:
             record.filter_present = None
 
-        mandatory = [record.view_match, record.view_in_sql, record.validation_pass]
-        optional = [c for c in [record.metric_present, record.grouping_present, record.filter_present] if c is not None]
-        all_checks = [c for c in mandatory if c is not None] + optional
+        # ── Full mode: stages 6-7 ─────────────────────────────────────────────
+        if mode == "full" and record.validation_pass and ctx.sql:
+            exec_outcome = await self._execution_stage.run(ctx)
+            if isinstance(exec_outcome, Refusal):
+                record.execution_status = "failed"
+                record.failure_reasons.append(f"Execution: {exec_outcome.reason}")
+            else:
+                record.execution_status = "success"
+                answer_outcome = await self._answer_stage.run(ctx)
+                record.answer = answer_outcome.answer
+                record.answer_quality_pass = _check_answer_quality(answer_outcome.answer, ctx.rows or [])
+                if not record.answer_quality_pass:
+                    record.failure_reasons.append("Answer: no result values found in answer text")
+        elif mode == "full":
+            record.execution_status = "skipped"
 
-        if all(all_checks):
-            record.status = "pass"
-        elif any(all_checks):
-            record.status = "partial"
-        else:
+        # ── Status determination ──────────────────────────────────────────────
+        if mode == "full" and record.execution_status == "failed":
             record.status = "fail"
+        else:
+            mandatory = [record.view_match, record.view_in_sql, record.validation_pass]
+            optional = [c for c in [record.metric_present, record.grouping_present, record.filter_present, record.answer_quality_pass] if c is not None]
+            all_checks = [c for c in mandatory if c is not None] + optional
 
-        ctx.trace.execution_status = "skipped"
+            if all(all_checks):
+                record.status = "pass"
+            elif any(all_checks):
+                record.status = "partial"
+            else:
+                record.status = "fail"
+
+        if mode == "fast":
+            ctx.trace.execution_status = "skipped"
         ctx.trace.latency_ms = build_latency(ctx)
         record.trace = ctx.trace
         record.latency_ms = ctx.trace.latency_ms.total_ms
@@ -396,15 +441,15 @@ class GoldenRunner:
             records.append(record)
         return records
 
-    async def run_all(self) -> EvaluationReport:
+    async def run_all(self, mode: str = "fast") -> EvaluationReport:
         questions = self._load_golden_questions()
         records: list[GoldenEvalRecord] = []
 
-        logger.info("golden_runner.start total_positive=%d", len(questions))
+        logger.info("golden_runner.start mode=%s total_positive=%d", mode, len(questions))
 
         for q in questions:
             try:
-                rec = await self.run_question(q)
+                rec = await self.run_question(q, mode=mode)
             except Exception as exc:
                 logger.exception("golden_runner.question_error q=%s", q.get("natural_language_question", "?"))
                 rec = GoldenEvalRecord(

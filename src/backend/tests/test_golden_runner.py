@@ -6,6 +6,7 @@ the repository (they are not mocked â€” we want to verify the actual metada
 loads correctly). validate_query is the real deterministic implementation.
 """
 import json
+import pytest
 from dataclasses import dataclass
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
@@ -225,3 +226,22 @@ async def test_run_all_returns_report(monkeypatch):
     first = as_dict["records"][0]
     assert "trace_id" in first
     assert "checks" in first
+
+
+@pytest.mark.integration
+async def test_golden_runner_pass_rate_above_threshold():
+    """Fast-mode pass rate must be >= 80%. Requires live Azure OpenAI credentials.
+
+    Run with: poetry run pytest -m integration
+    """
+    runner = GoldenRunner()
+    report = await runner.run_all(mode="fast")
+    failing = [
+        f"  [{r.status}] {r.question[:80]}: {r.failure_reasons}"
+        for r in report.records
+        if r.status in ("fail", "error")
+    ]
+    assert report.pass_rate >= 0.8, (
+        f"Pass rate {report.pass_rate:.0%} is below the 80% threshold.\n"
+        + "\n".join(failing)
+    )

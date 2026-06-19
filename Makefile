@@ -32,6 +32,7 @@ help:   ## show this help
 	@echo "  ------"
 	@echo "  check            syntax-check all .py files under src/backend/"
 	@echo "  tests            run pytest against src/backend/tests/"
+	@echo "  eval             run golden evaluation (MODE=fast|full, OUTPUT=path)"
 	@echo "  start-backend    start the FastAPI backend server"
 	@echo ""
 	@echo "  SQL"
@@ -70,6 +71,9 @@ check: install  ## syntax-check all Python files under src/backend/
 
 tests: install  ## run pytest against src/backend/tests/
 	@set PYTHONPATH=src && poetry run pytest src/backend/tests/ -v
+
+eval: install  ## run golden evaluation — MODE=fast|full (default fast), OUTPUT=path for JSON
+	@set PYTHONPATH=src && poetry run python -m backend.evaluation_runner --mode $(or $(MODE),fast) $(if $(OUTPUT),--output $(OUTPUT),)
 
 start-backend: install  ## start the FastAPI backend server
 	@set PYTHONPATH=src && poetry run python -m backend.main
