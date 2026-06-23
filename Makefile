@@ -72,8 +72,8 @@ check: install  ## syntax-check all Python files under src/backend/
 tests: install  ## run pytest against src/backend/tests/
 	@set PYTHONPATH=src && poetry run pytest src/backend/tests/ -v
 
-eval: install  ## run golden evaluation — MODE=fast|full (default fast), OUTPUT=path for JSON
-	@set PYTHONPATH=src && poetry run python -m backend.evaluation_runner --mode $(or $(MODE),fast) $(if $(OUTPUT),--output $(OUTPUT),)
+eval: install  ## run golden evaluation — MODE=fast|full (default fast), OUTPUT=path, LIMIT=N
+	@set PYTHONPATH=src && poetry run python -m backend.evaluation_runner --mode $(or $(MODE),fast) $(if $(OUTPUT),--output $(OUTPUT),) $(if $(LIMIT),--limit $(LIMIT),)
 
 start-backend: install  ## start the FastAPI backend server
 	@set PYTHONPATH=src && poetry run python -m backend.main

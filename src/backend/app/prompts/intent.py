@@ -1,7 +1,7 @@
-PROMPT_VERSION = "intent_v1"
+PROMPT_VERSION = "intent_v2"
 
 _KNOWN_DOMAINS = (
-    "article_engagement (comment volume, sentiment, replies, keyword coverage), "
+    "article_engagement (comment volume, avg_comment_sentiment, total_replies, keyword_count, publication_date, insert_date), "
     "keyword_engagement (keyword article count, comment count, contributor reach), "
     "contributor_behaviour (comment count, sentiment, article breadth, reply count), "
     "ingestion_errors (pipeline stage failures, error types, timing)"
@@ -27,8 +27,9 @@ Available views: {_KNOWN_VIEWS}
 
 Rules:
 - answerable is true only if the question can be answered from the available views above.
-- If the question requires forecasting, causal explanation, external data, or data not covered \
-by the views above, set answerable to false.
+- If the question requires forecasting future values, causal explanation ("why", "what causes"), \
+external data, or data not covered by the views above, set answerable to false.
+- Date filtering on publication_date or insert_date is supported and should be classified as answerable.
 - domain must be one of: article_engagement, keyword_engagement, contributor_behaviour, \
 ingestion_errors, or unknown.
 - suggested_metrics should be column names or aggregate expressions from the available views.

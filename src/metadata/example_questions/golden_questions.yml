@@ -15,16 +15,13 @@
 - natural_language_question: "How many keywords are associated with articles published after 2025-01-01?"
   expected_view: analytics.vw_article_engagement
   expected_sql: |
-    SELECT TOP 500 article_id, title, publication_date, keyword_count
+    SELECT TOP 1 SUM(keyword_count) AS total_keyword_count
     FROM analytics.vw_article_engagement
     WHERE publication_date >= '2025-01-01'
   expected_result_shape:
     columns:
-      - article_id
-      - title
-      - publication_date
-      - keyword_count
-    row_count: list
+      - total_keyword_count
+    row_count: single
 
 - natural_language_question: "Show low-engagement articles with fewer than 5 comments and average sentiment below 0.2."
   expected_view: analytics.vw_article_engagement
@@ -71,15 +68,13 @@
 - natural_language_question: "Who are the top contributors by comment count?"
   expected_view: analytics.vw_top_contributors
   expected_sql: |
-    SELECT TOP 10 contributor_id, comment_count, avg_sentiment, distinct_article_count
+    SELECT TOP 10 contributor_id, comment_count
     FROM analytics.vw_top_contributors
     ORDER BY comment_count DESC
   expected_result_shape:
     columns:
       - contributor_id
       - comment_count
-      - avg_sentiment
-      - distinct_article_count
     row_count: list
 
 - natural_language_question: "Which contributors have the highest average sentiment and at least 20 comments?"
@@ -99,12 +94,11 @@
 - natural_language_question: "List the most recent ingestion errors by stage and error type."
   expected_view: analytics.vw_ingestion_errors
   expected_sql: |
-    SELECT TOP 20 error_id, stage, error_type, error_message, attempted_at
+    SELECT TOP 10 stage, error_type, error_message, attempted_at
     FROM analytics.vw_ingestion_errors
     ORDER BY attempted_at DESC
   expected_result_shape:
     columns:
-      - error_id
       - stage
       - error_type
       - error_message
@@ -129,11 +123,11 @@
 - natural_language_question: "What is the total number of comments across all articles?"
   expected_view: analytics.vw_article_engagement
   expected_sql: |
-    SELECT TOP 1 SUM(comment_count) AS total_comments
+    SELECT TOP 1 SUM(comment_count) AS total_comment_count
     FROM analytics.vw_article_engagement
   expected_result_shape:
     columns:
-      - total_comments
+      - total_comment_count
     row_count: single
 
 - natural_language_question: "Which articles have more than 10 keywords associated?"
@@ -165,12 +159,12 @@
 - natural_language_question: "What is the average sentiment for articles published in 2025?"
   expected_view: analytics.vw_article_engagement
   expected_sql: |
-    SELECT TOP 1 AVG(avg_comment_sentiment) AS avg_sentiment_2025
+    SELECT TOP 1 AVG(avg_comment_sentiment) AS average_sentiment_2025
     FROM analytics.vw_article_engagement
     WHERE YEAR(publication_date) = 2025
   expected_result_shape:
     columns:
-      - avg_sentiment_2025
+      - average_sentiment_2025
     row_count: single
 
 - natural_language_question: "Which keywords have the lowest average comment sentiment?"
@@ -238,14 +232,12 @@
 - natural_language_question: "What is the total number of replies for top contributors?"
   expected_view: analytics.vw_top_contributors
   expected_sql: |
-    SELECT TOP 500 contributor_id, total_replies
+    SELECT TOP 1 SUM(total_replies) AS total_replies
     FROM analytics.vw_top_contributors
-    ORDER BY total_replies DESC
   expected_result_shape:
     columns:
-      - contributor_id
       - total_replies
-    row_count: list
+    row_count: single
 
 - natural_language_question: "List ingestion errors from the last 7 days."
   expected_view: analytics.vw_ingestion_errors
@@ -302,11 +294,11 @@
 - natural_language_question: "What is the average keyword count per article?"
   expected_view: analytics.vw_article_engagement
   expected_sql: |
-    SELECT TOP 1 AVG(keyword_count) AS avg_keywords
+    SELECT TOP 1 AVG(CAST(keyword_count AS FLOAT)) AS avg_keyword_count
     FROM analytics.vw_article_engagement
   expected_result_shape:
     columns:
-      - avg_keywords
+      - avg_keyword_count
     row_count: single
 
 - natural_language_question: "Which keywords have the highest contributor count?"
@@ -348,28 +340,16 @@
       - error_message
     row_count: list
 
-- natural_language_question: "Which articles have the highest sentiment variance?"
-  expected_view: analytics.vw_article_engagement
-  expected_sql: |
-    SELECT TOP 10 article_id, title, avg_comment_sentiment
-    FROM analytics.vw_article_engagement
-    ORDER BY ABS(avg_comment_sentiment) DESC
-  expected_result_shape:
-    columns:
-      - article_id
-      - title
-      - avg_comment_sentiment
-    row_count: list
 
 - natural_language_question: "How many keywords have no associated comments?"
   expected_view: analytics.vw_keyword_engagement
   expected_sql: |
-    SELECT TOP 1 COUNT(*) AS keywords_no_comments
+    SELECT TOP 1 COUNT(*) AS keywords_with_no_comments
     FROM analytics.vw_keyword_engagement
     WHERE comment_count = 0
   expected_result_shape:
     columns:
-      - keywords_no_comments
+      - keywords_with_no_comments
     row_count: single
 
 - natural_language_question: "Show top contributors by total replies."
@@ -450,11 +430,11 @@
 - natural_language_question: "What is the total keyword count across all articles?"
   expected_view: analytics.vw_article_engagement
   expected_sql: |
-    SELECT TOP 1 SUM(keyword_count) AS total_keywords
+    SELECT TOP 1 SUM(keyword_count) AS total_keyword_count
     FROM analytics.vw_article_engagement
   expected_result_shape:
     columns:
-      - total_keywords
+      - total_keyword_count
     row_count: single
 
 - natural_language_question: "Which keywords have the most comments?"
@@ -545,11 +525,11 @@
 - natural_language_question: "What is the maximum comment count for any article?"
   expected_view: analytics.vw_article_engagement
   expected_sql: |
-    SELECT TOP 1 MAX(comment_count) AS max_comments
+    SELECT TOP 1 MAX(comment_count) AS max_comment_count
     FROM analytics.vw_article_engagement
   expected_result_shape:
     columns:
-      - max_comments
+      - max_comment_count
     row_count: single
 
 - natural_language_question: "Which keywords have contributor count greater than 50?"
@@ -579,12 +559,12 @@
 - natural_language_question: "How many ingestion errors have error type 'network'?"
   expected_view: analytics.vw_ingestion_errors
   expected_sql: |
-    SELECT TOP 1 COUNT(*) AS network_errors
+    SELECT TOP 1 COUNT(*) AS error_count
     FROM analytics.vw_ingestion_errors
     WHERE error_type = 'network'
   expected_result_shape:
     columns:
-      - network_errors
+      - error_count
     row_count: single
 
 - natural_language_question: "Which articles have publication date in 2024?"

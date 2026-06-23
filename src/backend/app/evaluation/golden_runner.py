@@ -25,6 +25,7 @@ Negative cases:
   - Synthetic unsafe SQL patterns must fail validate_query
 """
 
+import asyncio
 import re
 import time
 from dataclasses import dataclass, field
@@ -441,27 +442,48 @@ class GoldenRunner:
             records.append(record)
         return records
 
-    async def run_all(self, mode: str = "fast") -> EvaluationReport:
+    async def run_all(self, mode: str = "fast", limit: int | None = None) -> EvaluationReport:
         questions = self._load_golden_questions()
+        if limit is not None:
+            questions = questions[:limit]
         records: list[GoldenEvalRecord] = []
 
         logger.info("golden_runner.start mode=%s total_positive=%d", mode, len(questions))
 
-        for q in questions:
+        for i, q in enumerate(questions):
+            if i > 0:
+                await asyncio.sleep(2)
             try:
                 rec = await self.run_question(q, mode=mode)
             except Exception as exc:
-                logger.exception("golden_runner.question_error q=%s", q.get("natural_language_question", "?"))
-                rec = GoldenEvalRecord(
-                    question=q.get("natural_language_question", "unknown"),
-                    expected_view=q.get("expected_view", ""),
-                    expected_sql=q.get("expected_sql", ""),
-                    status="error",
-                )
-                rec.failure_reasons.append(str(exc))
+                if "429" in str(exc) or "too_many_requests" in str(exc).lower():
+                    logger.warning("golden_runner.rate_limited q=%s — sleeping 60s", q.get("natural_language_question", "?")[:60])
+                    await asyncio.sleep(60)
+                    try:
+                        rec = await self.run_question(q, mode=mode)
+                    except Exception as retry_exc:
+                        exc = retry_exc
+                        logger.exception("golden_runner.question_error q=%s", q.get("natural_language_question", "?"))
+                        rec = GoldenEvalRecord(
+                            question=q.get("natural_language_question", "unknown"),
+                            expected_view=q.get("expected_view", ""),
+                            expected_sql=q.get("expected_sql", ""),
+                            status="error",
+                        )
+                        rec.failure_reasons.append(str(retry_exc))
+                else:
+                    logger.exception("golden_runner.question_error q=%s", q.get("natural_language_question", "?"))
+                    rec = GoldenEvalRecord(
+                        question=q.get("natural_language_question", "unknown"),
+                        expected_view=q.get("expected_view", ""),
+                        expected_sql=q.get("expected_sql", ""),
+                        status="error",
+                    )
+                    rec.failure_reasons.append(str(exc))
             records.append(rec)
 
         for neg in NEGATIVE_QUESTIONS:
+            await asyncio.sleep(2)
             try:
                 rec = await self.run_negative_question(neg)
             except Exception as exc:

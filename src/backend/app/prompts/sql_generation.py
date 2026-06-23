@@ -1,4 +1,4 @@
-PROMPT_VERSION = "sql_gen_v1"
+PROMPT_VERSION = "sql_gen_v3"
 
 
 def build_sql_generation_prompt(question: str, views_context: str) -> list[dict]:
@@ -34,9 +34,16 @@ Rules:
 - No DDL, DML, EXEC, subqueries outside analytics schema, or multi-statement queries.
 - Include only columns that exist in the view definitions above.
 - For ranking questions, use ORDER BY with SELECT TOP 10 (or another appropriate N).
-- For aggregate-only questions (SUM, AVG, COUNT, MAX, MIN with no natural row limit), \
-use SELECT TOP 500.
+- For scalar aggregate questions (a single SUM/AVG/COUNT/MAX/MIN with no GROUP BY), \
+use SELECT TOP 1 — the result is always one row.
+- For grouped aggregate questions (aggregate + GROUP BY), use SELECT TOP 10 for \
+"top N by metric" questions, or SELECT TOP 500 when all groups are needed.
 - For filter-only questions where all matching rows are needed, use SELECT TOP 500.
+- When returning multiple rows, always include the primary identifier column of the view \
+(article_id for vw_article_engagement, keyword_id for vw_keyword_engagement, \
+contributor_id for vw_top_contributors, error_id for vw_ingestion_errors).
+- Use descriptive aliases for aggregate results that reflect the metric, \
+e.g. total_comment_count, avg_sentiment, max_comment_count, error_count.
 
 Respond with exactly this JSON:
 {{

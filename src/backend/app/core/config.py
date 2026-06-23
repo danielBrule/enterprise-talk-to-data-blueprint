@@ -4,7 +4,7 @@ from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
 
-_repo_root = Path(__file__).resolve().parents[3]
+_repo_root = Path(__file__).resolve().parents[4]
 _backend_root = Path(__file__).resolve().parent.parent.parent
 
 # Load environment variables from repository root first, then fallback to backend/.env.

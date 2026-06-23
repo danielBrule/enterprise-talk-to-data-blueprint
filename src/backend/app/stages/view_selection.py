@@ -84,7 +84,7 @@ class ViewSelectionStage(Stage):
         ctx.latency["view_selection_ms"] = (time.perf_counter() - t0) * 1000
 
         selected_views: list[str] = result.get("selected_views", [])
-        confidence: float = result.get("confidence") or 0.0
+        confidence: float = float(result.get("confidence") or 0.0)
 
         ctx.trace.selected_views = selected_views
         ctx.trace.view_selection_confidence = confidence
