@@ -49,7 +49,7 @@ help:   ## show this help
 # ── Setup ─────────────────────────────────────────────────────────────────────
 
 install:  ## install all dependencies via Poetry (creates .venv if needed)
-	poetry install
+	@$(PWSH) -NoProfile -Command "$$env:PATH = \"$$env:APPDATA\Python\Scripts;$$env:PATH\"; poetry install"
 
 env: install   ## install deps then verify PDF toolchain (pandoc, wkhtmltopdf, mmdc)
 	@echo Checking PDF toolchain:
@@ -60,7 +60,7 @@ env: install   ## install deps then verify PDF toolchain (pandoc, wkhtmltopdf, m
 # ── Docs / PDF ────────────────────────────────────────────────────────────────
 
 pdf:       ## generate docs/pdf/*.pdf from Markdown sources
-	poetry run python scripts/build_pdfs.py docs/
+	@$(PWSH) -NoProfile -Command "$$env:PATH = \"$$env:APPDATA\Python\Scripts;$$env:PATH\"; poetry run python scripts/build_pdfs.py docs/"
 
 clean-pdf: ## remove generated PDFs
 	@$(PWSH) -NoProfile -Command "Remove-Item docs/pdf/*.pdf -Force -ErrorAction SilentlyContinue; Write-Host 'Removed generated PDFs.'"
@@ -68,24 +68,24 @@ clean-pdf: ## remove generated PDFs
 # ── Python ────────────────────────────────────────────────────────────────────
 
 check: install  ## syntax-check all Python files under src/backend/
-	poetry run python -c "import py_compile, pathlib; [py_compile.compile(str(p), doraise=True) for p in pathlib.Path('src/backend').rglob('*.py')]"
+	@$(PWSH) -NoProfile -Command "$$env:PATH = \"$$env:APPDATA\Python\Scripts;$$env:PATH\"; poetry run python -c \"import py_compile, pathlib; [py_compile.compile(str(p), doraise=True) for p in pathlib.Path('src/backend').rglob('*.py')]\""
 
 tests: install  ## run pytest against src/backend/tests/
-	@set PYTHONPATH=src && poetry run pytest src/backend/tests/ -v
+	@$(PWSH) -NoProfile -Command "$$env:PATH = \"$$env:APPDATA\Python\Scripts;$$env:PATH\"; $$env:PYTHONPATH = 'src'; poetry run pytest src/backend/tests/ -v"
 
-eval: install  ## run golden evaluation — MODE=fast|full (default fast), OUTPUT=path, LIMIT=N
-	@set PYTHONPATH=src && poetry run python -m backend.evaluation_runner --mode $(or $(MODE),fast) $(if $(OUTPUT),--output $(OUTPUT),) $(if $(LIMIT),--limit $(LIMIT),)
+eval: install  ## run golden evaluation — MODE=fast|full (default fast), OUTPUT=path, LIMIT=N, RUN=label
+	@$(PWSH) -NoProfile -Command "$$env:PATH = \"$$env:APPDATA\Python\Scripts;$$env:PATH\"; $$env:PYTHONPATH = 'src'; poetry run python -m backend.evaluation_runner --mode $(or $(MODE),fast) $(if $(OUTPUT),--output $(OUTPUT),) $(if $(LIMIT),--limit $(LIMIT),) $(if $(RUN),--eval-run $(RUN),)"
 
 mlflow-ui:  ## launch MLflow UI at http://localhost:5000 (no install needed)
 	@$(PWSH) -NoProfile -Command "$$env:PATH = \"$$env:APPDATA\Python\Scripts;$$env:PATH\"; poetry run mlflow ui --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns"
 
 start-backend: install  ## start the FastAPI backend server
-	@set PYTHONPATH=src && poetry run python -m backend.main
+	@$(PWSH) -NoProfile -Command "$$env:PATH = \"$$env:APPDATA\Python\Scripts;$$env:PATH\"; $$env:PYTHONPATH = 'src'; poetry run python -m backend.main"
 
 # ── SQL ───────────────────────────────────────────────────────────────────────
 
 apply-sql-views: install  ## deploy analytics views to the database
-	@set PYTHONPATH=src && poetry run python src/backend/db/deploy_views.py
+	@$(PWSH) -NoProfile -Command "$$env:PATH = \"$$env:APPDATA\Python\Scripts;$$env:PATH\"; $$env:PYTHONPATH = 'src'; poetry run python src/backend/db/deploy_views.py"
 
 # ── Infrastructure ────────────────────────────────────────────────────────────
 
