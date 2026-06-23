@@ -20,7 +20,7 @@
     WHERE publication_date >= '2025-01-01'
   expected_result_shape:
     columns:
-      - total_keyword_count
+      - SUM(keyword_count)
     row_count: single
 
 - natural_language_question: "Show low-engagement articles with fewer than 5 comments and average sentiment below 0.2."
@@ -128,7 +128,7 @@
     FROM analytics.vw_article_engagement
   expected_result_shape:
     columns:
-      - total_comment_count
+      - SUM(comment_count)
     row_count: single
 
 - natural_language_question: "Which articles have more than 10 keywords associated?"
@@ -165,7 +165,7 @@
     WHERE YEAR(publication_date) = 2025
   expected_result_shape:
     columns:
-      - average_sentiment_2025
+      - AVG(avg_comment_sentiment)
     row_count: single
 
 - natural_language_question: "Which keywords have the lowest average comment sentiment?"
@@ -237,7 +237,7 @@
     FROM analytics.vw_top_contributors
   expected_result_shape:
     columns:
-      - total_replies
+      - SUM(total_replies)
     row_count: single
 
 - natural_language_question: "List ingestion errors from the last 7 days."
@@ -264,7 +264,7 @@
   expected_result_shape:
     columns:
       - stage
-      - error_count
+      - COUNT(
     row_count: list
 
 - natural_language_question: "Show articles with publication date in the last month."
@@ -299,7 +299,7 @@
     FROM analytics.vw_article_engagement
   expected_result_shape:
     columns:
-      - avg_keyword_count
+      - AVG(CAST(keyword_count AS FLOAT))
     row_count: single
 
 - natural_language_question: "Which keywords have the highest contributor count?"
@@ -350,7 +350,7 @@
     WHERE comment_count = 0
   expected_result_shape:
     columns:
-      - keywords_with_no_comments
+      - COUNT(
     row_count: single
 
 - natural_language_question: "Show top contributors by total replies."
@@ -375,7 +375,7 @@
   expected_result_shape:
     columns:
       - error_type
-      - count
+      - COUNT(
     row_count: list
 
 - natural_language_question: "Which articles were inserted in the last week?"
@@ -471,7 +471,7 @@
   expected_result_shape:
     columns:
       - stage
-      - error_count
+      - COUNT(
     row_count: list
 
 - natural_language_question: "Which articles have the oldest publication dates?"
@@ -530,7 +530,7 @@
     FROM analytics.vw_article_engagement
   expected_result_shape:
     columns:
-      - max_comment_count
+      - MAX(comment_count)
     row_count: single
 
 - natural_language_question: "Which keywords have contributor count greater than 50?"
@@ -565,7 +565,7 @@
     WHERE error_type = 'network'
   expected_result_shape:
     columns:
-      - error_count
+      - COUNT(
     row_count: single
 
 - natural_language_question: "Which articles have publication date in 2024?"

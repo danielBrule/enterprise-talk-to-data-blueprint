@@ -90,6 +90,7 @@ class GoldenEvalRecord:
     question: str
     expected_view: str
     expected_sql: str
+    expected_expressions: list[str] = field(default_factory=list)
     case_type: str = "positive"  # "positive" | "negative_question" | "negative_sql"
 
     # Per-check results (None = not applicable)
@@ -183,21 +184,6 @@ class EvaluationReport:
         }
 
 
-def _extract_select_columns(sql_upper: str) -> list[str]:
-    """Extract bare column/alias names from the SELECT clause."""
-    select_match = re.search(r"\bSELECT\b(?:\s+TOP\s+\d+)?\s+(.*?)\s+\bFROM\b", sql_upper, re.DOTALL)
-    if not select_match:
-        return []
-    cols_raw = select_match.group(1)
-    cols = []
-    for part in cols_raw.split(","):
-        part = part.strip()
-        if " AS " in part:
-            cols.append(part.split(" AS ")[-1].strip())
-        else:
-            cols.append(part.split()[-1] if part.split() else "")
-    return [c for c in cols if c and c not in ("*",)]
-
 
 def _extract_group_by_columns(sql_upper: str) -> list[str]:
     match = re.search(r"\bGROUP\s+BY\s+(.*?)(?:\bORDER\b|\bHAVING\b|\bFETCH\b|$)", sql_upper, re.DOTALL)
@@ -273,6 +259,7 @@ class GoldenRunner:
             question=q["natural_language_question"],
             expected_view=q.get("expected_view", ""),
             expected_sql=q.get("expected_sql", ""),
+            expected_expressions=q.get("expected_result_shape", {}).get("columns", []),
             case_type="positive",
         )
         ctx = _make_ctx(record.question)
@@ -321,9 +308,9 @@ class GoldenRunner:
                 f"SQL: '{record.expected_view}' not referenced in generated SQL"
             )
 
-        expected_cols = _extract_select_columns(exp_upper)
-        if expected_cols:
-            missing = [c for c in expected_cols if c not in gen_upper]
+        if record.expected_expressions:
+            exprs_upper = [e.upper() for e in record.expected_expressions]
+            missing = [e for e in exprs_upper if e not in gen_upper]
             record.metric_present = len(missing) == 0
             if not record.metric_present:
                 record.failure_reasons.append(f"Metrics: missing {missing}")
