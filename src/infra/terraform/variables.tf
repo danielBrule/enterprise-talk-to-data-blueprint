@@ -65,3 +65,21 @@ variable "summary_model" {
   description = "Model to use for summarizing results."
   default     = "gpt-4.1-mini"
 }
+
+variable "schema_retrieval_capacity" {
+  type        = number
+  description = "Capacity for the schema retrieval deployment, in thousands of TPM."
+  default     = 10
+}
+
+variable "sql_generation_capacity" {
+  type        = number
+  description = "Capacity for the SQL generation deployment, in thousands of TPM."
+  default     = 10
+}
+
+variable "summary_capacity" {
+  type        = number
+  description = "Capacity for the summary deployment, in thousands of TPM."
+  default     = 10
+}

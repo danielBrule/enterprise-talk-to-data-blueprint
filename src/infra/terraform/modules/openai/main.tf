@@ -44,7 +44,7 @@ resource "azapi_resource" "openai_deployments" {
 
     sku = {
       name     = "Standard"
-      capacity = 1
+      capacity = each.value.capacity
     }
   }
 

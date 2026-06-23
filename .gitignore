@@ -4,6 +4,13 @@ __pycache__/
 *.pyc
 .env
 
+# Terraform — state, provider cache, and env-specific vars (contain secrets)
+src/infra/terraform/.terraform/
+src/infra/terraform/terraform.tfstate
+src/infra/terraform/terraform.tfstate.backup
+src/infra/terraform/.terraform.lock.hcl
+**/*.tfvars
+
 # OS
 .DS_Store
 Thumbs.db

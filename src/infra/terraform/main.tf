@@ -5,16 +5,19 @@ locals {
 
   openai_deployments = [
     {
-      name  = "talk2data-gpt41mini-schema-retrieval"
-      model = var.schema_retrieval_model
+      name     = "talk2data-gpt41mini-schema-retrieval"
+      model    = var.schema_retrieval_model
+      capacity = var.schema_retrieval_capacity
     },
     {
-      name  = "talk2data-gpt41mini-sql-generation"
-      model = var.sql_generation_model
+      name     = "talk2data-gpt41mini-sql-generation"
+      model    = var.sql_generation_model
+      capacity = var.sql_generation_capacity
     },
     {
-      name  = "talk2data-gpt41mini-summary"
-      model = var.summary_model
+      name     = "talk2data-gpt41mini-summary"
+      model    = var.summary_model
+      capacity = var.summary_capacity
     },
   ]
 }

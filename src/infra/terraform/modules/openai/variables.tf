@@ -20,10 +20,11 @@ variable "openai_account_name" {
 
 variable "deployment_configs" {
   type = list(object({
-    name  = string
-    model = string
+    name     = string
+    model    = string
+    capacity = number
   }))
-  description = "List of OpenAI deployments to create."
+  description = "List of OpenAI deployments to create. capacity is in thousands of tokens per minute (TPM)."
 }
 
 variable "tags" {
