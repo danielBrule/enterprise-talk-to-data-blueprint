@@ -63,7 +63,7 @@
       - keyword_id
       - full_keyword
       - contributor_count
-    row_count: single
+    row_count: list
 
 - natural_language_question: "Who are the top contributors by comment count?"
   expected_view: analytics.vw_top_contributors
@@ -296,11 +296,11 @@
 - natural_language_question: "What is the average keyword count per article?"
   expected_view: analytics.vw_article_engagement
   expected_sql: |
-    SELECT TOP 1 AVG(CAST(keyword_count AS FLOAT)) AS avg_keyword_count
+    SELECT TOP 1 AVG(keyword_count) AS avg_keyword_count
     FROM analytics.vw_article_engagement
   expected_result_shape:
     columns:
-      - AVG(CAST(keyword_count AS FLOAT))
+      - AVG(keyword_count)
     row_count: single
 
 - natural_language_question: "Which keywords have the highest contributor count?"
