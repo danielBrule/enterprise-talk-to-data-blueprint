@@ -124,17 +124,25 @@ annex pack (practical material to adapt, not follow mechanically).
 ## Repository
 
 ```text
-README.md            This file — the pitch and a map of the repo
-requirements.txt     Python dependencies for the reference implementation
-Makefile             Task runner (env, pdf) — wraps scripts/build.ps1
-scripts/             Build tooling (PDF generation)
-src/                 Reference implementation (in development) — see src/README.md
-docs/                The blueprint — see docs/README.md
-  master.md          Strategic overview: logic, risks, gates, operating model
-  phases/            The nine phase guides
-  annexes/           Templates, checklists, registers, worked examples
-  pdf/               Formatted PDF versions of every document
+README.md              This file — the pitch and a map of the repo
+Makefile               Task runner (install, eval, mlflow-ui, tests, infra-*)
+src/                   Reference implementation — see src/README.md
+docs/                  The blueprint — see docs/README.md
+  master.md            Strategic overview: logic, risks, gates, operating model
+  phases/              The nine phase guides
+  annexes/             Templates, checklists, registers, worked examples
+  pdf/                 Formatted PDF versions of every document
+evaluation_results/    Golden evaluation JSON reports, one file per run (git commit hash embedded)
+mlflow.db              MLflow experiment metadata (SQLite, ~100 KB) — committed so the UI works on clone
+mlruns/                MLflow artifact store (per-question CSV results) — committed alongside mlflow.db
+                       (run `make mlflow-ui` to browse results at http://localhost:5000)
 ```
+
+> **Why `mlflow.db` and `mlruns/` are committed.** Committing them means `make mlflow-ui` works
+> immediately after `git clone` with no re-run required. Both are small (SQLite DB ~100 KB,
+> artifacts ~6 KB per run). The correct long-term home is a remote tracking server (Azure ML
+> has native MLflow support); SQLite local tracking is a pragmatic choice for a
+> single-developer demo project.
 
 - **The blueprint** lives in [`docs/`](docs/) — start with [`docs/README.md`](docs/README.md).
 - **The implementation** lives in [`src/`](src/) — see [`src/README.md`](src/README.md).

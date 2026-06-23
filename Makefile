@@ -14,7 +14,7 @@ else
     PWSH ?= pwsh
 endif
 
-.PHONY: help env pdf clean-pdf install check start-backend apply-sql-views infra-init infra-apply tests
+.PHONY: help env pdf clean-pdf install check start-backend apply-sql-views infra-init infra-apply tests eval mlflow-ui
 
 help:   ## show this help
 	@echo ""
@@ -32,7 +32,8 @@ help:   ## show this help
 	@echo "  ------"
 	@echo "  check            syntax-check all .py files under src/backend/"
 	@echo "  tests            run pytest against src/backend/tests/"
-	@echo "  eval             run golden evaluation (MODE=fast|full, OUTPUT=path)"
+	@echo "  eval             run golden evaluation  MODE=fast|full  OUTPUT=path  LIMIT=N"
+	@echo "  mlflow-ui        launch MLflow UI at http://localhost:5000"
 	@echo "  start-backend    start the FastAPI backend server"
 	@echo ""
 	@echo "  SQL"
@@ -74,6 +75,9 @@ tests: install  ## run pytest against src/backend/tests/
 
 eval: install  ## run golden evaluation — MODE=fast|full (default fast), OUTPUT=path, LIMIT=N
 	@set PYTHONPATH=src && poetry run python -m backend.evaluation_runner --mode $(or $(MODE),fast) $(if $(OUTPUT),--output $(OUTPUT),) $(if $(LIMIT),--limit $(LIMIT),)
+
+mlflow-ui:  ## launch MLflow UI at http://localhost:5000 (no install needed)
+	@$(PWSH) -NoProfile -Command "$$env:PATH = \"$$env:APPDATA\Python\Scripts;$$env:PATH\"; poetry run mlflow ui --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns"
 
 start-backend: install  ## start the FastAPI backend server
 	@set PYTHONPATH=src && poetry run python -m backend.main
