@@ -1,6 +1,6 @@
 from datetime import date
 
-PROMPT_VERSION = "intent_v5"
+PROMPT_VERSION = "intent_v6"
 
 
 _KNOWN_DOMAINS = (
@@ -43,7 +43,9 @@ Rules:
 - If the question requires forecasting future values, causal explanation ("why", "what causes"), \
 external data, or data not covered by the views above, set answerable to false.
 - Date filtering on publication_date or insert_date is supported and should be classified as answerable.
-- Today's date is {today}. Any year or date before today is historical, not a future date.
+- Today's date is {today}. The current year is {date.today().year}. Any year or date \
+strictly before {date.today().year} is in the past — data exists for it and questions about it \
+are answerable. Only dates after today ({today}) require forecasting.
 - domain must be one of: article_engagement, keyword_engagement, contributor_behaviour, \
 ingestion_errors, or unknown.
 - suggested_metrics should be column names or aggregate expressions from the available views.{alias_lines}
