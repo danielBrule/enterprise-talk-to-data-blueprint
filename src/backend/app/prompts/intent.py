@@ -1,14 +1,14 @@
 from datetime import date
 import json
 
-PROMPT_VERSION = "intent_v7"
+PROMPT_VERSION = "intent_v9"
 
 
 _KNOWN_DOMAINS = (
-    "article_engagement (comment volume, avg_comment_sentiment, total_replies, keyword_count, publication_date, insert_date), "
-    "keyword_engagement (keyword article count, comment count, contributor reach), "
-    "contributor_behaviour (comment count, sentiment, distinct_article_count, article breadth, reply count), "
-    "ingestion_errors (pipeline stage failures, error types, timing)"
+    "article_engagement (comment_count, avg_comment_sentiment, total_replies, keyword_count, publication_date, insert_date), "
+    "keyword_engagement (article_count, comment_count, avg_comment_sentiment, contributor_count), "
+    "contributor_behaviour (comment_count, avg_sentiment, distinct_article_count, total_replies), "
+    "ingestion_errors (stage, data_id, error_type, error_message, attempted_at)"
 )
 
 _KNOWN_VIEWS = (
@@ -18,9 +18,8 @@ _KNOWN_VIEWS = (
     "analytics.vw_ingestion_errors"
 )
 
-# Few-shot examples anchoring the model on past-year handling and refusal cases.
-# Injected as a user/assistant exchange before the real question so temperature=0
-# doesn't override the date context with training-set priors.
+# Few-shot exchange injected before the real question so temperature=0 doesn't
+# override the injected date context with the model's training-set priors.
 _EXAMPLE_USER = """Classify this question: "What is the average sentiment for articles published in 2025?"
 
 Available analytics domains: {domains}
