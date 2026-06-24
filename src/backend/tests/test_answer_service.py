@@ -1,8 +1,10 @@
-﻿import json
+import json
 from unittest.mock import AsyncMock, MagicMock
 
 import backend.app.stages.answer as answer_service_module
 from backend.app.prompts.answer_generation import PROMPT_VERSION
+
+_MOCK_USAGE = {"prompt_tokens": 30, "completion_tokens": 50, "total_tokens": 80}
 
 SAMPLE_RESULTS = [
     {"article_id": 1, "title": "Article One", "comment_count": 100},
@@ -22,10 +24,10 @@ SAMPLE_METADATA = {
 async def test_generate_answer(monkeypatch):
     mock_llm = MagicMock()
     mock_llm.generate_summary = AsyncMock(
-        return_value=json.dumps({
+        return_value=(json.dumps({
             "answer": "Article One has the most comments with 100.",
             "caveats": ["Sentiment is averaged at the comment level."],
-        })
+        }), _MOCK_USAGE)
     )
     monkeypatch.setattr(answer_service_module, "LLMService", MagicMock(return_value=mock_llm))
 
@@ -41,15 +43,16 @@ async def test_generate_answer(monkeypatch):
     assert result.caveats
     assert result.prompt_version == PROMPT_VERSION
     assert result.latency_ms >= 0
+    assert result.token_usage == _MOCK_USAGE
 
 
 async def test_generate_empty_results(monkeypatch):
     mock_llm = MagicMock()
     mock_llm.generate_summary = AsyncMock(
-        return_value=json.dumps({
+        return_value=(json.dumps({
             "answer": "No results found for this query.",
             "caveats": [],
-        })
+        }), _MOCK_USAGE)
     )
     monkeypatch.setattr(answer_service_module, "LLMService", MagicMock(return_value=mock_llm))
 
@@ -63,10 +66,10 @@ async def test_generate_collects_metadata_caveats(monkeypatch):
     """Metadata limitations must appear in the prompt even if LLM omits them."""
     mock_llm = MagicMock()
     mock_llm.generate_summary = AsyncMock(
-        return_value=json.dumps({
+        return_value=(json.dumps({
             "answer": "Some answer.",
             "caveats": ["Sentiment is averaged at the comment level."],
-        })
+        }), _MOCK_USAGE)
     )
     monkeypatch.setattr(answer_service_module, "LLMService", MagicMock(return_value=mock_llm))
 
@@ -78,7 +81,7 @@ async def test_generate_collects_metadata_caveats(monkeypatch):
 
 async def test_generate_bad_json_falls_back(monkeypatch):
     mock_llm = MagicMock()
-    mock_llm.generate_summary = AsyncMock(return_value="not valid json")
+    mock_llm.generate_summary = AsyncMock(return_value=("not valid json", _MOCK_USAGE))
     monkeypatch.setattr(answer_service_module, "LLMService", MagicMock(return_value=mock_llm))
 
     service = answer_service_module.AnswerService()

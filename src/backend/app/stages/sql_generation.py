@@ -1,7 +1,7 @@
 import json
 import re
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..services.llm_service import LLMService
 from ..prompts.sql_generation import PROMPT_VERSION, build_sql_generation_prompt
@@ -17,6 +17,7 @@ class SQLGenResult:
     prompt_version: str
     model_deployment: str
     latency_ms: float
+    token_usage: dict = field(default_factory=dict)
 
 
 class SQLGenerationService:
@@ -70,7 +71,7 @@ class SQLGenerationService:
         messages = build_sql_generation_prompt(question, views_context)
 
         try:
-            raw = await self.llm.generate_sql_generation(messages, temperature=0)
+            raw, usage = await self.llm.generate_sql_generation(messages, temperature=0)
             clean = re.sub(r"```(?:json|sql)?", "", raw).strip().strip("`").strip()
             result = json.loads(clean)
             sql = result.get("sql", "").strip()
@@ -84,6 +85,7 @@ class SQLGenerationService:
                 prompt_version=PROMPT_VERSION,
                 model_deployment=deployment,
                 latency_ms=(time.perf_counter() - start) * 1000,
+                token_usage=usage,
             )
         except (json.JSONDecodeError, KeyError) as e:
             logger.error(
@@ -113,6 +115,7 @@ class SQLGenerationStage(Stage):
         ctx.trace.generated_sql = result.sql
         ctx.trace.prompt_versions["sql_generation"] = result.prompt_version
         ctx.trace.model_deployments["sql_generation"] = result.model_deployment
+        ctx.trace.token_usage["sql_generation"] = result.token_usage
         ctx.sql = result.sql
 
         if not result.sql:

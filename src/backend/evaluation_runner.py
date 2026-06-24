@@ -44,6 +44,20 @@ def _golden_questions_hash() -> str:
     return hashlib.md5(content).hexdigest()[:8]
 
 
+def _aggregate_token_usage(report) -> dict[str, dict[str, int]]:
+    """Sum token usage across all records, broken down by stage."""
+    stage_totals: dict[str, dict[str, int]] = {}
+    for r in report.records:
+        if not r.trace:
+            continue
+        for stage, counts in r.trace.token_usage.items():
+            if stage not in stage_totals:
+                stage_totals[stage] = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+            for k in ("prompt_tokens", "completion_tokens", "total_tokens"):
+                stage_totals[stage][k] += counts.get(k, 0)
+    return stage_totals
+
+
 def _log_to_mlflow(report, mode: str, commit: str, eval_run: str, duration_s: float) -> None:
     from backend.app.prompts.intent import build_intent_prompt
     from backend.app.prompts.sql_generation import build_sql_generation_prompt
@@ -51,6 +65,11 @@ def _log_to_mlflow(report, mode: str, commit: str, eval_run: str, duration_s: fl
     mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
     mlflow.set_experiment(MLFLOW_EXPERIMENT)
     with mlflow.start_run(run_name=f"{eval_run}-{mode}-{commit[:8]}"):
+        # Extract model deployment names from the first record that has them
+        model_deployments = next(
+            (r.trace.model_deployments for r in report.records if r.trace and r.trace.model_deployments),
+            {},
+        )
         mlflow.log_params({
             "mode": mode,
             "git_commit": commit[:8],
@@ -58,7 +77,31 @@ def _log_to_mlflow(report, mode: str, commit: str, eval_run: str, duration_s: fl
             "sql_gen_version": SQL_GEN_VERSION,
             "golden_questions_hash": _golden_questions_hash(),
             "eval_run": eval_run,
+            "model_intent": model_deployments.get("intent", "unknown"),
+            "model_view_selection": model_deployments.get("view_selection", "unknown"),
+            "model_sql_gen": model_deployments.get("sql_generation", "unknown"),
+            "model_answer": model_deployments.get("answer_generation", "unknown"),
         })
+
+        # Aggregate token usage across all records
+        stage_totals = _aggregate_token_usage(report)
+        total_tokens = sum(s.get("total_tokens", 0) for s in stage_totals.values())
+        total_prompt = sum(s.get("prompt_tokens", 0) for s in stage_totals.values())
+        total_completion = sum(s.get("completion_tokens", 0) for s in stage_totals.values())
+        questions_with_usage = sum(
+            1 for r in report.records if r.trace and r.trace.token_usage
+        )
+
+        token_metrics: dict[str, float] = {
+            "total_prompt_tokens": total_prompt,
+            "total_completion_tokens": total_completion,
+            "total_tokens": total_tokens,
+            "avg_tokens_per_question": round(total_tokens / questions_with_usage, 1) if questions_with_usage else 0,
+        }
+        for stage, counts in stage_totals.items():
+            token_metrics[f"prompt_tokens_{stage}"] = counts.get("prompt_tokens", 0)
+            token_metrics[f"completion_tokens_{stage}"] = counts.get("completion_tokens", 0)
+
         mlflow.log_metrics({
             "pass_rate": round(report.pass_rate, 4),
             "passed": report.passed,
@@ -67,11 +110,18 @@ def _log_to_mlflow(report, mode: str, commit: str, eval_run: str, duration_s: fl
             "total": report.total,
             "partial_rate": round(report.partial / report.total, 4) if report.total else 0,
             "eval_duration_s": round(duration_s, 1),
+            **token_metrics,
         })
 
         # Per-question trace: full details for every question
         traces = []
         for r in report.records:
+            stage_usage = r.trace.token_usage if r.trace else {}
+            q_total = {
+                "prompt_tokens": sum(v.get("prompt_tokens", 0) for v in stage_usage.values()),
+                "completion_tokens": sum(v.get("completion_tokens", 0) for v in stage_usage.values()),
+                "total_tokens": sum(v.get("total_tokens", 0) for v in stage_usage.values()),
+            }
             traces.append({
                 "question": r.question,
                 "case_type": r.case_type,
@@ -86,6 +136,7 @@ def _log_to_mlflow(report, mode: str, commit: str, eval_run: str, duration_s: fl
                 "failure_reasons": r.failure_reasons,
                 "latency_ms": r.latency_ms,
                 "trace_id": r.trace.trace_id if r.trace else None,
+                "token_usage": {**stage_usage, "total": q_total},
             })
         mlflow.log_text(json.dumps(traces, indent=2, default=str), "traces.json")
 

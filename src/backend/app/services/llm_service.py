@@ -42,7 +42,7 @@ class LLMService:
         task: str | None = None,
         model: str | None = None,
         **kwargs,
-    ) -> str:
+    ) -> tuple[str, dict]:
         """
         Generate a response from the Azure OpenAI model.
 
@@ -53,7 +53,8 @@ class LLMService:
             **kwargs: Additional parameters for the completion (e.g., temperature, max_tokens)
 
         Returns:
-            The generated response content
+            Tuple of (content, token_usage) where token_usage has prompt_tokens,
+            completion_tokens, and total_tokens.
         """
         if model is None:
             model = settings.get_azure_openai_deployment(task)
@@ -66,25 +67,32 @@ class LLMService:
         response = await self.client.chat.completions.create(
             model=model, messages=messages, **kwargs
         )
-        return response.choices[0].message.content
+        content = response.choices[0].message.content
+        usage = response.usage
+        token_usage = {
+            "prompt_tokens": usage.prompt_tokens if usage else 0,
+            "completion_tokens": usage.completion_tokens if usage else 0,
+            "total_tokens": usage.total_tokens if usage else 0,
+        }
+        return content, token_usage
 
     async def generate_schema_retrieval(
         self,
         messages: List[Dict[str, Any]],
         **kwargs,
-    ) -> str:
+    ) -> tuple[str, dict]:
         return await self.generate_response(messages, task="schema_retrieval", **kwargs)
 
     async def generate_sql_generation(
         self,
         messages: List[Dict[str, Any]],
         **kwargs,
-    ) -> str:
+    ) -> tuple[str, dict]:
         return await self.generate_response(messages, task="sql_generation", **kwargs)
 
     async def generate_summary(
         self,
         messages: List[Dict[str, Any]],
         **kwargs,
-    ) -> str:
+    ) -> tuple[str, dict]:
         return await self.generate_response(messages, task="summary", **kwargs)

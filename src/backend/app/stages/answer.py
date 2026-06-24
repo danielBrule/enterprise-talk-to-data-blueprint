@@ -1,7 +1,7 @@
 import json
 import re
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..services.llm_service import LLMService
 from ..prompts.answer_generation import PROMPT_VERSION, build_answer_generation_prompt
@@ -18,6 +18,7 @@ class AnswerResult:
     prompt_version: str
     model_deployment: str
     latency_ms: float
+    token_usage: dict = field(default_factory=dict)
 
 
 class AnswerService:
@@ -60,7 +61,7 @@ class AnswerService:
         messages = build_answer_generation_prompt(question, sql, results, metadata_caveats)
 
         try:
-            raw = await self.llm.generate_summary(messages, temperature=0)
+            raw, usage = await self.llm.generate_summary(messages, temperature=0)
             clean = re.sub(r"```(?:json)?", "", raw).strip().strip("`").strip()
             result = json.loads(clean)
             return AnswerResult(
@@ -69,6 +70,7 @@ class AnswerService:
                 prompt_version=PROMPT_VERSION,
                 model_deployment=deployment,
                 latency_ms=(time.perf_counter() - start) * 1000,
+                token_usage=usage,
             )
         except (json.JSONDecodeError, KeyError) as e:
             logger.warning("answer_service.parse_failed error=%s", str(e))
@@ -97,6 +99,7 @@ class AnswerStage(Stage):
         ctx.trace.caveats = result.caveats
         ctx.trace.prompt_versions["answer_generation"] = result.prompt_version
         ctx.trace.model_deployments["answer_generation"] = result.model_deployment
+        ctx.trace.token_usage["answer_generation"] = result.token_usage
         ctx.trace.latency_ms = build_latency(ctx)
 
         logger.info(

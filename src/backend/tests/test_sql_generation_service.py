@@ -1,8 +1,10 @@
-﻿import json
+import json
 from unittest.mock import AsyncMock, MagicMock
 
 import backend.app.stages.sql_generation as sql_gen_module
 from backend.app.prompts.sql_generation import PROMPT_VERSION
+
+_MOCK_USAGE = {"prompt_tokens": 20, "completion_tokens": 10, "total_tokens": 30}
 
 SAMPLE_METADATA = {
     "analytics.vw_article_engagement": {
@@ -26,7 +28,7 @@ SAFE_SQL = (
 
 async def test_generate_returns_sql(monkeypatch):
     mock_llm = MagicMock()
-    mock_llm.generate_sql_generation = AsyncMock(return_value=json.dumps({"sql": SAFE_SQL}))
+    mock_llm.generate_sql_generation = AsyncMock(return_value=(json.dumps({"sql": SAFE_SQL}), _MOCK_USAGE))
     monkeypatch.setattr(sql_gen_module, "LLMService", MagicMock(return_value=mock_llm))
 
     service = sql_gen_module.SQLGenerationService()
@@ -38,6 +40,7 @@ async def test_generate_returns_sql(monkeypatch):
     assert result.sql == SAFE_SQL
     assert result.prompt_version == PROMPT_VERSION
     assert result.latency_ms >= 0
+    assert result.token_usage == _MOCK_USAGE
 
 
 async def test_generate_metadata_included_in_prompt(monkeypatch):
@@ -47,7 +50,7 @@ async def test_generate_metadata_included_in_prompt(monkeypatch):
 
     async def capture_messages(messages, **kwargs):
         captured.append(messages)
-        return json.dumps({"sql": SAFE_SQL})
+        return json.dumps({"sql": SAFE_SQL}), _MOCK_USAGE
 
     mock_llm.generate_sql_generation = capture_messages
     monkeypatch.setattr(sql_gen_module, "LLMService", MagicMock(return_value=mock_llm))
@@ -67,7 +70,7 @@ async def test_generate_metadata_included_in_prompt(monkeypatch):
 async def test_generate_strips_markdown_fences(monkeypatch):
     raw_response = "```json\n" + json.dumps({"sql": SAFE_SQL}) + "\n```"
     mock_llm = MagicMock()
-    mock_llm.generate_sql_generation = AsyncMock(return_value=raw_response)
+    mock_llm.generate_sql_generation = AsyncMock(return_value=(raw_response, _MOCK_USAGE))
     monkeypatch.setattr(sql_gen_module, "LLMService", MagicMock(return_value=mock_llm))
 
     service = sql_gen_module.SQLGenerationService()
@@ -78,7 +81,7 @@ async def test_generate_strips_markdown_fences(monkeypatch):
 
 async def test_generate_bad_json_returns_empty(monkeypatch):
     mock_llm = MagicMock()
-    mock_llm.generate_sql_generation = AsyncMock(return_value="not json")
+    mock_llm.generate_sql_generation = AsyncMock(return_value=("not json", _MOCK_USAGE))
     monkeypatch.setattr(sql_gen_module, "LLMService", MagicMock(return_value=mock_llm))
 
     service = sql_gen_module.SQLGenerationService()

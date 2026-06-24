@@ -30,6 +30,7 @@ class ViewSelectionService:
                 "selected_views": [fallback_view] if fallback_view else [],
                 "confidence": 0.0,
                 "reason": "LLM not configured or no metadata available",
+                "token_usage": {},
             }
 
         views_context = [
@@ -53,7 +54,7 @@ class ViewSelectionService:
         messages = build_view_selection_prompt(question, views_context)
 
         logger.debug("view_selection.request question=%s", question[:80])
-        response = await self.llm_service.generate_schema_retrieval(messages)
+        response, usage = await self.llm_service.generate_schema_retrieval(messages)
         logger.debug("view_selection.response preview=%s", (response or "")[:120])
 
         try:
@@ -63,6 +64,7 @@ class ViewSelectionService:
                 "selected_views": result.get("selected_views", []),
                 "confidence": result.get("confidence", 0.0),
                 "reason": result.get("reason", ""),
+                "token_usage": usage,
             }
         except json.JSONDecodeError as e:
             logger.error("view_selection.parse_failed error=%s", str(e))
@@ -71,6 +73,7 @@ class ViewSelectionService:
                 "selected_views": [],
                 "confidence": 0.0,
                 "reason": "Failed to parse LLM response",
+                "token_usage": usage,
             }
 
 
@@ -89,6 +92,7 @@ class ViewSelectionStage(Stage):
         ctx.trace.selected_views = selected_views
         ctx.trace.view_selection_confidence = confidence
         ctx.trace.view_selection_reason = result.get("reason")
+        ctx.trace.token_usage["view_selection"] = result.get("token_usage", {})
         ctx.selected_views = selected_views
 
         # Below 0.4 the LLM's view selection is unreliable enough that downstream SQL

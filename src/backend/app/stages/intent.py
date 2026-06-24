@@ -1,6 +1,6 @@
 import json
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..services.llm_service import LLMService
 from ..services.metadata_service import get_view_aliases
@@ -20,6 +20,7 @@ class IntentResult:
     prompt_version: str
     model_deployment: str
     latency_ms: float
+    token_usage: dict = field(default_factory=dict)
 
 
 class IntentService:
@@ -50,7 +51,7 @@ class IntentService:
         aliases = await get_view_aliases()
         messages = build_intent_prompt(question, aliases=aliases)
         try:
-            raw = await self.llm.generate_schema_retrieval(messages, temperature=0)
+            raw, usage = await self.llm.generate_schema_retrieval(messages, temperature=0)
             result = json.loads(raw.strip())
             logger.info(
                 "intent.classified question=%s answerable=%s domain=%s",
@@ -66,6 +67,7 @@ class IntentService:
                 prompt_version=PROMPT_VERSION,
                 model_deployment=deployment,
                 latency_ms=(time.perf_counter() - start) * 1000,
+                token_usage=usage,
             )
         except (json.JSONDecodeError, KeyError) as e:
             logger.error("intent.parse_failed error=%s", str(e))
@@ -93,6 +95,7 @@ class IntentStage(Stage):
         ctx.trace.answerable = result.answerable
         ctx.trace.prompt_versions["intent"] = result.prompt_version
         ctx.trace.model_deployments["intent"] = result.model_deployment
+        ctx.trace.token_usage["intent"] = result.token_usage
 
         if not result.answerable:
             return refuse(ctx, result.reason)
