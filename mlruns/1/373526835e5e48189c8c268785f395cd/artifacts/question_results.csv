@@ -1,0 +1,61 @@
+question,status,failure_reasons
+Which articles have the highest comment volume and what is their average comment sentiment?,fail,Execution: Query execution failed — the database may be unavailable.
+How many keywords are associated with articles published after 2025-01-01?,fail,Execution: Query execution failed — the database may be unavailable.
+Show low-engagement articles with fewer than 5 comments and average sentiment below 0.2.,fail,Execution: Query execution failed — the database may be unavailable.
+Which keywords appear in the most articles and have the highest average comment sentiment?,fail,Execution: Query execution failed — the database may be unavailable.
+For the keyword 'climate change'  how many unique contributors commented on related articles?,fail,Execution: Query execution failed — the database may be unavailable.
+Who are the top contributors by comment count?,fail,Execution: Query execution failed — the database may be unavailable.
+Which contributors have the highest average sentiment and at least 20 comments?,fail,Execution: Query execution failed — the database may be unavailable.
+List the most recent ingestion errors by stage and error type.,fail,Execution: Query execution failed — the database may be unavailable.
+Find ingestion errors for a specific data item ID 'article-12345'.,fail,Execution: Query execution failed — the database may be unavailable.
+What is the total number of comments across all articles?,fail,Execution: Query execution failed — the database may be unavailable.
+Which articles have more than 10 keywords associated?,fail,Execution: Query execution failed — the database may be unavailable.
+Show articles with the highest total replies.,fail,Execution: Query execution failed — the database may be unavailable.
+What is the average sentiment for articles published in 2025?,fail,Execution: Query execution failed — the database may be unavailable.
+Which keywords have the lowest average comment sentiment?,fail,Execution: Query execution failed — the database may be unavailable.
+How many articles are associated with each keyword?,fail,Execution: Query execution failed — the database may be unavailable.
+Which keywords have more than 100 comments?,fail,Execution: Query execution failed — the database may be unavailable.
+Show contributors with the most distinct articles commented on.,fail,Execution: Query execution failed — the database may be unavailable.
+Which contributors have negative average sentiment?,fail,Execution: Query execution failed — the database may be unavailable.
+What is the total number of replies for top contributors?,fail,Execution: Query execution failed — the database may be unavailable.
+List ingestion errors from the last 7 days.,fail,Execution: Query execution failed — the database may be unavailable.
+Which stages have the most ingestion errors?,fail,Execution: Query execution failed — the database may be unavailable.
+Show articles with publication date in the last month.,fail,Execution: Query execution failed — the database may be unavailable.
+Which articles have no comments?,fail,Execution: Query execution failed — the database may be unavailable.
+What is the average keyword count per article?,fail,Metrics: missing ['AVG(KEYWORD_COUNT)']; Execution: Query execution failed — the database may be unavailable.
+Which keywords have the highest contributor count?,fail,Execution: Query execution failed — the database may be unavailable.
+Show contributors with comment count between 10 and 50.,fail,Execution: Query execution failed — the database may be unavailable.
+List all ingestion errors with error type 'validation'.,fail,Execution: Query execution failed — the database may be unavailable.
+How many keywords have no associated comments?,fail,Execution: Query execution failed — the database may be unavailable.
+Show top contributors by total replies.,fail,Execution: Query execution failed — the database may be unavailable.
+What are the most common error types in ingestion?,fail,Execution: Query execution failed — the database may be unavailable.
+Which articles were inserted in the last week?,fail,Execution: Query execution failed — the database may be unavailable.
+Show keywords with average sentiment above 0.5.,fail,Execution: Query execution failed — the database may be unavailable.
+Which contributors have commented on more than 20 distinct articles?,fail,Execution: Query execution failed — the database may be unavailable.
+List ingestion errors with messages containing 'timeout'.,fail,Execution: Query execution failed — the database may be unavailable.
+What is the total keyword count across all articles?,fail,Execution: Query execution failed — the database may be unavailable.
+Which keywords have the most comments?,fail,Execution: Query execution failed — the database may be unavailable.
+Show contributors with average sentiment between 0.1 and 0.3.,fail,Execution: Query execution failed — the database may be unavailable.
+How many ingestion errors occurred in each stage?,fail,Execution: Query execution failed — the database may be unavailable.
+Which articles have the oldest publication dates?,fail,Execution: Query execution failed — the database may be unavailable.
+Show keywords with article count less than 5.,fail,Execution: Query execution failed — the database may be unavailable.
+Which contributors have the lowest comment count?,fail,Execution: Query execution failed — the database may be unavailable.
+List ingestion errors attempted after a specific date.,fail,Execution: Query execution failed — the database may be unavailable.
+What is the maximum comment count for any article?,fail,Execution: Query execution failed — the database may be unavailable.
+Which keywords have contributor count greater than 50?,fail,Execution: Query execution failed — the database may be unavailable.
+Show contributors with total replies less than 10.,fail,Execution: Query execution failed — the database may be unavailable.
+How many ingestion errors have error type 'network'?,fail,Execution: Query execution failed — the database may be unavailable.
+Which articles have publication date in 2024?,fail,Execution: Query execution failed — the database may be unavailable.
+Show keywords ordered by average sentiment descending.,fail,Execution: Query execution failed — the database may be unavailable.
+Which contributors have distinct article count equal to 1?,fail,Execution: Query execution failed — the database may be unavailable.
+List ingestion errors with stage 'extraction'.,fail,Execution: Query execution failed — the database may be unavailable.
+What will article engagement look like next quarter?,pass,
+Why do some articles generate more comments than others?,pass,
+Show me the stock price for articles published today,pass,
+INSERT not allowed,pass,
+DDL not allowed,pass,
+Raw dbo.* table access not allowed,pass,
+Missing TOP/LIMIT clause,pass,
+DML not allowed,pass,
+Exceeds row limit,pass,
+Multi-statement query not allowed,pass,

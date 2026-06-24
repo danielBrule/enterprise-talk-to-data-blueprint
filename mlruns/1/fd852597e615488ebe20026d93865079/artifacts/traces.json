@@ -1,0 +1,1995 @@
+[
+  {
+    "question": "Which articles have the highest comment volume and what is their average comment sentiment?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 10 article_id, title, comment_count AS total_comment_count, avg_comment_sentiment AS avg_sentiment FROM analytics.vw_article_engagement WHERE comment_count > 0 ORDER BY comment_count DESC",
+    "expected_sql": "SELECT TOP 10 article_id, title, comment_count, avg_comment_sentiment\nFROM analytics.vw_article_engagement\nORDER BY comment_count DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 8080.367700007628,
+    "trace_id": "dc7001bd-306d-4654-833d-0727e108ffdd",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 888,
+        "completion_tokens": 52,
+        "total_tokens": 940
+      },
+      "view_selection": {
+        "prompt_tokens": 1418,
+        "completion_tokens": 66,
+        "total_tokens": 1484
+      },
+      "sql_generation": {
+        "prompt_tokens": 541,
+        "completion_tokens": 51,
+        "total_tokens": 592
+      },
+      "total": {
+        "prompt_tokens": 2847,
+        "completion_tokens": 169,
+        "total_tokens": 3016
+      }
+    }
+  },
+  {
+    "question": "How many keywords are associated with articles published after 2025-01-01?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 1 SUM(keyword_count) AS total_keyword_count FROM analytics.vw_article_engagement WHERE publication_date > '2025-01-01'",
+    "expected_sql": "SELECT TOP 1 SUM(keyword_count) AS total_keyword_count\nFROM analytics.vw_article_engagement\nWHERE publication_date >= '2025-01-01'\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 4960.678499992355,
+    "trace_id": "d3f6acb6-4c9d-48d6-a1b8-509c96e7ac61",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 890,
+        "completion_tokens": 54,
+        "total_tokens": 944
+      },
+      "view_selection": {
+        "prompt_tokens": 1420,
+        "completion_tokens": 60,
+        "total_tokens": 1480
+      },
+      "sql_generation": {
+        "prompt_tokens": 543,
+        "completion_tokens": 39,
+        "total_tokens": 582
+      },
+      "total": {
+        "prompt_tokens": 2853,
+        "completion_tokens": 153,
+        "total_tokens": 3006
+      }
+    }
+  },
+  {
+    "question": "Show low-engagement articles with fewer than 5 comments and average sentiment below 0.2.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 500 article_id, title, comment_count, avg_comment_sentiment FROM analytics.vw_article_engagement WHERE comment_count < 5 AND avg_comment_sentiment < 0.2",
+    "expected_sql": "SELECT TOP 500 article_id, title, comment_count, avg_comment_sentiment\nFROM analytics.vw_article_engagement\nWHERE comment_count < 5\n  AND avg_comment_sentiment < 0.2\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 5071.767100002035,
+    "trace_id": "44e686b5-d4d7-4f9b-89ef-b145fb416214",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 893,
+        "completion_tokens": 50,
+        "total_tokens": 943
+      },
+      "view_selection": {
+        "prompt_tokens": 1423,
+        "completion_tokens": 85,
+        "total_tokens": 1508
+      },
+      "sql_generation": {
+        "prompt_tokens": 546,
+        "completion_tokens": 48,
+        "total_tokens": 594
+      },
+      "total": {
+        "prompt_tokens": 2862,
+        "completion_tokens": 183,
+        "total_tokens": 3045
+      }
+    }
+  },
+  {
+    "question": "Which keywords appear in the most articles and have the highest average comment sentiment?",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": null,
+    "expected_sql": "SELECT TOP 10 keyword_id, full_keyword, article_count, avg_comment_sentiment\nFROM analytics.vw_keyword_engagement\nORDER BY article_count DESC, avg_comment_sentiment DESC\n",
+    "view_match": null,
+    "validation_pass": null,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [
+      "Intent: Average comment sentiment by keyword is not available in the provided views; vw_keyword_engagement has keyword article count but not average comment sentiment."
+    ],
+    "latency_ms": 1734.090300000389,
+    "trace_id": "94684265-e57a-4cb1-8b62-7368c5f7a31a",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 888,
+        "completion_tokens": 57,
+        "total_tokens": 945
+      },
+      "total": {
+        "prompt_tokens": 888,
+        "completion_tokens": 57,
+        "total_tokens": 945
+      }
+    }
+  },
+  {
+    "question": "For the keyword 'climate change', how many unique contributors commented on related articles?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": "SELECT TOP 1 keyword_id, contributor_count AS unique_contributor_count FROM analytics.vw_keyword_engagement WHERE full_keyword = 'climate change'",
+    "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, contributor_count\nFROM analytics.vw_keyword_engagement\nWHERE full_keyword = 'climate change'\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 3476.292999999714,
+    "trace_id": "86fdaa93-b6e2-4fa6-8cef-ed9258a4b787",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 890,
+        "completion_tokens": 50,
+        "total_tokens": 940
+      },
+      "view_selection": {
+        "prompt_tokens": 1420,
+        "completion_tokens": 69,
+        "total_tokens": 1489
+      },
+      "sql_generation": {
+        "prompt_tokens": 541,
+        "completion_tokens": 38,
+        "total_tokens": 579
+      },
+      "total": {
+        "prompt_tokens": 2851,
+        "completion_tokens": 157,
+        "total_tokens": 3008
+      }
+    }
+  },
+  {
+    "question": "Who are the top contributors by comment count?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 10 contributor_id, comment_count AS total_comment_count FROM analytics.vw_top_contributors ORDER BY comment_count DESC",
+    "expected_sql": "SELECT TOP 10 contributor_id, comment_count\nFROM analytics.vw_top_contributors\nORDER BY comment_count DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 4599.6337000106,
+    "trace_id": "87a67f77-e1a2-448e-85e8-3bb0fed959f4",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 882,
+        "completion_tokens": 42,
+        "total_tokens": 924
+      },
+      "view_selection": {
+        "prompt_tokens": 1412,
+        "completion_tokens": 57,
+        "total_tokens": 1469
+      },
+      "sql_generation": {
+        "prompt_tokens": 513,
+        "completion_tokens": 34,
+        "total_tokens": 547
+      },
+      "total": {
+        "prompt_tokens": 2807,
+        "completion_tokens": 133,
+        "total_tokens": 2940
+      }
+    }
+  },
+  {
+    "question": "Which contributors have the highest average sentiment and at least 20 comments?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 10 contributor_id, comment_count AS total_comment_count, avg_sentiment FROM analytics.vw_top_contributors WHERE comment_count >= 20 ORDER BY avg_sentiment DESC",
+    "expected_sql": "SELECT TOP 500 contributor_id, comment_count, avg_sentiment\nFROM analytics.vw_top_contributors\nWHERE comment_count >= 20\nORDER BY avg_sentiment DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 13319.438299993635,
+    "trace_id": "67bb2725-9452-4957-9a30-4b23d63f0972",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 887,
+        "completion_tokens": 55,
+        "total_tokens": 942
+      },
+      "view_selection": {
+        "prompt_tokens": 1417,
+        "completion_tokens": 68,
+        "total_tokens": 1485
+      },
+      "sql_generation": {
+        "prompt_tokens": 518,
+        "completion_tokens": 45,
+        "total_tokens": 563
+      },
+      "total": {
+        "prompt_tokens": 2822,
+        "completion_tokens": 168,
+        "total_tokens": 2990
+      }
+    }
+  },
+  {
+    "question": "List the most recent ingestion errors by stage and error type.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 10 error_id, stage, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors ORDER BY attempted_at DESC",
+    "expected_sql": "SELECT TOP 20 error_id, stage, error_type, error_message, attempted_at\nFROM analytics.vw_ingestion_errors\nORDER BY attempted_at DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 21640.20530000562,
+    "trace_id": "bded8869-5f74-4211-9a57-833151d743fa",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 885,
+        "completion_tokens": 63,
+        "total_tokens": 948
+      },
+      "view_selection": {
+        "prompt_tokens": 1415,
+        "completion_tokens": 70,
+        "total_tokens": 1485
+      },
+      "sql_generation": {
+        "prompt_tokens": 528,
+        "completion_tokens": 38,
+        "total_tokens": 566
+      },
+      "total": {
+        "prompt_tokens": 2828,
+        "completion_tokens": 171,
+        "total_tokens": 2999
+      }
+    }
+  },
+  {
+    "question": "Find ingestion errors for a specific data item ID 'article-12345'.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 500 error_id, stage, data_id, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors WHERE data_id = 'article-12345'",
+    "expected_sql": "SELECT TOP 500 error_id, stage, error_type, error_message, attempted_at\nFROM analytics.vw_ingestion_errors\nWHERE data_id = 'article-12345'\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 12981.037899997318,
+    "trace_id": "4d2637e4-d2d3-47b1-9197-0efb2e4321c2",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 889,
+        "completion_tokens": 74,
+        "total_tokens": 963
+      },
+      "view_selection": {
+        "prompt_tokens": 1419,
+        "completion_tokens": 70,
+        "total_tokens": 1489
+      },
+      "sql_generation": {
+        "prompt_tokens": 532,
+        "completion_tokens": 45,
+        "total_tokens": 577
+      },
+      "total": {
+        "prompt_tokens": 2840,
+        "completion_tokens": 189,
+        "total_tokens": 3029
+      }
+    }
+  },
+  {
+    "question": "What is the total number of comments across all articles?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 1 SUM(comment_count) AS total_comment_count FROM analytics.vw_article_engagement",
+    "expected_sql": "SELECT TOP 1 SUM(comment_count) AS total_comment_count\nFROM analytics.vw_article_engagement\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 13524.353700006031,
+    "trace_id": "18580945-00fe-499e-88ca-0b75c553b9a5",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 884,
+        "completion_tokens": 59,
+        "total_tokens": 943
+      },
+      "view_selection": {
+        "prompt_tokens": 1414,
+        "completion_tokens": 82,
+        "total_tokens": 1496
+      },
+      "sql_generation": {
+        "prompt_tokens": 536,
+        "completion_tokens": 28,
+        "total_tokens": 564
+      },
+      "total": {
+        "prompt_tokens": 2834,
+        "completion_tokens": 169,
+        "total_tokens": 3003
+      }
+    }
+  },
+  {
+    "question": "Which articles have more than 10 keywords associated?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 500 article_id, title, keyword_count FROM analytics.vw_article_engagement WHERE keyword_count > 10",
+    "expected_sql": "SELECT TOP 500 article_id, title, keyword_count\nFROM analytics.vw_article_engagement\nWHERE keyword_count > 10\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 13864.651500000036,
+    "trace_id": "aca4131b-ac7b-46be-b61b-2df1b7d9db06",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 883,
+        "completion_tokens": 59,
+        "total_tokens": 942
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 65,
+        "total_tokens": 1478
+      },
+      "sql_generation": {
+        "prompt_tokens": 536,
+        "completion_tokens": 33,
+        "total_tokens": 569
+      },
+      "total": {
+        "prompt_tokens": 2832,
+        "completion_tokens": 157,
+        "total_tokens": 2989
+      }
+    }
+  },
+  {
+    "question": "Show articles with the highest total replies.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 10 article_id, title, total_replies FROM analytics.vw_article_engagement ORDER BY total_replies DESC",
+    "expected_sql": "SELECT TOP 5 article_id, title, total_replies\nFROM analytics.vw_article_engagement\nORDER BY total_replies DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 13805.151799999294,
+    "trace_id": "d0be0915-c6f8-4e29-98a3-ff3916b5132a",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 881,
+        "completion_tokens": 47,
+        "total_tokens": 928
+      },
+      "view_selection": {
+        "prompt_tokens": 1411,
+        "completion_tokens": 60,
+        "total_tokens": 1471
+      },
+      "sql_generation": {
+        "prompt_tokens": 534,
+        "completion_tokens": 34,
+        "total_tokens": 568
+      },
+      "total": {
+        "prompt_tokens": 2826,
+        "completion_tokens": 141,
+        "total_tokens": 2967
+      }
+    }
+  },
+  {
+    "question": "What is the average sentiment for articles published in 2025?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 1 AVG(avg_comment_sentiment) AS avg_sentiment_2025 FROM analytics.vw_article_engagement WHERE YEAR(publication_date) = 2025",
+    "expected_sql": "SELECT TOP 1 AVG(avg_comment_sentiment) AS average_sentiment_2025\nFROM analytics.vw_article_engagement\nWHERE YEAR(publication_date) = 2025\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 13714.462800009642,
+    "trace_id": "5d0487bd-18f0-4d60-960c-2f048dd96437",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 886,
+        "completion_tokens": 62,
+        "total_tokens": 948
+      },
+      "view_selection": {
+        "prompt_tokens": 1416,
+        "completion_tokens": 65,
+        "total_tokens": 1481
+      },
+      "sql_generation": {
+        "prompt_tokens": 538,
+        "completion_tokens": 43,
+        "total_tokens": 581
+      },
+      "total": {
+        "prompt_tokens": 2840,
+        "completion_tokens": 170,
+        "total_tokens": 3010
+      }
+    }
+  },
+  {
+    "question": "Which keywords have the lowest average comment sentiment?",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": null,
+    "expected_sql": "SELECT TOP 10 keyword_id, full_keyword, avg_comment_sentiment\nFROM analytics.vw_keyword_engagement\nORDER BY avg_comment_sentiment ASC\n",
+    "view_match": null,
+    "validation_pass": null,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [
+      "Intent: Average comment sentiment by keyword is not available in the provided views; vw_keyword_engagement does not include sentiment metrics."
+    ],
+    "latency_ms": 7459.487300002365,
+    "trace_id": "a9c1ba21-2dd6-48c9-a067-75c8ac719bda",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 882,
+        "completion_tokens": 49,
+        "total_tokens": 931
+      },
+      "total": {
+        "prompt_tokens": 882,
+        "completion_tokens": 49,
+        "total_tokens": 931
+      }
+    }
+  },
+  {
+    "question": "How many articles are associated with each keyword?",
+    "case_type": "positive",
+    "status": "error",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": null,
+    "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, article_count\nFROM analytics.vw_keyword_engagement\nORDER BY article_count DESC\n",
+    "view_match": null,
+    "validation_pass": null,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [
+      "Error code: 429 - {'error': {'message': 'Too Many Requests', 'type': 'too_many_requests', 'param': None, 'code': 'too_many_requests'}}"
+    ],
+    "latency_ms": null,
+    "trace_id": null,
+    "token_usage": {
+      "total": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  },
+  {
+    "question": "Which keywords have more than 100 comments?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": "SELECT TOP 500 keyword_id, full_keyword, comment_count FROM analytics.vw_keyword_engagement WHERE comment_count > 100 ORDER BY comment_count DESC",
+    "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, comment_count\nFROM analytics.vw_keyword_engagement\nWHERE comment_count > 100\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 13788.83130000031,
+    "trace_id": "2c0f501e-6b5f-4396-983e-75e07cc4c11e",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 882,
+        "completion_tokens": 41,
+        "total_tokens": 923
+      },
+      "view_selection": {
+        "prompt_tokens": 1412,
+        "completion_tokens": 54,
+        "total_tokens": 1466
+      },
+      "sql_generation": {
+        "prompt_tokens": 534,
+        "completion_tokens": 39,
+        "total_tokens": 573
+      },
+      "total": {
+        "prompt_tokens": 2828,
+        "completion_tokens": 134,
+        "total_tokens": 2962
+      }
+    }
+  },
+  {
+    "question": "Show contributors with the most distinct articles commented on.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 10 contributor_id, distinct_article_count AS distinct_articles_commented_on FROM analytics.vw_top_contributors ORDER BY distinct_article_count DESC",
+    "expected_sql": "SELECT TOP 10 contributor_id, distinct_article_count\nFROM analytics.vw_top_contributors\nORDER BY distinct_article_count DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 14447.240299996338,
+    "trace_id": "f6b093a1-9c9a-49f3-b54f-dbfff4c1c736",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 883,
+        "completion_tokens": 51,
+        "total_tokens": 934
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 68,
+        "total_tokens": 1481
+      },
+      "sql_generation": {
+        "prompt_tokens": 514,
+        "completion_tokens": 38,
+        "total_tokens": 552
+      },
+      "total": {
+        "prompt_tokens": 2810,
+        "completion_tokens": 157,
+        "total_tokens": 2967
+      }
+    }
+  },
+  {
+    "question": "Which contributors have negative average sentiment?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 500 contributor_id, avg_sentiment FROM analytics.vw_top_contributors WHERE avg_sentiment < 0",
+    "expected_sql": "SELECT TOP 500 contributor_id, avg_sentiment\nFROM analytics.vw_top_contributors\nWHERE avg_sentiment < 0\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 13770.523800005321,
+    "trace_id": "8a3232aa-dd09-4e21-9d29-80a1bbe82ead",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 880,
+        "completion_tokens": 48,
+        "total_tokens": 928
+      },
+      "view_selection": {
+        "prompt_tokens": 1410,
+        "completion_tokens": 53,
+        "total_tokens": 1463
+      },
+      "sql_generation": {
+        "prompt_tokens": 511,
+        "completion_tokens": 33,
+        "total_tokens": 544
+      },
+      "total": {
+        "prompt_tokens": 2801,
+        "completion_tokens": 134,
+        "total_tokens": 2935
+      }
+    }
+  },
+  {
+    "question": "What is the total number of replies for top contributors?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 1 SUM(total_replies) AS total_replies FROM analytics.vw_top_contributors",
+    "expected_sql": "SELECT TOP 1 SUM(total_replies) AS total_replies\nFROM analytics.vw_top_contributors\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 13100.093899993226,
+    "trace_id": "e835c574-1a44-4b54-8b42-8b37480f86f3",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 884,
+        "completion_tokens": 52,
+        "total_tokens": 936
+      },
+      "view_selection": {
+        "prompt_tokens": 1414,
+        "completion_tokens": 69,
+        "total_tokens": 1483
+      },
+      "sql_generation": {
+        "prompt_tokens": 514,
+        "completion_tokens": 29,
+        "total_tokens": 543
+      },
+      "total": {
+        "prompt_tokens": 2812,
+        "completion_tokens": 150,
+        "total_tokens": 2962
+      }
+    }
+  },
+  {
+    "question": "List ingestion errors from the last 7 days.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 500 error_id, stage, data_id, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors WHERE attempted_at >= DATEADD(day, -7, GETDATE()) ORDER BY attempted_at DESC",
+    "expected_sql": "SELECT TOP 500 error_id, stage, error_type, attempted_at\nFROM analytics.vw_ingestion_errors\nWHERE attempted_at >= DATEADD(DAY, -7, GETDATE())\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 19566.978100003325,
+    "trace_id": "ecdaf71b-db2e-4dba-911b-7506ca0a86dc",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 883,
+        "completion_tokens": 68,
+        "total_tokens": 951
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 73,
+        "total_tokens": 1486
+      },
+      "sql_generation": {
+        "prompt_tokens": 526,
+        "completion_tokens": 55,
+        "total_tokens": 581
+      },
+      "total": {
+        "prompt_tokens": 2822,
+        "completion_tokens": 196,
+        "total_tokens": 3018
+      }
+    }
+  },
+  {
+    "question": "Which stages have the most ingestion errors?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 10 stage, COUNT(error_id) AS error_count FROM analytics.vw_ingestion_errors GROUP BY stage ORDER BY error_count DESC",
+    "expected_sql": "SELECT TOP 500 stage, COUNT(*) AS error_count\nFROM analytics.vw_ingestion_errors\nGROUP BY stage\nORDER BY error_count DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 18542.178900010185,
+    "trace_id": "c589dd46-9db1-4b4b-8250-42b3bbc10678",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 881,
+        "completion_tokens": 49,
+        "total_tokens": 930
+      },
+      "view_selection": {
+        "prompt_tokens": 1411,
+        "completion_tokens": 81,
+        "total_tokens": 1492
+      },
+      "sql_generation": {
+        "prompt_tokens": 524,
+        "completion_tokens": 37,
+        "total_tokens": 561
+      },
+      "total": {
+        "prompt_tokens": 2816,
+        "completion_tokens": 167,
+        "total_tokens": 2983
+      }
+    }
+  },
+  {
+    "question": "Show articles with publication date in the last month.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 500 article_id, title, publication_date FROM analytics.vw_article_engagement WHERE publication_date >= DATEADD(MONTH, -1, CAST(GETDATE() AS DATE))",
+    "expected_sql": "SELECT TOP 500 article_id, title, publication_date\nFROM analytics.vw_article_engagement\nWHERE publication_date >= DATEADD(MONTH, -1, GETDATE())\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 21713.721000007354,
+    "trace_id": "35d822a0-06d9-4d4e-874c-e9512890bf0f",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 883,
+        "completion_tokens": 49,
+        "total_tokens": 932
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 63,
+        "total_tokens": 1476
+      },
+      "sql_generation": {
+        "prompt_tokens": 536,
+        "completion_tokens": 47,
+        "total_tokens": 583
+      },
+      "total": {
+        "prompt_tokens": 2832,
+        "completion_tokens": 159,
+        "total_tokens": 2991
+      }
+    }
+  },
+  {
+    "question": "Which articles have no comments?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 500 article_id, title FROM analytics.vw_article_engagement WHERE comment_count = 0",
+    "expected_sql": "SELECT TOP 500 article_id, title\nFROM analytics.vw_article_engagement\nWHERE comment_count = 0\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 28011.536899997736,
+    "trace_id": "76ec380e-18d1-476f-a3f3-d42f346d82ed",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 879,
+        "completion_tokens": 48,
+        "total_tokens": 927
+      },
+      "view_selection": {
+        "prompt_tokens": 1409,
+        "completion_tokens": 61,
+        "total_tokens": 1470
+      },
+      "sql_generation": {
+        "prompt_tokens": 532,
+        "completion_tokens": 30,
+        "total_tokens": 562
+      },
+      "total": {
+        "prompt_tokens": 2820,
+        "completion_tokens": 139,
+        "total_tokens": 2959
+      }
+    }
+  },
+  {
+    "question": "What is the average keyword count per article?",
+    "case_type": "positive",
+    "status": "error",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": null,
+    "expected_sql": "SELECT TOP 1 AVG(keyword_count) AS avg_keyword_count\nFROM analytics.vw_article_engagement\n",
+    "view_match": null,
+    "validation_pass": null,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [
+      "Error code: 429 - {'error': {'message': 'Too Many Requests', 'type': 'too_many_requests', 'param': None, 'code': 'too_many_requests'}}"
+    ],
+    "latency_ms": null,
+    "trace_id": null,
+    "token_usage": {
+      "total": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  },
+  {
+    "question": "Which keywords have the highest contributor count?",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": null,
+    "expected_sql": "SELECT TOP 10 keyword_id, full_keyword, contributor_count\nFROM analytics.vw_keyword_engagement\nORDER BY contributor_count DESC\n",
+    "view_match": null,
+    "validation_pass": null,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [
+      "Intent: The available views do not contain a metric for contributor count by keyword; contributor reach is available but not contributor count."
+    ],
+    "latency_ms": 6516.501200007042,
+    "trace_id": "127b74ca-7184-4e2b-9f81-99966ba15638",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 881,
+        "completion_tokens": 49,
+        "total_tokens": 930
+      },
+      "total": {
+        "prompt_tokens": 881,
+        "completion_tokens": 49,
+        "total_tokens": 930
+      }
+    }
+  },
+  {
+    "question": "Show contributors with comment count between 10 and 50.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 500 contributor_id, comment_count, avg_sentiment, total_replies, distinct_article_count FROM analytics.vw_top_contributors WHERE comment_count BETWEEN 10 AND 50",
+    "expected_sql": "SELECT TOP 500 contributor_id, comment_count, avg_sentiment\nFROM analytics.vw_top_contributors\nWHERE comment_count BETWEEN 10 AND 50\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 13388.634999995702,
+    "trace_id": "8d2c0386-6471-4f5e-8bdc-4afcda7c1d13",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 885,
+        "completion_tokens": 49,
+        "total_tokens": 934
+      },
+      "view_selection": {
+        "prompt_tokens": 1415,
+        "completion_tokens": 59,
+        "total_tokens": 1474
+      },
+      "sql_generation": {
+        "prompt_tokens": 516,
+        "completion_tokens": 46,
+        "total_tokens": 562
+      },
+      "total": {
+        "prompt_tokens": 2816,
+        "completion_tokens": 154,
+        "total_tokens": 2970
+      }
+    }
+  },
+  {
+    "question": "List all ingestion errors with error type 'validation'.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 500 error_id, stage, data_id, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors WHERE error_type = 'validation'",
+    "expected_sql": "SELECT TOP 500 error_id, data_id, error_message\nFROM analytics.vw_ingestion_errors\nWHERE error_type = 'validation'\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 12869.676699992851,
+    "trace_id": "1a39ceb2-4b82-4207-9b64-6b912c75be0f",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 884,
+        "completion_tokens": 50,
+        "total_tokens": 934
+      },
+      "view_selection": {
+        "prompt_tokens": 1414,
+        "completion_tokens": 62,
+        "total_tokens": 1476
+      },
+      "sql_generation": {
+        "prompt_tokens": 527,
+        "completion_tokens": 42,
+        "total_tokens": 569
+      },
+      "total": {
+        "prompt_tokens": 2825,
+        "completion_tokens": 154,
+        "total_tokens": 2979
+      }
+    }
+  },
+  {
+    "question": "How many keywords have no associated comments?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": "SELECT TOP 1 COUNT(keyword_id) AS keywords_with_no_comments FROM analytics.vw_keyword_engagement WHERE comment_count = 0",
+    "expected_sql": "SELECT TOP 1 COUNT(*) AS keywords_with_no_comments\nFROM analytics.vw_keyword_engagement\nWHERE comment_count = 0\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 13353.38369999954,
+    "trace_id": "9fdf1c2a-d04e-4731-958c-745b392e6e5d",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 881,
+        "completion_tokens": 61,
+        "total_tokens": 942
+      },
+      "view_selection": {
+        "prompt_tokens": 1411,
+        "completion_tokens": 57,
+        "total_tokens": 1468
+      },
+      "sql_generation": {
+        "prompt_tokens": 533,
+        "completion_tokens": 35,
+        "total_tokens": 568
+      },
+      "total": {
+        "prompt_tokens": 2825,
+        "completion_tokens": 153,
+        "total_tokens": 2978
+      }
+    }
+  },
+  {
+    "question": "Show top contributors by total replies.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 10 contributor_id, total_replies AS total_replies FROM analytics.vw_top_contributors ORDER BY total_replies DESC",
+    "expected_sql": "SELECT TOP 5 contributor_id, total_replies\nFROM analytics.vw_top_contributors\nORDER BY total_replies DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 14071.98249999783,
+    "trace_id": "4b591cb8-7ffb-4473-8cc1-1bb7eb0f6845",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 880,
+        "completion_tokens": 45,
+        "total_tokens": 925
+      },
+      "view_selection": {
+        "prompt_tokens": 1410,
+        "completion_tokens": 77,
+        "total_tokens": 1487
+      },
+      "sql_generation": {
+        "prompt_tokens": 511,
+        "completion_tokens": 36,
+        "total_tokens": 547
+      },
+      "total": {
+        "prompt_tokens": 2801,
+        "completion_tokens": 158,
+        "total_tokens": 2959
+      }
+    }
+  },
+  {
+    "question": "What are the most common error types in ingestion?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 10 error_id, error_type, COUNT(*) AS error_count FROM analytics.vw_ingestion_errors GROUP BY error_id, error_type ORDER BY error_count DESC",
+    "expected_sql": "SELECT TOP 500 error_type, COUNT(*) AS count\nFROM analytics.vw_ingestion_errors\nGROUP BY error_type\nORDER BY count DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 13657.227799994871,
+    "trace_id": "b938f255-7f41-4b8f-bf09-20f4c0daef43",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 883,
+        "completion_tokens": 41,
+        "total_tokens": 924
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 63,
+        "total_tokens": 1476
+      },
+      "sql_generation": {
+        "prompt_tokens": 525,
+        "completion_tokens": 43,
+        "total_tokens": 568
+      },
+      "total": {
+        "prompt_tokens": 2821,
+        "completion_tokens": 147,
+        "total_tokens": 2968
+      }
+    }
+  },
+  {
+    "question": "Which articles were inserted in the last week?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 500 article_id, title, insert_date FROM analytics.vw_article_engagement WHERE insert_date >= DATEADD(day, -7, GETDATE()) ORDER BY insert_date DESC",
+    "expected_sql": "SELECT TOP 500 article_id, title, insert_date\nFROM analytics.vw_article_engagement\nWHERE insert_date >= DATEADD(WEEK, -1, GETDATE())\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 13430.211799990502,
+    "trace_id": "d2c2cb7b-0f9a-42ba-b3af-ba5a33a80f0e",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 882,
+        "completion_tokens": 55,
+        "total_tokens": 937
+      },
+      "view_selection": {
+        "prompt_tokens": 1412,
+        "completion_tokens": 53,
+        "total_tokens": 1465
+      },
+      "sql_generation": {
+        "prompt_tokens": 535,
+        "completion_tokens": 46,
+        "total_tokens": 581
+      },
+      "total": {
+        "prompt_tokens": 2829,
+        "completion_tokens": 154,
+        "total_tokens": 2983
+      }
+    }
+  },
+  {
+    "question": "Show keywords with average sentiment above 0.5.",
+    "case_type": "positive",
+    "status": "error",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": null,
+    "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, avg_comment_sentiment\nFROM analytics.vw_keyword_engagement\nWHERE avg_comment_sentiment > 0.5\n",
+    "view_match": null,
+    "validation_pass": null,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [
+      "Error code: 429 - {'error': {'message': 'Too Many Requests', 'type': 'too_many_requests', 'param': None, 'code': 'too_many_requests'}}"
+    ],
+    "latency_ms": null,
+    "trace_id": null,
+    "token_usage": {
+      "total": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  },
+  {
+    "question": "Which contributors have commented on more than 20 distinct articles?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 500 contributor_id, distinct_article_count FROM analytics.vw_top_contributors WHERE distinct_article_count > 20 ORDER BY distinct_article_count DESC",
+    "expected_sql": "SELECT TOP 500 contributor_id, distinct_article_count\nFROM analytics.vw_top_contributors\nWHERE distinct_article_count > 20\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 14647.285200000624,
+    "trace_id": "6366a08c-cb32-4690-8222-395a14e52a89",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 885,
+        "completion_tokens": 51,
+        "total_tokens": 936
+      },
+      "view_selection": {
+        "prompt_tokens": 1415,
+        "completion_tokens": 71,
+        "total_tokens": 1486
+      },
+      "sql_generation": {
+        "prompt_tokens": 516,
+        "completion_tokens": 39,
+        "total_tokens": 555
+      },
+      "total": {
+        "prompt_tokens": 2816,
+        "completion_tokens": 161,
+        "total_tokens": 2977
+      }
+    }
+  },
+  {
+    "question": "List ingestion errors with messages containing 'timeout'.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 500 error_id, stage, data_id, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors WHERE error_message LIKE '%timeout%'",
+    "expected_sql": "SELECT TOP 500 error_id, error_message, attempted_at\nFROM analytics.vw_ingestion_errors\nWHERE error_message LIKE '%timeout%'\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 13043.64999999234,
+    "trace_id": "cdda5692-3b54-4167-aca2-098d6048d8f9",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 883,
+        "completion_tokens": 58,
+        "total_tokens": 941
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 66,
+        "total_tokens": 1479
+      },
+      "sql_generation": {
+        "prompt_tokens": 526,
+        "completion_tokens": 43,
+        "total_tokens": 569
+      },
+      "total": {
+        "prompt_tokens": 2822,
+        "completion_tokens": 167,
+        "total_tokens": 2989
+      }
+    }
+  },
+  {
+    "question": "What is the total keyword count across all articles?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 1 SUM(keyword_count) AS total_keyword_count FROM analytics.vw_article_engagement",
+    "expected_sql": "SELECT TOP 1 SUM(keyword_count) AS total_keyword_count\nFROM analytics.vw_article_engagement\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 13973.047100007534,
+    "trace_id": "1099b847-d180-4af4-8210-eaf43b54dcfb",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 883,
+        "completion_tokens": 52,
+        "total_tokens": 935
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 66,
+        "total_tokens": 1479
+      },
+      "sql_generation": {
+        "prompt_tokens": 535,
+        "completion_tokens": 28,
+        "total_tokens": 563
+      },
+      "total": {
+        "prompt_tokens": 2831,
+        "completion_tokens": 146,
+        "total_tokens": 2977
+      }
+    }
+  },
+  {
+    "question": "Which keywords have the most comments?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": "SELECT TOP 10 keyword_id, full_keyword, comment_count AS total_comment_count FROM analytics.vw_keyword_engagement ORDER BY comment_count DESC",
+    "expected_sql": "SELECT TOP 10 keyword_id, full_keyword, comment_count\nFROM analytics.vw_keyword_engagement\nORDER BY comment_count DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 14451.637100006337,
+    "trace_id": "826a275a-3b20-4739-8fbc-4ed8646866ae",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 880,
+        "completion_tokens": 52,
+        "total_tokens": 932
+      },
+      "view_selection": {
+        "prompt_tokens": 1410,
+        "completion_tokens": 61,
+        "total_tokens": 1471
+      },
+      "sql_generation": {
+        "prompt_tokens": 532,
+        "completion_tokens": 37,
+        "total_tokens": 569
+      },
+      "total": {
+        "prompt_tokens": 2822,
+        "completion_tokens": 150,
+        "total_tokens": 2972
+      }
+    }
+  },
+  {
+    "question": "Show contributors with average sentiment between 0.1 and 0.3.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 500 contributor_id, avg_sentiment FROM analytics.vw_top_contributors WHERE avg_sentiment BETWEEN 0.1 AND 0.3",
+    "expected_sql": "SELECT TOP 500 contributor_id, avg_sentiment\nFROM analytics.vw_top_contributors\nWHERE avg_sentiment BETWEEN 0.1 AND 0.3\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 12656.786099993042,
+    "trace_id": "dc9d7f95-a9ff-4220-b864-c58735e68d02",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 889,
+        "completion_tokens": 48,
+        "total_tokens": 937
+      },
+      "view_selection": {
+        "prompt_tokens": 1419,
+        "completion_tokens": 76,
+        "total_tokens": 1495
+      },
+      "sql_generation": {
+        "prompt_tokens": 520,
+        "completion_tokens": 40,
+        "total_tokens": 560
+      },
+      "total": {
+        "prompt_tokens": 2828,
+        "completion_tokens": 164,
+        "total_tokens": 2992
+      }
+    }
+  },
+  {
+    "question": "How many ingestion errors occurred in each stage?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 500 stage, COUNT(error_id) AS ingestion_error_count FROM analytics.vw_ingestion_errors GROUP BY stage ORDER BY ingestion_error_count DESC",
+    "expected_sql": "SELECT TOP 500 stage, COUNT(*) AS error_count\nFROM analytics.vw_ingestion_errors\nGROUP BY stage\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 14876.272499997867,
+    "trace_id": "7c02d2c2-b0e6-4238-9421-622966fea5c7",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 882,
+        "completion_tokens": 56,
+        "total_tokens": 938
+      },
+      "view_selection": {
+        "prompt_tokens": 1412,
+        "completion_tokens": 75,
+        "total_tokens": 1487
+      },
+      "sql_generation": {
+        "prompt_tokens": 525,
+        "completion_tokens": 39,
+        "total_tokens": 564
+      },
+      "total": {
+        "prompt_tokens": 2819,
+        "completion_tokens": 170,
+        "total_tokens": 2989
+      }
+    }
+  },
+  {
+    "question": "Which articles have the oldest publication dates?",
+    "case_type": "positive",
+    "status": "error",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": null,
+    "expected_sql": "SELECT TOP 5 article_id, title, publication_date\nFROM analytics.vw_article_engagement\nORDER BY publication_date ASC\n",
+    "view_match": null,
+    "validation_pass": null,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [
+      "Error code: 429 - {'error': {'message': 'Too Many Requests', 'type': 'too_many_requests', 'param': None, 'code': 'too_many_requests'}}"
+    ],
+    "latency_ms": null,
+    "trace_id": null,
+    "token_usage": {
+      "total": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  },
+  {
+    "question": "Show keywords with article count less than 5.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": "SELECT TOP 500 keyword_id, full_keyword, article_count FROM analytics.vw_keyword_engagement WHERE article_count < 5",
+    "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, article_count\nFROM analytics.vw_keyword_engagement\nWHERE article_count < 5\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 17977.357600000687,
+    "trace_id": "6126b8f2-bd1b-4b53-b0fc-87610e829e42",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 883,
+        "completion_tokens": 50,
+        "total_tokens": 933
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 85,
+        "total_tokens": 1498
+      },
+      "sql_generation": {
+        "prompt_tokens": 535,
+        "completion_tokens": 34,
+        "total_tokens": 569
+      },
+      "total": {
+        "prompt_tokens": 2831,
+        "completion_tokens": 169,
+        "total_tokens": 3000
+      }
+    }
+  },
+  {
+    "question": "Which contributors have the lowest comment count?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 10 contributor_id, comment_count FROM analytics.vw_top_contributors ORDER BY comment_count ASC",
+    "expected_sql": "SELECT TOP 10 contributor_id, comment_count\nFROM analytics.vw_top_contributors\nORDER BY comment_count ASC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 14149.900200005504,
+    "trace_id": "492a78f0-a4d3-4818-aa0d-e924eb399c03",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 881,
+        "completion_tokens": 49,
+        "total_tokens": 930
+      },
+      "view_selection": {
+        "prompt_tokens": 1411,
+        "completion_tokens": 55,
+        "total_tokens": 1466
+      },
+      "sql_generation": {
+        "prompt_tokens": 512,
+        "completion_tokens": 30,
+        "total_tokens": 542
+      },
+      "total": {
+        "prompt_tokens": 2804,
+        "completion_tokens": 134,
+        "total_tokens": 2938
+      }
+    }
+  },
+  {
+    "question": "List ingestion errors attempted after a specific date.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 500 error_id, stage, data_id, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors WHERE attempted_at > @SpecificDate ORDER BY attempted_at DESC",
+    "expected_sql": "SELECT TOP 500 error_id, attempted_at\nFROM analytics.vw_ingestion_errors\nWHERE attempted_at > '2025-01-01'\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 14161.947600005078,
+    "trace_id": "873f5a88-eec2-4968-a1cf-40dbb2a4ca12",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 882,
+        "completion_tokens": 59,
+        "total_tokens": 941
+      },
+      "view_selection": {
+        "prompt_tokens": 1412,
+        "completion_tokens": 65,
+        "total_tokens": 1477
+      },
+      "sql_generation": {
+        "prompt_tokens": 525,
+        "completion_tokens": 48,
+        "total_tokens": 573
+      },
+      "total": {
+        "prompt_tokens": 2819,
+        "completion_tokens": 172,
+        "total_tokens": 2991
+      }
+    }
+  },
+  {
+    "question": "What is the maximum comment count for any article?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 1 MAX(comment_count) AS max_comment_count FROM analytics.vw_article_engagement",
+    "expected_sql": "SELECT TOP 1 MAX(comment_count) AS max_comment_count\nFROM analytics.vw_article_engagement\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 13125.318299993523,
+    "trace_id": "15ebebe6-d767-470c-ab32-2eaf51e30be4",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 883,
+        "completion_tokens": 49,
+        "total_tokens": 932
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 59,
+        "total_tokens": 1472
+      },
+      "sql_generation": {
+        "prompt_tokens": 535,
+        "completion_tokens": 28,
+        "total_tokens": 563
+      },
+      "total": {
+        "prompt_tokens": 2831,
+        "completion_tokens": 136,
+        "total_tokens": 2967
+      }
+    }
+  },
+  {
+    "question": "Which keywords have contributor count greater than 50?",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": null,
+    "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, contributor_count\nFROM analytics.vw_keyword_engagement\nWHERE contributor_count > 50\n",
+    "view_match": null,
+    "validation_pass": null,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [
+      "Intent: Contributor count per keyword is not available in any of the provided views."
+    ],
+    "latency_ms": 7496.749500001897,
+    "trace_id": "5bad9b48-dd39-4ff8-823c-1cf819002379",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 883,
+        "completion_tokens": 38,
+        "total_tokens": 921
+      },
+      "total": {
+        "prompt_tokens": 883,
+        "completion_tokens": 38,
+        "total_tokens": 921
+      }
+    }
+  },
+  {
+    "question": "Show contributors with total replies less than 10.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 500 contributor_id, total_replies FROM analytics.vw_top_contributors WHERE total_replies < 10",
+    "expected_sql": "SELECT TOP 500 contributor_id, total_replies\nFROM analytics.vw_top_contributors\nWHERE total_replies < 10\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 12385.167700005695,
+    "trace_id": "aabd565a-8aab-49e8-b1fa-fea5da686bcc",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 883,
+        "completion_tokens": 52,
+        "total_tokens": 935
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 59,
+        "total_tokens": 1472
+      },
+      "sql_generation": {
+        "prompt_tokens": 514,
+        "completion_tokens": 33,
+        "total_tokens": 547
+      },
+      "total": {
+        "prompt_tokens": 2810,
+        "completion_tokens": 144,
+        "total_tokens": 2954
+      }
+    }
+  },
+  {
+    "question": "How many ingestion errors have error type 'network'?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 1 COUNT(*) AS network_error_count FROM analytics.vw_ingestion_errors WHERE error_type = 'network'",
+    "expected_sql": "SELECT TOP 1 COUNT(*) AS error_count\nFROM analytics.vw_ingestion_errors\nWHERE error_type = 'network'\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 13107.865400001174,
+    "trace_id": "b06100ba-222f-4bf8-a69f-0bf434dc365c",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 884,
+        "completion_tokens": 56,
+        "total_tokens": 940
+      },
+      "view_selection": {
+        "prompt_tokens": 1414,
+        "completion_tokens": 64,
+        "total_tokens": 1478
+      },
+      "sql_generation": {
+        "prompt_tokens": 527,
+        "completion_tokens": 32,
+        "total_tokens": 559
+      },
+      "total": {
+        "prompt_tokens": 2825,
+        "completion_tokens": 152,
+        "total_tokens": 2977
+      }
+    }
+  },
+  {
+    "question": "Which articles have publication date in 2024?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 500 article_id, title, publication_date FROM analytics.vw_article_engagement WHERE YEAR(publication_date) = 2024",
+    "expected_sql": "SELECT TOP 500 article_id, title, publication_date\nFROM analytics.vw_article_engagement\nWHERE YEAR(publication_date) = 2024\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 4535.680900007719,
+    "trace_id": "25047b21-b662-4b67-b124-df445b0fc802",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 883,
+        "completion_tokens": 48,
+        "total_tokens": 931
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 67,
+        "total_tokens": 1480
+      },
+      "sql_generation": {
+        "prompt_tokens": 536,
+        "completion_tokens": 37,
+        "total_tokens": 573
+      },
+      "total": {
+        "prompt_tokens": 2832,
+        "completion_tokens": 152,
+        "total_tokens": 2984
+      }
+    }
+  },
+  {
+    "question": "Show keywords ordered by average sentiment descending.",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": null,
+    "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, avg_comment_sentiment\nFROM analytics.vw_keyword_engagement\nORDER BY avg_comment_sentiment DESC\n",
+    "view_match": null,
+    "validation_pass": null,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [
+      "Intent: No available view contains average sentiment aggregated by keyword; avg_comment_sentiment exists only at article level, not keyword level."
+    ],
+    "latency_ms": 6080.4743000044255,
+    "trace_id": "c032eaae-d4fa-4298-bd9b-b3b081067895",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 881,
+        "completion_tokens": 48,
+        "total_tokens": 929
+      },
+      "total": {
+        "prompt_tokens": 881,
+        "completion_tokens": 48,
+        "total_tokens": 929
+      }
+    }
+  },
+  {
+    "question": "Which contributors have distinct article count equal to 1?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 500 contributor_id, distinct_article_count FROM analytics.vw_top_contributors WHERE distinct_article_count = 1",
+    "expected_sql": "SELECT TOP 500 contributor_id, distinct_article_count\nFROM analytics.vw_top_contributors\nWHERE distinct_article_count = 1\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 11877.244900009828,
+    "trace_id": "08e5d61e-b1ab-419b-8f63-83c1a7cc4ccc",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 884,
+        "completion_tokens": 62,
+        "total_tokens": 946
+      },
+      "view_selection": {
+        "prompt_tokens": 1414,
+        "completion_tokens": 63,
+        "total_tokens": 1477
+      },
+      "sql_generation": {
+        "prompt_tokens": 515,
+        "completion_tokens": 33,
+        "total_tokens": 548
+      },
+      "total": {
+        "prompt_tokens": 2813,
+        "completion_tokens": 158,
+        "total_tokens": 2971
+      }
+    }
+  },
+  {
+    "question": "List ingestion errors with stage 'extraction'.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 500 error_id, stage, data_id, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors WHERE stage = 'extraction'",
+    "expected_sql": "SELECT TOP 500 error_id, data_id, error_message\nFROM analytics.vw_ingestion_errors\nWHERE stage = 'extraction'\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 13816.655699993134,
+    "trace_id": "52ef2ecd-edf0-49a4-8084-c42e76165ad9",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 883,
+        "completion_tokens": 62,
+        "total_tokens": 945
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 60,
+        "total_tokens": 1473
+      },
+      "sql_generation": {
+        "prompt_tokens": 526,
+        "completion_tokens": 42,
+        "total_tokens": 568
+      },
+      "total": {
+        "prompt_tokens": 2822,
+        "completion_tokens": 164,
+        "total_tokens": 2986
+      }
+    }
+  },
+  {
+    "question": "What will article engagement look like next quarter?",
+    "case_type": "negative_question",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "",
+    "view_match": null,
+    "validation_pass": null,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 1352.4076000030618,
+    "trace_id": "71f6c500-2860-4133-bbab-d329f68f3be4",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 882,
+        "completion_tokens": 67,
+        "total_tokens": 949
+      },
+      "total": {
+        "prompt_tokens": 882,
+        "completion_tokens": 67,
+        "total_tokens": 949
+      }
+    }
+  },
+  {
+    "question": "Why do some articles generate more comments than others?",
+    "case_type": "negative_question",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "",
+    "view_match": null,
+    "validation_pass": null,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 1927.8331999958027,
+    "trace_id": "21dd4c27-0f3a-4def-bdbd-af066fa78462",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 883,
+        "completion_tokens": 42,
+        "total_tokens": 925
+      },
+      "total": {
+        "prompt_tokens": 883,
+        "completion_tokens": 42,
+        "total_tokens": 925
+      }
+    }
+  },
+  {
+    "question": "Show me the stock price for articles published today",
+    "case_type": "negative_question",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "",
+    "view_match": null,
+    "validation_pass": null,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 1084.3790999933844,
+    "trace_id": "5b54a765-f1df-485b-a190-fb22873dacaa",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 883,
+        "completion_tokens": 37,
+        "total_tokens": 920
+      },
+      "total": {
+        "prompt_tokens": 883,
+        "completion_tokens": 37,
+        "total_tokens": 920
+      }
+    }
+  },
+  {
+    "question": "INSERT not allowed",
+    "case_type": "negative_sql",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "INSERT INTO analytics.vw_article_engagement VALUES (1)",
+    "view_match": null,
+    "validation_pass": true,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": null,
+    "trace_id": "64831801-50bc-4b80-99c7-291354e9df0d",
+    "token_usage": {
+      "total": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  },
+  {
+    "question": "DDL not allowed",
+    "case_type": "negative_sql",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "DROP TABLE analytics.vw_article_engagement",
+    "view_match": null,
+    "validation_pass": true,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": null,
+    "trace_id": "754eb265-4319-4198-b71d-9cc51b3925a4",
+    "token_usage": {
+      "total": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  },
+  {
+    "question": "Raw dbo.* table access not allowed",
+    "case_type": "negative_sql",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "SELECT * FROM dbo.core_articles",
+    "view_match": null,
+    "validation_pass": true,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": null,
+    "trace_id": "46ca843a-b886-4923-b72c-64af2cfd3b4d",
+    "token_usage": {
+      "total": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  },
+  {
+    "question": "Missing TOP/LIMIT clause",
+    "case_type": "negative_sql",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "SELECT * FROM analytics.vw_article_engagement",
+    "view_match": null,
+    "validation_pass": true,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": null,
+    "trace_id": "71b44c77-9b3b-4113-b19c-b68225fb4d6e",
+    "token_usage": {
+      "total": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  },
+  {
+    "question": "DML not allowed",
+    "case_type": "negative_sql",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "UPDATE analytics.vw_article_engagement SET comment_count = 0",
+    "view_match": null,
+    "validation_pass": true,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": null,
+    "trace_id": "cbf6948e-6de0-4ea3-ad1c-245be6793e54",
+    "token_usage": {
+      "total": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  },
+  {
+    "question": "Exceeds row limit",
+    "case_type": "negative_sql",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "SELECT TOP 501 * FROM analytics.vw_article_engagement",
+    "view_match": null,
+    "validation_pass": true,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": null,
+    "trace_id": "b88fb506-0672-4035-b44d-1f61aba5097e",
+    "token_usage": {
+      "total": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  },
+  {
+    "question": "Multi-statement query not allowed",
+    "case_type": "negative_sql",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "SELECT TOP 10 article_id FROM analytics.vw_article_engagement; SELECT TOP 5 keyword_id FROM analytics.vw_keyword_engagement",
+    "view_match": null,
+    "validation_pass": true,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": null,
+    "trace_id": "9b339472-5b94-4f64-ab40-c64834ac7c49",
+    "token_usage": {
+      "total": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  }
+]
