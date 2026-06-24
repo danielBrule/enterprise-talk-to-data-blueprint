@@ -1,0 +1,1435 @@
+{
+  "git_commit": "618d8a984a752587e68b86307201dc07cd5e4277",
+  "eval_run": "v13-full",
+  "total": 60,
+  "passed": 39,
+  "partial": 15,
+  "failed": 1,
+  "errors": 5,
+  "pass_rate": 0.65,
+  "access_enforcement_note": "Access context is captured but not enforced in this MVP.",
+  "records": [
+    {
+      "question": "Which articles have the highest comment volume and what is their average comment sentiment?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_article_engagement",
+      "generated_sql": "SELECT TOP 10 article_id, title, comment_count AS total_comment_count, avg_comment_sentiment AS avg_sentiment FROM analytics.vw_article_engagement WHERE comment_count > 0 ORDER BY comment_count DESC",
+      "expected_sql": "SELECT TOP 10 article_id, title, comment_count, avg_comment_sentiment\nFROM analytics.vw_article_engagement\nORDER BY comment_count DESC\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "The articles with the highest comment volumes are: 'Saint-Denis : M\u00e9lenchon, Panot, Tondelier attendus au rassemblement contre le racisme organis\u00e9 par le maire Bally Bagayoko' (16,588 comments), 'Audiovisuel public : le rapport du d\u00e9put\u00e9 Charles Alloncle menac\u00e9 de censure par la commission' (11,824 comments), and 'Pourquoi le rapport Alloncle inqui\u00e8te France T\u00e9l\u00e9visions et Radio France' (10,448 comments). All have an average comment sentiment of 0.0.",
+      "failure_reasons": [],
+      "latency_ms": 140394.25269999992,
+      "trace_id": "637676a0-0adf-4310-8763-b7cbe0dc4961"
+    },
+    {
+      "question": "How many keywords are associated with articles published after 2025-01-01?",
+      "case_type": "positive",
+      "status": "partial",
+      "expected_view": "analytics.vw_article_engagement",
+      "generated_sql": "SELECT TOP 1 SUM(keyword_count) AS total_keyword_count FROM analytics.vw_article_engagement WHERE publication_date > '2025-01-01'",
+      "expected_sql": "SELECT TOP 1 SUM(keyword_count) AS total_keyword_count\nFROM analytics.vw_article_engagement\nWHERE publication_date >= '2025-01-01'\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": false
+      },
+      "answer": "There are 179,642 keywords associated with articles published after 2025-01-01.",
+      "failure_reasons": [
+        "Answer: no result values found in answer text"
+      ],
+      "latency_ms": 30857.500099999925,
+      "trace_id": "19c46068-be59-4eb9-afb1-5b7fe28c8db7"
+    },
+    {
+      "question": "Show low-engagement articles with fewer than 5 comments and average sentiment below 0.2.",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_article_engagement",
+      "generated_sql": "SELECT TOP 500 article_id, title, comment_count, avg_comment_sentiment FROM analytics.vw_article_engagement WHERE comment_count < 5 AND avg_comment_sentiment < 0.2",
+      "expected_sql": "SELECT TOP 500 article_id, title, comment_count, avg_comment_sentiment\nFROM analytics.vw_article_engagement\nWHERE comment_count < 5\n  AND avg_comment_sentiment < 0.2\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "There are 500 low-engagement articles with fewer than 5 comments and an average sentiment below 0.2. Examples include articles with zero comments and neutral sentiment, such as 'Cyclisme : le sprinteur de la Visma Matthew Brennan forfait pour Milan-Sanremo' and 'Hantavirus: \u00abun virus qui a une mortalit\u00e9 \u00e9lev\u00e9e\u00bb, pr\u00e9cise la ministre de la Sant\u00e9.'",
+      "failure_reasons": [],
+      "latency_ms": 112464.01340000011,
+      "trace_id": "7f7f74f7-c90a-4890-82e2-c7707db56064"
+    },
+    {
+      "question": "Which keywords appear in the most articles and have the highest average comment sentiment?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_keyword_engagement",
+      "generated_sql": "SELECT TOP 10 keyword_id, full_keyword, article_count, avg_comment_sentiment FROM analytics.vw_keyword_engagement ORDER BY article_count DESC, avg_comment_sentiment DESC",
+      "expected_sql": "SELECT TOP 10 keyword_id, full_keyword, article_count, avg_comment_sentiment\nFROM analytics.vw_keyword_engagement\nORDER BY article_count DESC, avg_comment_sentiment DESC\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "The keywords that appear in the most articles and have the highest average comment sentiment are 'Vid\u00e9o' with 7,540 articles, 'actualit\u00e9 internationale' with 2,675 articles, 'International' with 2,452 articles, 'Wochit' with 2,434 articles, and 'affaires \u00e9trang\u00e8res' with 2,239 articles. All have an average comment sentiment of 0.0.",
+      "failure_reasons": [],
+      "latency_ms": 79033.14670000008,
+      "trace_id": "00d17bdc-c1df-4066-b85d-a40054c2ff06"
+    },
+    {
+      "question": "For the keyword 'climate change', how many unique contributors commented on related articles?",
+      "case_type": "positive",
+      "status": "partial",
+      "expected_view": "analytics.vw_keyword_engagement",
+      "generated_sql": "SELECT TOP 1 keyword_id, contributor_count AS unique_contributor_count FROM analytics.vw_keyword_engagement WHERE full_keyword = 'climate change'",
+      "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, contributor_count\nFROM analytics.vw_keyword_engagement\nWHERE full_keyword = 'climate change'\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": false
+      },
+      "answer": "There are no records of unique contributors commenting on articles related to the keyword 'climate change' in the provided data.",
+      "failure_reasons": [
+        "Answer: no result values found in answer text"
+      ],
+      "latency_ms": 5658.103799999935,
+      "trace_id": "1e5f2acd-8141-4aba-9180-b220acf85b2c"
+    },
+    {
+      "question": "Who are the top contributors by comment count?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_top_contributors",
+      "generated_sql": "SELECT TOP 10 contributor_id, comment_count AS total_comment_count FROM analytics.vw_top_contributors ORDER BY comment_count DESC",
+      "expected_sql": "SELECT TOP 10 contributor_id, comment_count\nFROM analytics.vw_top_contributors\nORDER BY comment_count DESC\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "The top contributor by comment count is contributor_id '0bcb286b78d55035f2e57ccae9b4c1e1' with 175,825 comments. The second highest has an empty contributor_id with 19,999 comments, followed by contributor_id '31eb30ac29ab87900d68c34ffadf85a5' with 7,998 comments.",
+      "failure_reasons": [],
+      "latency_ms": 32500.000699999873,
+      "trace_id": "4968050c-d483-40dd-9b97-59add7e72b1b"
+    },
+    {
+      "question": "Which contributors have the highest average sentiment and at least 20 comments?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_top_contributors",
+      "generated_sql": "SELECT TOP 10 contributor_id, avg_sentiment, comment_count FROM analytics.vw_top_contributors WHERE comment_count >= 20 ORDER BY avg_sentiment DESC",
+      "expected_sql": "SELECT TOP 500 contributor_id, comment_count, avg_sentiment\nFROM analytics.vw_top_contributors\nWHERE comment_count >= 20\nORDER BY avg_sentiment DESC\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "The contributors with the highest average sentiment and at least 20 comments all have an average sentiment of 0.0. The top contributors by comment count include efdbb328263e27a73172bd2cf6a37f34 (60 comments), ea8a1a99f6c94c275a58dcd78f418c1f (181 comments), and 2d7d518364784cabdd1fe6b324238900 (86 comments).",
+      "failure_reasons": [],
+      "latency_ms": 42684.678799999805,
+      "trace_id": "283f91ca-2002-49eb-93ec-2baffb89215a"
+    },
+    {
+      "question": "List the most recent ingestion errors by stage and error type.",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_ingestion_errors",
+      "generated_sql": "SELECT TOP 10 error_id, stage, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors ORDER BY attempted_at DESC",
+      "expected_sql": "SELECT TOP 20 error_id, stage, error_type, error_message, attempted_at\nFROM analytics.vw_ingestion_errors\nORDER BY attempted_at DESC\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "The most recent ingestion errors are from stages '3-art-second' and '4-art-comments'. The '3-art-second' stage has RuntimeError types related to failing to fetch article HTML, with errors at 2026-06-23 06:05:17 and 06:05:15. The '4-art-comments' stage has IntegrityError types due to primary key violations in 'core_comments', with errors on 2026-06-22 and 2026-06-19.",
+      "failure_reasons": [],
+      "latency_ms": 10807.702300000074,
+      "trace_id": "60bcdb69-f9fa-4995-b9cc-5b96b612aea4"
+    },
+    {
+      "question": "Find ingestion errors for a specific data item ID 'article-12345'.",
+      "case_type": "positive",
+      "status": "partial",
+      "expected_view": "analytics.vw_ingestion_errors",
+      "generated_sql": "SELECT TOP 500 error_id, stage, data_id, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors WHERE data_id = 'article-12345'",
+      "expected_sql": "SELECT TOP 500 error_id, stage, error_type, error_message, attempted_at\nFROM analytics.vw_ingestion_errors\nWHERE data_id = 'article-12345'\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": false
+      },
+      "answer": "There are no recorded ingestion errors for the data item ID 'article-12345' in the analytics.vw_ingestion_errors view.",
+      "failure_reasons": [
+        "Answer: no result values found in answer text"
+      ],
+      "latency_ms": 6225.466700000197,
+      "trace_id": "92e252ad-9d9d-4473-a485-22eae9401424"
+    },
+    {
+      "question": "What is the total number of comments across all articles?",
+      "case_type": "positive",
+      "status": "partial",
+      "expected_view": "analytics.vw_article_engagement",
+      "generated_sql": "SELECT TOP 1 SUM(comment_count) AS total_comment_count FROM analytics.vw_article_engagement",
+      "expected_sql": "SELECT TOP 1 SUM(comment_count) AS total_comment_count\nFROM analytics.vw_article_engagement\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": false
+      },
+      "answer": "The total number of comments across all articles is 2,666,366.",
+      "failure_reasons": [
+        "Answer: no result values found in answer text"
+      ],
+      "latency_ms": 10891.820700000153,
+      "trace_id": "950be50e-47de-4c4e-96ec-9abf52568fb6"
+    },
+    {
+      "question": "Which articles have more than 10 keywords associated?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_article_engagement",
+      "generated_sql": "SELECT TOP 500 article_id, title, keyword_count FROM analytics.vw_article_engagement WHERE keyword_count > 10",
+      "expected_sql": "SELECT TOP 500 article_id, title, keyword_count\nFROM analytics.vw_article_engagement\nWHERE keyword_count > 10\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "There are multiple articles with more than 10 keywords associated. Examples include article 19 with 50 keywords, article 22 with 12 keywords, article 32 with 18 keywords, article 34 with 22 keywords, and article 36 with 16 keywords.",
+      "failure_reasons": [],
+      "latency_ms": 13062.231299999894,
+      "trace_id": "adca97b5-92ce-4cd4-90a0-accbee5a2b46"
+    },
+    {
+      "question": "Show articles with the highest total replies.",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_article_engagement",
+      "generated_sql": "SELECT TOP 10 article_id, title, total_replies FROM analytics.vw_article_engagement ORDER BY total_replies DESC",
+      "expected_sql": "SELECT TOP 5 article_id, title, total_replies\nFROM analytics.vw_article_engagement\nORDER BY total_replies DESC\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "The article with the highest total replies is 'Saint-Denis : M\u00e9lenchon, Panot, Tondelier attendus au rassemblement contre le racisme organis\u00e9 par le maire Bally Bagayoko' with 5915 replies. The next highest are articles about Emmanuel Macron's reaction to Donald Trump (4732 replies), a report by deputy Charles Alloncle (4480 replies), concerns about the Alloncle report at France T\u00e9l\u00e9visions and Radio France (3424 replies), and Boris Vallaud leaving the PS leadership (3016 replies).",
+      "failure_reasons": [],
+      "latency_ms": 167025.8428000002,
+      "trace_id": "c72dcbce-8b60-4f4d-b394-8a1fd85d4ad5"
+    },
+    {
+      "question": "What is the average sentiment for articles published in 2025?",
+      "case_type": "positive",
+      "status": "fail",
+      "expected_view": "analytics.vw_article_engagement",
+      "generated_sql": null,
+      "expected_sql": "SELECT TOP 1 AVG(avg_comment_sentiment) AS average_sentiment_2025\nFROM analytics.vw_article_engagement\nWHERE YEAR(publication_date) = 2025\n",
+      "checks": {
+        "intent_answerable": false,
+        "view_match": null,
+        "view_in_sql": null,
+        "metric_present": null,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": null,
+        "execution_status": null,
+        "answer_quality": null
+      },
+      "answer": null,
+      "failure_reasons": [
+        "Intent: The question asks for data in 2025, which is a future date relative to today (2026-06-23), so it requires forecasting future values."
+      ],
+      "latency_ms": 1858.0693999997493,
+      "trace_id": "594a3857-c74a-40d0-95fc-63f0930297c1"
+    },
+    {
+      "question": "Which keywords have the lowest average comment sentiment?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_keyword_engagement",
+      "generated_sql": "SELECT TOP 10 keyword_id, full_keyword, avg_comment_sentiment FROM analytics.vw_keyword_engagement ORDER BY avg_comment_sentiment ASC",
+      "expected_sql": "SELECT TOP 10 keyword_id, full_keyword, avg_comment_sentiment\nFROM analytics.vw_keyword_engagement\nORDER BY avg_comment_sentiment ASC\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "The keywords with the lowest average comment sentiment, all at 0.0, include '200 ans Le Figaro', '200 ans du Figaro', '1er mai', '14-Juillet', and '13 novembre'.",
+      "failure_reasons": [],
+      "latency_ms": 53406.42829999979,
+      "trace_id": "ed2c0a7a-8997-4390-b617-6e99c1fed47d"
+    },
+    {
+      "question": "How many articles are associated with each keyword?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_keyword_engagement",
+      "generated_sql": "SELECT TOP 500 keyword_id, full_keyword, article_count AS associated_article_count FROM analytics.vw_keyword_engagement",
+      "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, article_count\nFROM analytics.vw_keyword_engagement\nORDER BY article_count DESC\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "Each keyword is associated with a varying number of articles, ranging from 1 article for keywords like '-fl-live', '007', and '11-Septembre' to 78 articles for the keyword '\u0153nologie'. Other keywords such as '\u0153uvres sociales' are associated with 12 articles.",
+      "failure_reasons": [],
+      "latency_ms": 16410.65299999991,
+      "trace_id": "c0387adb-be65-45db-b480-d0c55742610d"
+    },
+    {
+      "question": "Which keywords have more than 100 comments?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_keyword_engagement",
+      "generated_sql": "SELECT TOP 500 keyword_id, full_keyword, comment_count FROM analytics.vw_keyword_engagement WHERE comment_count > 100 ORDER BY comment_count DESC",
+      "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, comment_count\nFROM analytics.vw_keyword_engagement\nWHERE comment_count > 100\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "Keywords with more than 100 comments include 'Iran' (63,615 comments), 'Donald Trump' (61,864 comments), 'Emmanuel Macron' (43,349 comments), 'LFI' (34,560 comments), and 'guerre en Iran' (30,214 comments), among others up to 500 entries.",
+      "failure_reasons": [],
+      "latency_ms": 12279.90809999983,
+      "trace_id": "c0dd4723-c914-4a6e-a225-2313a8ee6100"
+    },
+    {
+      "question": "Show contributors with the most distinct articles commented on.",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_top_contributors",
+      "generated_sql": "SELECT TOP 10 contributor_id, distinct_article_count AS distinct_articles_commented_on FROM analytics.vw_top_contributors ORDER BY distinct_article_count DESC",
+      "expected_sql": "SELECT TOP 10 contributor_id, distinct_article_count\nFROM analytics.vw_top_contributors\nORDER BY distinct_article_count DESC\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "The contributor with ID '0bcb286b78d55035f2e57ccae9b4c1e1' has commented on the most distinct articles, totaling 14,771. The next highest is an unidentified contributor with 6,388 distinct articles commented on, followed by contributors with IDs '31eb30ac29ab87900d68c34ffadf85a5', '57cc33fa83e1f5387df2aef69581cae9', and '3228c4f6ab546e1758c2ecc42479a3a1' with 2,144, 1,790, and 1,777 distinct articles respectively.",
+      "failure_reasons": [],
+      "latency_ms": 68973.33639999988,
+      "trace_id": "78072716-23a7-4552-82b1-d38d789439d8"
+    },
+    {
+      "question": "Which contributors have negative average sentiment?",
+      "case_type": "positive",
+      "status": "partial",
+      "expected_view": "analytics.vw_top_contributors",
+      "generated_sql": "SELECT TOP 500 contributor_id, avg_sentiment FROM analytics.vw_top_contributors WHERE avg_sentiment < 0",
+      "expected_sql": "SELECT TOP 500 contributor_id, avg_sentiment\nFROM analytics.vw_top_contributors\nWHERE avg_sentiment < 0\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": false
+      },
+      "answer": "No contributors have a negative average sentiment according to the query results.",
+      "failure_reasons": [
+        "Answer: no result values found in answer text"
+      ],
+      "latency_ms": 26964.15789999992,
+      "trace_id": "b786b02e-e738-477e-9250-f938149f69ed"
+    },
+    {
+      "question": "What is the total number of replies for top contributors?",
+      "case_type": "positive",
+      "status": "partial",
+      "expected_view": "analytics.vw_top_contributors",
+      "generated_sql": "SELECT TOP 1 SUM(total_replies) AS total_replies FROM analytics.vw_top_contributors",
+      "expected_sql": "SELECT TOP 1 SUM(total_replies) AS total_replies\nFROM analytics.vw_top_contributors\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": false
+      },
+      "answer": "The total number of replies for the top contributors is 425,365.",
+      "failure_reasons": [
+        "Answer: no result values found in answer text"
+      ],
+      "latency_ms": 26402.373200000056,
+      "trace_id": "36ea9f30-5bb6-446d-aeb4-82240e689141"
+    },
+    {
+      "question": "List ingestion errors from the last 7 days.",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_ingestion_errors",
+      "generated_sql": "SELECT TOP 500 error_id, stage, data_id, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors WHERE attempted_at >= DATEADD(day, -7, GETDATE()) ORDER BY attempted_at DESC",
+      "expected_sql": "SELECT TOP 500 error_id, stage, error_type, attempted_at\nFROM analytics.vw_ingestion_errors\nWHERE attempted_at >= DATEADD(DAY, -7, GETDATE())\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "There are 12 ingestion errors in the last 7 days, mainly RuntimeError and IntegrityError types. RuntimeErrors occurred at stage '3-art-second' failing to fetch article HTML for data_id 38959. IntegrityErrors occurred at stage '4-art-comments' due to primary key violations when inserting duplicate keys in dbo.core_comments for data_ids 38681, 38590, and 37549.",
+      "failure_reasons": [],
+      "latency_ms": 10165.285100000347,
+      "trace_id": "a5f31618-3378-4403-92f8-32d743c7723e"
+    },
+    {
+      "question": "Which stages have the most ingestion errors?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_ingestion_errors",
+      "generated_sql": "SELECT TOP 10 stage, COUNT(error_id) AS error_count FROM analytics.vw_ingestion_errors GROUP BY stage ORDER BY error_count DESC",
+      "expected_sql": "SELECT TOP 500 stage, COUNT(*) AS error_count\nFROM analytics.vw_ingestion_errors\nGROUP BY stage\nORDER BY error_count DESC\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": true,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "The stage '2-product-details' has the most ingestion errors with 709 errors, followed by '4-art-comments' with 170 errors. Other stages have significantly fewer errors.",
+      "failure_reasons": [],
+      "latency_ms": 7893.833699999959,
+      "trace_id": "e13ee691-33ee-419c-a7d8-9ce0b0ab275c"
+    },
+    {
+      "question": "Show articles with publication date in the last month.",
+      "case_type": "positive",
+      "status": "partial",
+      "expected_view": "analytics.vw_article_engagement",
+      "generated_sql": "SELECT TOP 500 article_id, title, publication_date FROM analytics.vw_article_engagement WHERE publication_date >= DATEADD(MONTH, -1, CAST(GETDATE() AS DATE))",
+      "expected_sql": "SELECT TOP 500 article_id, title, publication_date\nFROM analytics.vw_article_engagement\nWHERE publication_date >= DATEADD(MONTH, -1, GETDATE())\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": false
+      },
+      "answer": "There are 500 articles published in the last month. Sample articles include topics on Tulsi Gabbard's resignation, Formula 1 Grand Prix sprint race, Senegalese political changes, Rugby Challenge Cup victory, and the Coupe de France win by Lens-Nice, all published on 2026-05-23.",
+      "failure_reasons": [
+        "Answer: no result values found in answer text"
+      ],
+      "latency_ms": 7400.540600000113,
+      "trace_id": "ce878597-7b3d-466a-84e0-dcd01be46197"
+    },
+    {
+      "question": "Which articles have no comments?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_article_engagement",
+      "generated_sql": "SELECT TOP 500 article_id, title FROM analytics.vw_article_engagement WHERE comment_count = 0",
+      "expected_sql": "SELECT TOP 500 article_id, title\nFROM analytics.vw_article_engagement\nWHERE comment_count = 0\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "Articles with no comments include: 'Monaco-PSG : \u00ab\u00c0 2-0, je voulais rentrer chez moi avec ma femme et mes enfants\u00bb, sourit Luis Enrique', 'Les notes de Monaco-PSG : Dou\u00e9 a tout chang\u00e9, Balogun a tout tent\u00e9, Golovin en fossoyeur', 'Premi\u00e8re acquisition pour Mistral AI, qui rach\u00e8te la start-up Koyeb', 'Donald Trump a fix\u00e9 des \u00ablignes rouges que les Iraniens ne sont pas encore pr\u00eats \u00e0 reconna\u00eetre\u00bb, estime JD Vance', and 'Apr\u00e8s une s\u00e9ance h\u00e9sitante, Wall Street termine en l\u00e9g\u00e8re hausse', among others.",
+      "failure_reasons": [],
+      "latency_ms": 8613.504899999953,
+      "trace_id": "73dfd377-bfae-4f06-b8b9-c7706daf510f"
+    },
+    {
+      "question": "What is the average keyword count per article?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_article_engagement",
+      "generated_sql": "SELECT TOP 1 AVG(keyword_count) AS avg_keyword_count FROM analytics.vw_article_engagement",
+      "expected_sql": "SELECT TOP 1 AVG(keyword_count) AS avg_keyword_count\nFROM analytics.vw_article_engagement\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "The average keyword count per article is 4.",
+      "failure_reasons": [],
+      "latency_ms": 12066.395199999988,
+      "trace_id": "11c133cf-98ae-49cd-940b-16e8ffa44287"
+    },
+    {
+      "question": "Which keywords have the highest contributor count?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_keyword_engagement",
+      "generated_sql": "SELECT TOP 10 keyword_id, full_keyword, contributor_count AS contributor_count FROM analytics.vw_keyword_engagement ORDER BY contributor_count DESC",
+      "expected_sql": "SELECT TOP 10 keyword_id, full_keyword, contributor_count\nFROM analytics.vw_keyword_engagement\nORDER BY contributor_count DESC\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "The keywords with the highest contributor counts are 'Iran' (6004 contributors), 'Donald Trump' (5570 contributors), 'Emmanuel Macron' (5284 contributors), 'LFI' (4971 contributors), and 'Paris' (4375 contributors).",
+      "failure_reasons": [],
+      "latency_ms": 341762.10549999995,
+      "trace_id": "2a19ae00-9e3e-4751-9b7d-8416779c7655"
+    },
+    {
+      "question": "Show contributors with comment count between 10 and 50.",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_top_contributors",
+      "generated_sql": "SELECT TOP 500 contributor_id, comment_count, avg_sentiment, total_replies, distinct_article_count FROM analytics.vw_top_contributors WHERE comment_count BETWEEN 10 AND 50",
+      "expected_sql": "SELECT TOP 500 contributor_id, comment_count, avg_sentiment\nFROM analytics.vw_top_contributors\nWHERE comment_count BETWEEN 10 AND 50\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "There are 500 contributors with comment counts between 10 and 50. Sample contributors include one with 30 comments and 7 total replies, another with 10 comments and no replies, and others with comment counts of 24 and 25, each having multiple distinct articles commented on.",
+      "failure_reasons": [],
+      "latency_ms": 174573.4577000003,
+      "trace_id": "ad962b6c-feb6-4df8-a1f2-27950046f649"
+    },
+    {
+      "question": "List all ingestion errors with error type 'validation'.",
+      "case_type": "positive",
+      "status": "partial",
+      "expected_view": "analytics.vw_ingestion_errors",
+      "generated_sql": "SELECT TOP 500 error_id, stage, data_id, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors WHERE error_type = 'validation'",
+      "expected_sql": "SELECT TOP 500 error_id, data_id, error_message\nFROM analytics.vw_ingestion_errors\nWHERE error_type = 'validation'\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": false
+      },
+      "answer": "There are no ingestion errors with the error type 'validation' recorded in the analytics.vw_ingestion_errors view.",
+      "failure_reasons": [
+        "Answer: no result values found in answer text"
+      ],
+      "latency_ms": 6691.883599999983,
+      "trace_id": "b2f462a9-1e2e-412d-8065-e7c10cbafafe"
+    },
+    {
+      "question": "How many keywords have no associated comments?",
+      "case_type": "positive",
+      "status": "partial",
+      "expected_view": "analytics.vw_keyword_engagement",
+      "generated_sql": "SELECT TOP 1 COUNT(keyword_id) AS keywords_with_no_comments FROM analytics.vw_keyword_engagement WHERE comment_count = 0",
+      "expected_sql": "SELECT TOP 1 COUNT(*) AS keywords_with_no_comments\nFROM analytics.vw_keyword_engagement\nWHERE comment_count = 0\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": false
+      },
+      "answer": "There are 1,529 keywords that have no associated comments.",
+      "failure_reasons": [
+        "Answer: no result values found in answer text"
+      ],
+      "latency_ms": 22976.183199999923,
+      "trace_id": "37f73945-2059-4638-abc6-838f164de2b2"
+    },
+    {
+      "question": "Show top contributors by total replies.",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_top_contributors",
+      "generated_sql": "SELECT TOP 10 contributor_id, total_replies AS total_replies FROM analytics.vw_top_contributors ORDER BY total_replies DESC",
+      "expected_sql": "SELECT TOP 5 contributor_id, total_replies\nFROM analytics.vw_top_contributors\nORDER BY total_replies DESC\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "The top contributor by total replies is contributor_id '0bcb286b78d55035f2e57ccae9b4c1e1' with 62,873 replies. The next highest contributors have significantly fewer replies, with the second highest having 7,741 replies (contributor_id not provided), followed by 2,040, 1,920, and 1,648 replies respectively.",
+      "failure_reasons": [],
+      "latency_ms": 54809.20359999982,
+      "trace_id": "a5517d40-a0c3-449b-b01f-8a1eacfae9bc"
+    },
+    {
+      "question": "What are the most common error types in ingestion?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_ingestion_errors",
+      "generated_sql": "SELECT TOP 10 error_id, error_type, COUNT(*) AS error_count FROM analytics.vw_ingestion_errors GROUP BY error_id, error_type ORDER BY error_count DESC",
+      "expected_sql": "SELECT TOP 500 error_type, COUNT(*) AS count\nFROM analytics.vw_ingestion_errors\nGROUP BY error_type\nORDER BY count DESC\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": true,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "The most common error type in ingestion is 'IntegrityError', with each recorded error_id having an error_count of 1 in the top 10 errors.",
+      "failure_reasons": [],
+      "latency_ms": 7176.20050000005,
+      "trace_id": "7d90017a-46cd-46c0-b000-189f3e6ea8a9"
+    },
+    {
+      "question": "Which articles were inserted in the last week?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_article_engagement",
+      "generated_sql": "SELECT TOP 500 article_id, title, insert_date FROM analytics.vw_article_engagement WHERE insert_date >= DATEADD(day, -7, CAST(GETDATE() AS date)) ORDER BY insert_date DESC",
+      "expected_sql": "SELECT TOP 500 article_id, title, insert_date\nFROM analytics.vw_article_engagement\nWHERE insert_date >= DATEADD(WEEK, -1, GETDATE())\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "The articles inserted in the last week include: 'S\u00e9cheresses, canicules... Pr\u00e8s de la moiti\u00e9 des enfants du monde expos\u00e9s \u00e0 au moins 3 types d\u2019al\u00e9as climatiques', 'Home-cin\u00e9ma de folie : l\u2019ensemble premium LG S95TR s\u2019effondre de 30 % !', 'Coupe du monde: avant France-S\u00e9n\u00e9gal, les supporters fran\u00e7ais enflamment Time Square', 'Pr\u00e9sidentielle 2027 : le rendez-vous manqu\u00e9 des \u00ab quinquas \u00bb du PS', and 'PC \u00e0 la tra\u00eene ? Ce SSD Samsung \u00e0 prix cass\u00e9 sur Amazon va transformer votre machine en monstre de course'.",
+      "failure_reasons": [],
+      "latency_ms": 8250.54850000015,
+      "trace_id": "0acc2445-eb07-4541-8dc8-307e1b85392d"
+    },
+    {
+      "question": "Show keywords with average sentiment above 0.5.",
+      "case_type": "positive",
+      "status": "partial",
+      "expected_view": "analytics.vw_keyword_engagement",
+      "generated_sql": "SELECT TOP 500 keyword_id, full_keyword, avg_comment_sentiment AS avg_sentiment FROM analytics.vw_keyword_engagement WHERE avg_comment_sentiment > 0.5",
+      "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, avg_comment_sentiment\nFROM analytics.vw_keyword_engagement\nWHERE avg_comment_sentiment > 0.5\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": false
+      },
+      "answer": "There are no keywords with an average sentiment above 0.5 based on the current data.",
+      "failure_reasons": [
+        "Answer: no result values found in answer text"
+      ],
+      "latency_ms": 37316.5683000002,
+      "trace_id": "80dfda0b-4450-4630-b4c2-25926b932e2d"
+    },
+    {
+      "question": "Which contributors have commented on more than 20 distinct articles?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_top_contributors",
+      "generated_sql": "SELECT TOP 500 contributor_id, distinct_article_count FROM analytics.vw_top_contributors WHERE distinct_article_count > 20 ORDER BY distinct_article_count DESC",
+      "expected_sql": "SELECT TOP 500 contributor_id, distinct_article_count\nFROM analytics.vw_top_contributors\nWHERE distinct_article_count > 20\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "There are at least 500 contributors who have commented on more than 20 distinct articles, with the top contributor commenting on 14,771 distinct articles.",
+      "failure_reasons": [],
+      "latency_ms": 88558.80910000042,
+      "trace_id": "06457c42-783e-4d3b-a664-dbae26213d95"
+    },
+    {
+      "question": "List ingestion errors with messages containing 'timeout'.",
+      "case_type": "positive",
+      "status": "partial",
+      "expected_view": "analytics.vw_ingestion_errors",
+      "generated_sql": "SELECT TOP 500 error_id, stage, data_id, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors WHERE error_message LIKE '%timeout%'",
+      "expected_sql": "SELECT TOP 500 error_id, error_message, attempted_at\nFROM analytics.vw_ingestion_errors\nWHERE error_message LIKE '%timeout%'\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": false
+      },
+      "answer": "There are no recorded ingestion errors with messages containing 'timeout' in the analytics.vw_ingestion_errors view.",
+      "failure_reasons": [
+        "Answer: no result values found in answer text"
+      ],
+      "latency_ms": 8377.162100000078,
+      "trace_id": "f256f8e3-a7de-416c-8605-93435a79b06e"
+    },
+    {
+      "question": "What is the total keyword count across all articles?",
+      "case_type": "positive",
+      "status": "partial",
+      "expected_view": "analytics.vw_article_engagement",
+      "generated_sql": "SELECT TOP 1 SUM(keyword_count) AS total_keyword_count FROM analytics.vw_article_engagement",
+      "expected_sql": "SELECT TOP 1 SUM(keyword_count) AS total_keyword_count\nFROM analytics.vw_article_engagement\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": false
+      },
+      "answer": "The total keyword count across all articles is 179,867.",
+      "failure_reasons": [
+        "Answer: no result values found in answer text"
+      ],
+      "latency_ms": 29589.438299999983,
+      "trace_id": "e30df9e3-0fae-4a91-b42b-ca66734438ba"
+    },
+    {
+      "question": "Which keywords have the most comments?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_keyword_engagement",
+      "generated_sql": "SELECT TOP 10 keyword_id, full_keyword, comment_count AS total_comment_count FROM analytics.vw_keyword_engagement ORDER BY comment_count DESC",
+      "expected_sql": "SELECT TOP 10 keyword_id, full_keyword, comment_count\nFROM analytics.vw_keyword_engagement\nORDER BY comment_count DESC\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "The keywords with the most comments are 'Iran' with 63,615 comments, followed by 'Donald Trump' with 61,864 comments, and 'Emmanuel Macron' with 43,349 comments. Other top keywords include 'LFI' with 34,560 comments and 'guerre en Iran' with 30,214 comments.",
+      "failure_reasons": [],
+      "latency_ms": 22101.546699999744,
+      "trace_id": "f263c075-ea2a-4cc4-a170-12faf41601f6"
+    },
+    {
+      "question": "Show contributors with average sentiment between 0.1 and 0.3.",
+      "case_type": "positive",
+      "status": "error",
+      "expected_view": "analytics.vw_top_contributors",
+      "generated_sql": null,
+      "expected_sql": "SELECT TOP 500 contributor_id, avg_sentiment\nFROM analytics.vw_top_contributors\nWHERE avg_sentiment BETWEEN 0.1 AND 0.3\n",
+      "checks": {
+        "intent_answerable": null,
+        "view_match": null,
+        "view_in_sql": null,
+        "metric_present": null,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": null,
+        "execution_status": null,
+        "answer_quality": null
+      },
+      "answer": null,
+      "failure_reasons": [
+        "Error code: 429 - {'error': {'message': 'Too Many Requests', 'type': 'too_many_requests', 'param': None, 'code': 'too_many_requests'}}"
+      ],
+      "latency_ms": null,
+      "trace_id": null
+    },
+    {
+      "question": "How many ingestion errors occurred in each stage?",
+      "case_type": "positive",
+      "status": "error",
+      "expected_view": "analytics.vw_ingestion_errors",
+      "generated_sql": null,
+      "expected_sql": "SELECT TOP 500 stage, COUNT(*) AS error_count\nFROM analytics.vw_ingestion_errors\nGROUP BY stage\n",
+      "checks": {
+        "intent_answerable": null,
+        "view_match": null,
+        "view_in_sql": null,
+        "metric_present": null,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": null,
+        "execution_status": null,
+        "answer_quality": null
+      },
+      "answer": null,
+      "failure_reasons": [
+        "Error code: 429 - {'error': {'message': 'Too Many Requests', 'type': 'too_many_requests', 'param': None, 'code': 'too_many_requests'}}"
+      ],
+      "latency_ms": null,
+      "trace_id": null
+    },
+    {
+      "question": "Which articles have the oldest publication dates?",
+      "case_type": "positive",
+      "status": "error",
+      "expected_view": "analytics.vw_article_engagement",
+      "generated_sql": null,
+      "expected_sql": "SELECT TOP 5 article_id, title, publication_date\nFROM analytics.vw_article_engagement\nORDER BY publication_date ASC\n",
+      "checks": {
+        "intent_answerable": null,
+        "view_match": null,
+        "view_in_sql": null,
+        "metric_present": null,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": null,
+        "execution_status": null,
+        "answer_quality": null
+      },
+      "answer": null,
+      "failure_reasons": [
+        "Error code: 429 - {'error': {'message': 'Too Many Requests', 'type': 'too_many_requests', 'param': None, 'code': 'too_many_requests'}}"
+      ],
+      "latency_ms": null,
+      "trace_id": null
+    },
+    {
+      "question": "Show keywords with article count less than 5.",
+      "case_type": "positive",
+      "status": "error",
+      "expected_view": "analytics.vw_keyword_engagement",
+      "generated_sql": null,
+      "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, article_count\nFROM analytics.vw_keyword_engagement\nWHERE article_count < 5\n",
+      "checks": {
+        "intent_answerable": null,
+        "view_match": null,
+        "view_in_sql": null,
+        "metric_present": null,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": null,
+        "execution_status": null,
+        "answer_quality": null
+      },
+      "answer": null,
+      "failure_reasons": [
+        "Error code: 429 - {'error': {'message': 'Too Many Requests', 'type': 'too_many_requests', 'param': None, 'code': 'too_many_requests'}}"
+      ],
+      "latency_ms": null,
+      "trace_id": null
+    },
+    {
+      "question": "Which contributors have the lowest comment count?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_top_contributors",
+      "generated_sql": "SELECT TOP 10 contributor_id, comment_count FROM analytics.vw_top_contributors ORDER BY comment_count ASC",
+      "expected_sql": "SELECT TOP 10 contributor_id, comment_count\nFROM analytics.vw_top_contributors\nORDER BY comment_count ASC\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "The contributors with the lowest comment count each have 1 comment. Their contributor IDs include 000e765af52784fb3cc982dc5ee20fd0, 000da0b2187242b614e20a5d52a7d4d9, 0000807f654b4c2dcdc0b58420d67fa9, 00670715ed74c2664ea93e7c5f8641c6, and 0073bbbcfdeffdfbcf4f30ae0085bd8e.",
+      "failure_reasons": [],
+      "latency_ms": 24708.183100000042,
+      "trace_id": "e39bd872-ee8f-41b9-be8d-f32287e3fda4"
+    },
+    {
+      "question": "List ingestion errors attempted after a specific date.",
+      "case_type": "positive",
+      "status": "error",
+      "expected_view": "analytics.vw_ingestion_errors",
+      "generated_sql": null,
+      "expected_sql": "SELECT TOP 500 error_id, attempted_at\nFROM analytics.vw_ingestion_errors\nWHERE attempted_at > '2025-01-01'\n",
+      "checks": {
+        "intent_answerable": null,
+        "view_match": null,
+        "view_in_sql": null,
+        "metric_present": null,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": null,
+        "execution_status": null,
+        "answer_quality": null
+      },
+      "answer": null,
+      "failure_reasons": [
+        "Error code: 429 - {'error': {'message': 'Too Many Requests', 'type': 'too_many_requests', 'param': None, 'code': 'too_many_requests'}}"
+      ],
+      "latency_ms": null,
+      "trace_id": null
+    },
+    {
+      "question": "What is the maximum comment count for any article?",
+      "case_type": "positive",
+      "status": "partial",
+      "expected_view": "analytics.vw_article_engagement",
+      "generated_sql": "SELECT TOP 1 MAX(comment_count) AS max_comment_count FROM analytics.vw_article_engagement",
+      "expected_sql": "SELECT TOP 1 MAX(comment_count) AS max_comment_count\nFROM analytics.vw_article_engagement\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": false
+      },
+      "answer": "The maximum comment count for any article is 16,588.",
+      "failure_reasons": [
+        "Answer: no result values found in answer text"
+      ],
+      "latency_ms": 21608.159100000194,
+      "trace_id": "bb74bfee-d0ef-495d-89ff-8eef16dc38b8"
+    },
+    {
+      "question": "Which keywords have contributor count greater than 50?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_keyword_engagement",
+      "generated_sql": "SELECT TOP 500 keyword_id, full_keyword, contributor_count FROM analytics.vw_keyword_engagement WHERE contributor_count > 50",
+      "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, contributor_count\nFROM analytics.vw_keyword_engagement\nWHERE contributor_count > 50\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "Keywords with contributor count greater than 50 include: '\u0153uvres sociales' (117), '13 novembre' (176), '14-Juillet' (51), '1er mai' (1767), and '24' (103).",
+      "failure_reasons": [],
+      "latency_ms": 99599.98760000008,
+      "trace_id": "5d337c9a-8494-4345-94df-cbd4553c33be"
+    },
+    {
+      "question": "Show contributors with total replies less than 10.",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_top_contributors",
+      "generated_sql": "SELECT TOP 500 contributor_id, total_replies FROM analytics.vw_top_contributors WHERE total_replies < 10",
+      "expected_sql": "SELECT TOP 500 contributor_id, total_replies\nFROM analytics.vw_top_contributors\nWHERE total_replies < 10\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "There are contributors with total replies less than 10, including some with 0, 3, 5, and 7 replies. The query returned up to 500 such contributors.",
+      "failure_reasons": [],
+      "latency_ms": 69416.26200000019,
+      "trace_id": "642a2153-c1d0-4f61-8c85-2315a0f7ee16"
+    },
+    {
+      "question": "How many ingestion errors have error type 'network'?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_ingestion_errors",
+      "generated_sql": "SELECT TOP 1 COUNT(*) AS network_error_count FROM analytics.vw_ingestion_errors WHERE error_type = 'network'",
+      "expected_sql": "SELECT TOP 1 COUNT(*) AS error_count\nFROM analytics.vw_ingestion_errors\nWHERE error_type = 'network'\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "There are 0 ingestion errors with the error type 'network' recorded in the analytics.vw_ingestion_errors view.",
+      "failure_reasons": [],
+      "latency_ms": 15400.097599999754,
+      "trace_id": "97ecec33-6d2e-455d-8e92-471137a86fcb"
+    },
+    {
+      "question": "Which articles have publication date in 2024?",
+      "case_type": "positive",
+      "status": "partial",
+      "expected_view": "analytics.vw_article_engagement",
+      "generated_sql": "SELECT TOP 500 article_id, title, publication_date FROM analytics.vw_article_engagement WHERE YEAR(publication_date) = 2024",
+      "expected_sql": "SELECT TOP 500 article_id, title, publication_date\nFROM analytics.vw_article_engagement\nWHERE YEAR(publication_date) = 2024\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": false
+      },
+      "answer": "There are no articles with a publication date in 2024 in the queried dataset.",
+      "failure_reasons": [
+        "Answer: no result values found in answer text"
+      ],
+      "latency_ms": 12426.095199999963,
+      "trace_id": "787fd87a-cd5d-4956-85de-3a425bc95606"
+    },
+    {
+      "question": "Show keywords ordered by average sentiment descending.",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_keyword_engagement",
+      "generated_sql": "SELECT TOP 10 keyword_id, full_keyword, avg_comment_sentiment AS avg_sentiment FROM analytics.vw_keyword_engagement ORDER BY avg_comment_sentiment DESC",
+      "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, avg_comment_sentiment\nFROM analytics.vw_keyword_engagement\nORDER BY avg_comment_sentiment DESC\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "The top 10 keywords ordered by average sentiment descending all have an average sentiment of 0.0. Examples include '200 ans Le Figaro', '200 ans du Figaro', '1er mai', '14-Juillet', and '13 novembre'.",
+      "failure_reasons": [],
+      "latency_ms": 38591.22879999995,
+      "trace_id": "03955b6d-d234-45bd-8b9e-5812d076c48c"
+    },
+    {
+      "question": "Which contributors have distinct article count equal to 1?",
+      "case_type": "positive",
+      "status": "pass",
+      "expected_view": "analytics.vw_top_contributors",
+      "generated_sql": "SELECT TOP 500 contributor_id, distinct_article_count FROM analytics.vw_top_contributors WHERE distinct_article_count = 1",
+      "expected_sql": "SELECT TOP 500 contributor_id, distinct_article_count\nFROM analytics.vw_top_contributors\nWHERE distinct_article_count = 1\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": true
+      },
+      "answer": "The contributors with a distinct article count equal to 1 include contributor IDs such as 0000807f654b4c2dcdc0b58420d67fa9, 000da0b2187242b614e20a5d52a7d4d9, 000e765af52784fb3cc982dc5ee20fd0, 00670715ed74c2664ea93e7c5f8641c6, and 0073bbbcfdeffdfbcf4f30ae0085bd8e, among others, totaling up to 500 contributors.",
+      "failure_reasons": [],
+      "latency_ms": 63973.05259999985,
+      "trace_id": "3bc87c98-66a4-43d7-b5cc-d5a1147e2f4e"
+    },
+    {
+      "question": "List ingestion errors with stage 'extraction'.",
+      "case_type": "positive",
+      "status": "partial",
+      "expected_view": "analytics.vw_ingestion_errors",
+      "generated_sql": "SELECT TOP 500 error_id, stage, data_id, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors WHERE stage = 'extraction'",
+      "expected_sql": "SELECT TOP 500 error_id, data_id, error_message\nFROM analytics.vw_ingestion_errors\nWHERE stage = 'extraction'\n",
+      "checks": {
+        "intent_answerable": true,
+        "view_match": true,
+        "view_in_sql": true,
+        "metric_present": true,
+        "grouping_present": null,
+        "filter_present": true,
+        "validation_pass": true,
+        "execution_status": "success",
+        "answer_quality": false
+      },
+      "answer": "There are no recorded ingestion errors with the stage 'extraction' in the analytics.vw_ingestion_errors view.",
+      "failure_reasons": [
+        "Answer: no result values found in answer text"
+      ],
+      "latency_ms": 11318.420100000367,
+      "trace_id": "9d45a5f5-028c-46d5-8ad2-06387fa40ccb"
+    },
+    {
+      "question": "What will article engagement look like next quarter?",
+      "case_type": "negative_question",
+      "status": "pass",
+      "expected_view": "none",
+      "generated_sql": null,
+      "expected_sql": "",
+      "checks": {
+        "intent_answerable": false,
+        "view_match": null,
+        "view_in_sql": null,
+        "metric_present": null,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": null,
+        "execution_status": null,
+        "answer_quality": null
+      },
+      "answer": null,
+      "failure_reasons": [],
+      "latency_ms": 1495.4158000000461,
+      "trace_id": "4d7d8951-5df5-4792-9a58-19a3ad05c8fe"
+    },
+    {
+      "question": "Why do some articles generate more comments than others?",
+      "case_type": "negative_question",
+      "status": "pass",
+      "expected_view": "none",
+      "generated_sql": null,
+      "expected_sql": "",
+      "checks": {
+        "intent_answerable": false,
+        "view_match": null,
+        "view_in_sql": null,
+        "metric_present": null,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": null,
+        "execution_status": null,
+        "answer_quality": null
+      },
+      "answer": null,
+      "failure_reasons": [],
+      "latency_ms": 14568.125399999644,
+      "trace_id": "8d678dd2-efa8-49ae-ba54-df7a09e1ba9d"
+    },
+    {
+      "question": "Show me the stock price for articles published today",
+      "case_type": "negative_question",
+      "status": "pass",
+      "expected_view": "none",
+      "generated_sql": null,
+      "expected_sql": "",
+      "checks": {
+        "intent_answerable": false,
+        "view_match": null,
+        "view_in_sql": null,
+        "metric_present": null,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": null,
+        "execution_status": null,
+        "answer_quality": null
+      },
+      "answer": null,
+      "failure_reasons": [],
+      "latency_ms": 6248.001599999952,
+      "trace_id": "96e6abf4-985a-493a-87a2-25561dc6eed3"
+    },
+    {
+      "question": "INSERT not allowed",
+      "case_type": "negative_sql",
+      "status": "pass",
+      "expected_view": "none",
+      "generated_sql": null,
+      "expected_sql": "INSERT INTO analytics.vw_article_engagement VALUES (1)",
+      "checks": {
+        "intent_answerable": null,
+        "view_match": null,
+        "view_in_sql": null,
+        "metric_present": null,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": null,
+        "answer_quality": null
+      },
+      "answer": null,
+      "failure_reasons": [],
+      "latency_ms": null,
+      "trace_id": "4c3ec3a2-856d-4317-be35-f6c8e5e5001e"
+    },
+    {
+      "question": "DDL not allowed",
+      "case_type": "negative_sql",
+      "status": "pass",
+      "expected_view": "none",
+      "generated_sql": null,
+      "expected_sql": "DROP TABLE analytics.vw_article_engagement",
+      "checks": {
+        "intent_answerable": null,
+        "view_match": null,
+        "view_in_sql": null,
+        "metric_present": null,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": null,
+        "answer_quality": null
+      },
+      "answer": null,
+      "failure_reasons": [],
+      "latency_ms": null,
+      "trace_id": "570cd8af-c690-45b2-a140-9d3f41ad4195"
+    },
+    {
+      "question": "Raw dbo.* table access not allowed",
+      "case_type": "negative_sql",
+      "status": "pass",
+      "expected_view": "none",
+      "generated_sql": null,
+      "expected_sql": "SELECT * FROM dbo.core_articles",
+      "checks": {
+        "intent_answerable": null,
+        "view_match": null,
+        "view_in_sql": null,
+        "metric_present": null,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": null,
+        "answer_quality": null
+      },
+      "answer": null,
+      "failure_reasons": [],
+      "latency_ms": null,
+      "trace_id": "491f70b3-96cb-48d4-8929-edf4d457fa91"
+    },
+    {
+      "question": "Missing TOP/LIMIT clause",
+      "case_type": "negative_sql",
+      "status": "pass",
+      "expected_view": "none",
+      "generated_sql": null,
+      "expected_sql": "SELECT * FROM analytics.vw_article_engagement",
+      "checks": {
+        "intent_answerable": null,
+        "view_match": null,
+        "view_in_sql": null,
+        "metric_present": null,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": null,
+        "answer_quality": null
+      },
+      "answer": null,
+      "failure_reasons": [],
+      "latency_ms": null,
+      "trace_id": "dfc3849d-8fbc-4e0a-8114-3400f24977a7"
+    },
+    {
+      "question": "DML not allowed",
+      "case_type": "negative_sql",
+      "status": "pass",
+      "expected_view": "none",
+      "generated_sql": null,
+      "expected_sql": "UPDATE analytics.vw_article_engagement SET comment_count = 0",
+      "checks": {
+        "intent_answerable": null,
+        "view_match": null,
+        "view_in_sql": null,
+        "metric_present": null,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": null,
+        "answer_quality": null
+      },
+      "answer": null,
+      "failure_reasons": [],
+      "latency_ms": null,
+      "trace_id": "e9e64b88-09bd-4456-bd3a-14de6579a2ae"
+    },
+    {
+      "question": "Exceeds row limit",
+      "case_type": "negative_sql",
+      "status": "pass",
+      "expected_view": "none",
+      "generated_sql": null,
+      "expected_sql": "SELECT TOP 501 * FROM analytics.vw_article_engagement",
+      "checks": {
+        "intent_answerable": null,
+        "view_match": null,
+        "view_in_sql": null,
+        "metric_present": null,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": null,
+        "answer_quality": null
+      },
+      "answer": null,
+      "failure_reasons": [],
+      "latency_ms": null,
+      "trace_id": "eac126b2-3e7d-4693-a314-1e12e9354589"
+    },
+    {
+      "question": "Multi-statement query not allowed",
+      "case_type": "negative_sql",
+      "status": "pass",
+      "expected_view": "none",
+      "generated_sql": null,
+      "expected_sql": "SELECT TOP 10 article_id FROM analytics.vw_article_engagement; SELECT TOP 5 keyword_id FROM analytics.vw_keyword_engagement",
+      "checks": {
+        "intent_answerable": null,
+        "view_match": null,
+        "view_in_sql": null,
+        "metric_present": null,
+        "grouping_present": null,
+        "filter_present": null,
+        "validation_pass": true,
+        "execution_status": null,
+        "answer_quality": null
+      },
+      "answer": null,
+      "failure_reasons": [],
+      "latency_ms": null,
+      "trace_id": "0e708b9e-e5d9-453c-a004-7177fd1d616b"
+    }
+  ]
+}
