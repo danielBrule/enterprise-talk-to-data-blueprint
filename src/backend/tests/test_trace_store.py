@@ -113,6 +113,28 @@ def test_pii_filter_enabled_other_fields_are_unchanged():
     assert result["row_count"] == 5
 
 
+# ── pipeline_env stamping ─────────────────────────────────────────────────────
+
+def test_pipeline_env_is_stamped_on_every_record(tmp_path, monkeypatch):
+    import backend.app.core.trace_store as store_module
+    monkeypatch.setattr(store_module.settings, "pipeline_env", "eval")
+    store = TraceStore(path=str(tmp_path / "traces.jsonl"), anonymize=False)
+    store.append(_trace())
+
+    record = json.loads((tmp_path / "traces.jsonl").read_text(encoding="utf-8").strip())
+    assert record["pipeline_env"] == "eval"
+
+
+def test_pipeline_env_default_is_api(tmp_path, monkeypatch):
+    import backend.app.core.trace_store as store_module
+    monkeypatch.setattr(store_module.settings, "pipeline_env", "api")
+    store = TraceStore(path=str(tmp_path / "traces.jsonl"), anonymize=False)
+    store.append(_trace())
+
+    record = json.loads((tmp_path / "traces.jsonl").read_text(encoding="utf-8").strip())
+    assert record["pipeline_env"] == "api"
+
+
 # ── TraceStore + PiiFilter integration ───────────────────────────────────────
 
 def test_trace_store_anonymizes_question_when_enabled(tmp_path):

@@ -52,6 +52,11 @@ class TraceStore:
         """
         try:
             raw = json.loads(trace.model_dump_json())
+            # Stamp the execution environment before filtering so eval runs and
+            # manual dev calls can be filtered out of production analytics.
+            # This is a store-level concern, not a TraceRecord concern — the
+            # pipeline itself does not need to know where its output will land.
+            raw["pipeline_env"] = settings.pipeline_env
             filtered = self._filter.apply(raw)
             self._write(json.dumps(filtered))
         except Exception as exc:

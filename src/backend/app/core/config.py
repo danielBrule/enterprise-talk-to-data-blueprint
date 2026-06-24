@@ -81,6 +81,10 @@ class Settings:
         # Default false: this system handles internal analytics queries with no personal data.
         # Enable in domains where questions could carry PII (HR, finance, customer data).
         self.trace_anonymize: bool = os.getenv("TRACE_ANONYMIZE", "false").lower() == "true"
+        # Stamped on every JSONL record so eval runs and manual dev calls can be
+        # filtered out of production analytics without changing TraceRecord itself.
+        # Values: "api" (live endpoint), "eval" (golden runner), "local" (dev testing).
+        self.pipeline_env: str = os.getenv("PIPELINE_ENV", "api")
 
     def get_azure_openai_deployment(self, task: str | None = None) -> str:
         # No default fallback — each task must be explicitly configured via its own env var.

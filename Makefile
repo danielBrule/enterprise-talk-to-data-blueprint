@@ -75,7 +75,7 @@ tests: install  ## run pytest against src/backend/tests/
 	@$(PWSH) -NoProfile -Command "$$env:PATH = \"$$env:APPDATA\Python\Scripts;$$env:PATH\"; $$env:PYTHONPATH = 'src'; poetry run pytest src/backend/tests/ -v"
 
 eval: install  ## run golden evaluation — MODE=fast|full (default fast), OUTPUT=path, LIMIT=N, RUN=label, CONCURRENCY=N (default 5)
-	@$(PWSH) -NoProfile -Command "$$env:PATH = \"$$env:APPDATA\Python\Scripts;$$env:PATH\"; $$env:PYTHONPATH = 'src'; poetry run python -m backend.evaluation_runner --mode $(or $(MODE),fast) $(if $(OUTPUT),--output $(OUTPUT),) $(if $(LIMIT),--limit $(LIMIT),) $(if $(RUN),--eval-run $(RUN),) $(if $(CONCURRENCY),--concurrency $(CONCURRENCY),)"
+	@$(PWSH) -NoProfile -Command "$$env:PATH = \"$$env:APPDATA\Python\Scripts;$$env:PATH\"; $$env:PYTHONPATH = 'src'; $$env:PIPELINE_ENV = 'eval'; poetry run python -m backend.evaluation_runner --mode $(or $(MODE),fast) $(if $(OUTPUT),--output $(OUTPUT),) $(if $(LIMIT),--limit $(LIMIT),) $(if $(RUN),--eval-run $(RUN),) $(if $(CONCURRENCY),--concurrency $(CONCURRENCY),)"
 
 mlflow-ui:  ## launch MLflow UI at http://localhost:5000 (no install needed)
 	@$(PWSH) -NoProfile -Command "$$env:PATH = \"$$env:APPDATA\Python\Scripts;$$env:PATH\"; poetry run mlflow ui --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns"
