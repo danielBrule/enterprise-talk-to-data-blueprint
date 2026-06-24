@@ -1,3 +1,4 @@
+import asyncio
 import time
 from typing import TYPE_CHECKING
 
@@ -14,6 +15,8 @@ from ..stages.metadata import MetadataStage
 from ..stages.sql_generation import SQLGenerationService, SQLGenerationStage
 from ..stages.sql_validation import SQLValidationStage
 from ..stages.execution import ExecutionStage
+from ..core.config import settings
+from ..services.llm_service import APITimeoutError
 from ..stages.answer import AnswerService, AnswerStage
 
 
@@ -90,7 +93,16 @@ class TalkToDataPipeline:
             latency={},
             pipeline_start=time.perf_counter(),
         )
+        timeout = settings.pipeline_timeout_seconds
+        try:
+            return await asyncio.wait_for(self._run_stages(ctx), timeout=timeout)
+        except (asyncio.TimeoutError, APITimeoutError):
+            reason = f"Request timed out after {timeout}s — please try a simpler question."
+            ctx.trace.refusal_reason = reason
+            ctx.trace.execution_status = "failed"
+            return AskResponse(refused=True, refusal_reason=reason, trace=ctx.trace)
 
+    async def _run_stages(self, ctx: PipelineContext) -> AskResponse:
         for stage in self.stages:
             outcome = await stage.run(ctx)
             if isinstance(outcome, Refusal):

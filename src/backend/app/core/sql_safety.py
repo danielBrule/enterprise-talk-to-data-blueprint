@@ -1,5 +1,6 @@
 import re
 
+from .config import settings
 from .logger import logger
 
 
@@ -16,6 +17,7 @@ DANGEROUS_KEYWORDS = [
     r"\bCREATE\b",
     r"\bALTER\b",
     r"\bTRUNCATE\b",
+    r"\bMERGE\b",
     r"\bEXEC\b",
     r"\bEXECUTE\b",
     r"\bGRANT\b",
@@ -24,7 +26,7 @@ DANGEROUS_KEYWORDS = [
 ]
 
 MAX_LIMIT = 500
-QUERY_TIMEOUT_SECONDS = 30
+QUERY_TIMEOUT_SECONDS: int = settings.sql_query_timeout_seconds
 
 
 # ── Rules ──────────────────────────────────────────────────────────────────────
@@ -101,7 +103,7 @@ def validate_query(query: str, params: dict | None = None) -> None:
     Raises SQLSafetyError if any rule is violated:
     - Rule 1  : Must be a SELECT statement
     - Rule 2a : No multi-statement queries (semicolon before final character)
-    - Rule 2b : No dangerous keywords (INSERT, UPDATE, DELETE, DROP, …)
+    - Rule 2b : No dangerous keywords (INSERT, UPDATE, DELETE, DROP, MERGE, …)
     - Rule 3  : No direct dbo.* table access (analytics.* views only)
     - Rule 4/5: Must include SELECT TOP or LIMIT; value must be 1–MAX_LIMIT
     """
@@ -115,7 +117,3 @@ def validate_query(query: str, params: dict | None = None) -> None:
     _check_no_dangerous_keywords(normalized)
     _check_no_dbo_access(normalized)
     _check_row_limit(normalized, params)
-
-
-def add_query_timeout(timeout_seconds: int = QUERY_TIMEOUT_SECONDS) -> str:
-    return f"SET STATEMENT_TIMEOUT {timeout_seconds * 1000}"

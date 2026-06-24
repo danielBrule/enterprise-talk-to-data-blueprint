@@ -163,6 +163,15 @@ def test_validate_query_dangerous_keyword_in_string_literal():
         validate_query("SELECT 'INSERT' FROM analytics.vw_article_engagement LIMIT 50")
 
 
+def test_validate_query_merge_rejected():
+    """Invalid: MERGE is not allowed (caught by SELECT or keyword check)"""
+    with pytest.raises(SQLSafetyError):
+        validate_query(
+            "MERGE analytics.vw_article_engagement USING (SELECT 1) AS src ON 1=0 "
+            "WHEN NOT MATCHED THEN INSERT VALUES (1)"
+        )
+
+
 def test_validate_query_multi_statement_rejected():
     """Invalid: Multi-statement queries (semicolon before end) are blocked"""
     with pytest.raises(SQLSafetyError, match="Multi-statement"):

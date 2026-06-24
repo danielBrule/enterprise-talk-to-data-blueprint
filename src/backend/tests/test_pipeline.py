@@ -227,6 +227,23 @@ async def test_pipeline_refused_when_low_confidence(monkeypatch):
     assert response.trace.execution_status == "refused"
 
 
+async def test_pipeline_timeout_returns_refusal(monkeypatch):
+    import asyncio as _asyncio
+
+    async def _timeout_immediately(coro, timeout):
+        coro.close()
+        raise _asyncio.TimeoutError()
+
+    monkeypatch.setattr("asyncio.wait_for", _timeout_immediately)
+
+    pipeline = _build_pipeline(monkeypatch)
+    response = await pipeline.run(AskRequest(question="top articles"))
+
+    assert response.refused is True
+    assert "timed out" in response.refusal_reason.lower()
+    assert response.trace.execution_status == "failed"
+
+
 async def test_pipeline_execution_failure_refuses(monkeypatch):
     pipeline = _build_pipeline(monkeypatch)
 

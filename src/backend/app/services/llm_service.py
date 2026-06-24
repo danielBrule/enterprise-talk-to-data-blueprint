@@ -1,8 +1,10 @@
-from openai import AsyncAzureOpenAI
+from openai import AsyncAzureOpenAI, APITimeoutError
 from typing import List, Dict, Any
 
 from backend.app.core.config import settings
 from backend.app.core.logger import logger
+
+LLM_TIMEOUT_SECONDS: int = settings.llm_timeout_seconds
 
 
 class LLMService:
@@ -33,6 +35,7 @@ class LLMService:
             azure_endpoint=settings.azure_openai_endpoint,
             api_key=settings.azure_openai_api_key,
             api_version=settings.azure_openai_api_version,
+            timeout=LLM_TIMEOUT_SECONDS,
         )
 
     async def generate_response(
@@ -64,9 +67,13 @@ class LLMService:
                 "Azure OpenAI model deployment is not configured. Set AZURE_OPENAI_DEPLOYMENT or the task-specific deployment environment variable."
             )
 
-        response = await self.client.chat.completions.create(
-            model=model, messages=messages, **kwargs
-        )
+        try:
+            response = await self.client.chat.completions.create(
+                model=model, messages=messages, **kwargs
+            )
+        except APITimeoutError:
+            logger.error("llm.timeout model=%s task=%s timeout_s=%s", model, task, LLM_TIMEOUT_SECONDS)
+            raise
         content = response.choices[0].message.content
         usage = response.usage
         token_usage = {

@@ -5,7 +5,7 @@ from sqlalchemy.sql import Executable
 
 from ..core.config import settings
 from ..core.logger import logger
-from ..core.sql_safety import validate_query, SQLSafetyError
+from ..core.sql_safety import validate_query, SQLSafetyError, QUERY_TIMEOUT_SECONDS
 
 _engine = None
 
@@ -42,10 +42,15 @@ async def execute_query(query: Executable, params: dict | None = None) -> list[d
 
         def _sync_execute():
             with get_connection() as conn:
-                result = conn.execute(query, params)
+                # execution_options(timeout=N) sets cursor.timeout on pyodbc,
+                # which is the correct per-statement timeout for Azure SQL.
+                result = conn.execution_options(timeout=QUERY_TIMEOUT_SECONDS).execute(query, params)
                 return [dict(row._mapping) for row in result]
 
-        rows = await asyncio.to_thread(_sync_execute)
+        rows = await asyncio.wait_for(
+            asyncio.to_thread(_sync_execute),
+            timeout=QUERY_TIMEOUT_SECONDS + 5,
+        )
         duration_ms = (time.perf_counter() - start_time) * 1000
         logger.info(
             "sql.query.complete sql=%s params=%s duration_ms=%s rows=%s",
@@ -55,6 +60,15 @@ async def execute_query(query: Executable, params: dict | None = None) -> list[d
             len(rows),
         )
         return rows
+    except asyncio.TimeoutError:
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        logger.error(
+            "sql.query.timeout sql=%s timeout_s=%s duration_ms=%s",
+            str(query)[:80],
+            QUERY_TIMEOUT_SECONDS,
+            round(duration_ms, 2),
+        )
+        raise RuntimeError(f"Query timed out after {QUERY_TIMEOUT_SECONDS}s")
     except Exception:
         duration_ms = (time.perf_counter() - start_time) * 1000
         logger.exception(
