@@ -1,6 +1,7 @@
 from datetime import date
+import json
 
-PROMPT_VERSION = "intent_v6"
+PROMPT_VERSION = "intent_v7"
 
 
 _KNOWN_DOMAINS = (
@@ -17,9 +18,41 @@ _KNOWN_VIEWS = (
     "analytics.vw_ingestion_errors"
 )
 
+# Few-shot examples anchoring the model on past-year handling and refusal cases.
+# Injected as a user/assistant exchange before the real question so temperature=0
+# doesn't override the date context with training-set priors.
+_EXAMPLE_USER = """Classify this question: "What is the average sentiment for articles published in 2025?"
+
+Available analytics domains: {domains}
+Available views: {views}
+
+Rules:
+- answerable is true only if the question can be answered from the available views above.
+- If the question requires forecasting future values, causal explanation ("why", "what causes"), external data, or data not covered by the views above, set answerable to false.
+- Date filtering on publication_date or insert_date is supported and should be classified as answerable.
+- Today's date is 2026-06-24. The current year is 2026. Years before 2026 (e.g. 2025, 2024, 2023) are in the past — historical data exists for them and questions about them are answerable. Only dates strictly after today require forecasting.
+- domain must be one of: article_engagement, keyword_engagement, contributor_behaviour, ingestion_errors, or unknown.
+- suggested_metrics should be column names or aggregate expressions from the available views.
+
+Respond with exactly this JSON:
+{{
+  "answerable": "<boolean>",
+  "reason": "<brief explanation>",
+  "domain": "<article_engagement | keyword_engagement | contributor_behaviour | ingestion_errors | unknown>",
+  "suggested_metrics": ["<column_name_or_aggregate_expression>"]
+}}""".format(domains=_KNOWN_DOMAINS, views=_KNOWN_VIEWS)
+
+_EXAMPLE_ASSISTANT = json.dumps({
+    "answerable": True,
+    "reason": "2025 is a past year (current year is 2026) — historical sentiment data for articles published in 2025 is available in vw_article_engagement.",
+    "domain": "article_engagement",
+    "suggested_metrics": ["avg_comment_sentiment"],
+})
+
 
 def build_intent_prompt(question: str, aliases: dict[str, list[str]] | None = None) -> list[dict]:
     today = date.today().isoformat()
+    current_year = date.today().year
     system = (
         "You classify whether an analytics question can be answered from a specific set of "
         "database views. Reply only with valid JSON — no markdown, no explanation outside the JSON."
@@ -43,9 +76,10 @@ Rules:
 - If the question requires forecasting future values, causal explanation ("why", "what causes"), \
 external data, or data not covered by the views above, set answerable to false.
 - Date filtering on publication_date or insert_date is supported and should be classified as answerable.
-- Today's date is {today}. The current year is {date.today().year}. Any year or date \
-strictly before {date.today().year} is in the past — data exists for it and questions about it \
-are answerable. Only dates after today ({today}) require forecasting.
+- Today's date is {today}. The current year is {current_year}. Years before {current_year} \
+(e.g. {current_year - 1}, {current_year - 2}, {current_year - 3}) are in the past — historical \
+data exists for them and questions about them are answerable. Only dates strictly after today \
+require forecasting.
 - domain must be one of: article_engagement, keyword_engagement, contributor_behaviour, \
 ingestion_errors, or unknown.
 - suggested_metrics should be column names or aggregate expressions from the available views.{alias_lines}
@@ -59,5 +93,7 @@ Respond with exactly this JSON:
 }}"""
     return [
         {"role": "system", "content": system},
+        {"role": "user", "content": _EXAMPLE_USER},
+        {"role": "assistant", "content": _EXAMPLE_ASSISTANT},
         {"role": "user", "content": user},
     ]
