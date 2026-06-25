@@ -59,7 +59,8 @@ handled uniformly.
 
 | # | Practice | Status | File | Env var |
 |---|---|---|---|---|
-| 13 | **Per-request token budget** — accumulated `total_tokens` across all LLM stages is checked after each LLM call; the pipeline refuses early if the budget is exceeded. Set to 0 to disable. | ✅ | `app/services/talk_to_data_pipeline.py` | `MAX_TOKENS_PER_REQUEST` (default 10 000) |
+| 13 | **Per-request token budget** — accumulated `total_tokens` across all LLM stages is checked after each LLM call; the pipeline refuses early if the budget is exceeded. Token usage is accumulated across SQL generation retries so the budget correctly reflects total cost. Set to 0 to disable. | ✅ | `app/services/talk_to_data_pipeline.py` | `MAX_TOKENS_PER_REQUEST` (default 10 000) |
+| 13b | **SQL self-correction retry loop** — when SQL validation fails (any rule: missing column, forbidden join, missing TOP, etc.) the error is fed back to the SQL generation stage as a correction hint and the query is regenerated. Up to `MAX_SQL_RETRIES` retries before refusing to the user with the last error. Retry count is tracked in the trace (`sql_retries`) and logged to MLflow (`questions_with_sql_retries`, `total_sql_retries`). Token usage and latency are accumulated across all attempts. | ✅ | `app/services/talk_to_data_pipeline.py`, `app/stages/sql_generation.py`, `app/prompts/sql_generation.py` | `MAX_SQL_RETRIES` (default 2) |
 
 ---
 

@@ -34,3 +34,8 @@ class PipelineContext:
     metadata_context: dict | None = None
     sql: str | None = None
     rows: list | None = None
+
+    # Set by SQLValidationStage when the generated SQL fails any safety or metadata check.
+    # Read by SQLGenerationStage on retry to inject the error as a correction hint into
+    # the prompt. Cleared to None when validation passes.
+    sql_validation_error: str | None = None

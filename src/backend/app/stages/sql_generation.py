@@ -82,7 +82,7 @@ class SQLGenerationService:
 
         return "\n".join(parts)
 
-    async def generate(self, question: str, metadata_context: dict, joins: dict | None = None) -> SQLGenResult:
+    async def generate(self, question: str, metadata_context: dict, joins: dict | None = None, correction: str | None = None) -> SQLGenResult:
         start = time.perf_counter()
         deployment = settings.get_azure_openai_deployment("sql_generation")
 
@@ -96,7 +96,7 @@ class SQLGenerationService:
             )
 
         views_context = self._build_views_context(metadata_context, joins)
-        messages = build_sql_generation_prompt(question, views_context)
+        messages = build_sql_generation_prompt(question, views_context, correction=correction)
 
         try:
             raw, usage = await self.llm.generate_sql_generation(messages, temperature=0)
@@ -135,16 +135,36 @@ class SQLGenerationStage(Stage):
 
     async def run(self, ctx: PipelineContext) -> Refusal | None:
         t0 = time.perf_counter()
+
+        # Track retries: first call has no error, subsequent calls have a correction hint
+        is_retry = ctx.sql_validation_error is not None
+        if is_retry:
+            ctx.trace.sql_retries += 1
+
         joins = await get_approved_joins()
         result = await self.sql_generation_service.generate(
-            ctx.question, ctx.metadata_context or {}, joins=joins
+            ctx.question,
+            ctx.metadata_context or {},
+            joins=joins,
+            correction=ctx.sql_validation_error,
         )
-        ctx.latency["sql_generation_ms"] = (time.perf_counter() - t0) * 1000
 
-        ctx.trace.generated_sql = result.sql
+        # Accumulate latency and tokens across attempts so totals are accurate
+        elapsed_ms = (time.perf_counter() - t0) * 1000
+        ctx.latency["sql_generation_ms"] = ctx.latency.get("sql_generation_ms", 0) + elapsed_ms
+
+        prev = ctx.trace.token_usage.get("sql_generation", {})
+        ctx.trace.token_usage["sql_generation"] = {
+            "prompt_tokens": prev.get("prompt_tokens", 0) + result.token_usage.get("prompt_tokens", 0),
+            "completion_tokens": prev.get("completion_tokens", 0) + result.token_usage.get("completion_tokens", 0),
+            "total_tokens": prev.get("total_tokens", 0) + result.token_usage.get("total_tokens", 0),
+        }
+
+        if result.sql:
+            ctx.trace.sql_attempts.append(result.sql)
+        ctx.trace.generated_sql = result.sql  # overwritten each attempt; final value = last attempt
         ctx.trace.prompt_versions["sql_generation"] = result.prompt_version
         ctx.trace.model_deployments["sql_generation"] = result.model_deployment
-        ctx.trace.token_usage["sql_generation"] = result.token_usage
         ctx.sql = result.sql
 
         if not result.sql:

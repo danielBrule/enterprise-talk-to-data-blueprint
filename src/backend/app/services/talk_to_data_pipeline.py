@@ -53,9 +53,11 @@ class TalkToDataPipeline:
        Refuses if: LLM unavailable, LLM returns no query, or JSON parse fails.
 
     5. SQLValidationStage   [no LLM]
-       Validates the generated SQL for safety: SELECT only, analytics.* views only,
-       no DDL/DML, no multi-statement, LIMIT required (max 500 rows).
-       Refuses if: any safety rule is violated.
+       Validates the generated SQL: SELECT only, analytics.* views only, no DDL/DML,
+       no multi-statement, LIMIT required, columns exist in metadata, mandatory filters
+       present. Does NOT refuse directly — stores the error in ctx.sql_validation_error
+       so the pipeline can retry SQL generation (up to MAX_SQL_RETRIES times) with the
+       error as a correction hint before surfacing a refusal to the user.
 
     6. ExecutionStage       [no LLM]
        Executes the validated SQL against Azure SQL.
@@ -138,13 +140,16 @@ class TalkToDataPipeline:
 
     async def _run_stages(self, ctx: PipelineContext) -> AskResponse:
         budget = settings.max_tokens_per_request
-        for stage in self.stages:
-            outcome = await stage.run(ctx)
+        max_sql_retries = settings.max_sql_retries
+
+        def _to_response(outcome) -> AskResponse | None:
             if isinstance(outcome, Refusal):
                 return AskResponse(refused=True, refusal_reason=outcome.reason, trace=outcome.trace)
             if isinstance(outcome, Success):
                 return AskResponse(answer=outcome.answer, caveats=outcome.caveats, refused=False, trace=outcome.trace)
+            return None
 
+        def _budget_response() -> AskResponse | None:
             if budget > 0:
                 used = sum(u.get("total_tokens", 0) for u in ctx.trace.token_usage.values())
                 if used > budget:
@@ -153,5 +158,54 @@ class TalkToDataPipeline:
                     ctx.trace.refusal_reason = reason
                     ctx.trace.execution_status = "refused"
                     return AskResponse(refused=True, refusal_reason=reason, trace=ctx.trace)
+            return None
+
+        # Stages 1–3: intent, view_selection, metadata (linear, no retry)
+        for stage in self.stages[:3]:
+            if r := _to_response(await stage.run(ctx)):
+                return r
+            if r := _budget_response():
+                return r
+
+        # Stages 4–5: SQL generation + validation with self-correction retry loop.
+        # SQLValidationStage stores the error in ctx.sql_validation_error rather than
+        # refusing directly, so the generation stage can receive it as a correction hint.
+        sql_gen_stage, sql_val_stage = self.stages[3], self.stages[4]
+        for attempt in range(1, max_sql_retries + 2):
+            if r := _to_response(await sql_gen_stage.run(ctx)):
+                return r
+            if r := _budget_response():
+                return r
+
+            await sql_val_stage.run(ctx)
+
+            if ctx.sql_validation_error is None:
+                break  # validation passed — proceed to execution
+
+            if attempt > max_sql_retries:
+                reason = (
+                    f"The SQL query could not be generated correctly after "
+                    f"{max_sql_retries + 1} attempts. "
+                    f"Last error: {ctx.sql_validation_error}"
+                )
+                logger.warning(
+                    "sql_generation.retry_exhausted attempts=%d error=%s",
+                    attempt, ctx.sql_validation_error,
+                )
+                ctx.trace.refusal_reason = reason
+                ctx.trace.execution_status = "refused"
+                return AskResponse(refused=True, refusal_reason=reason, trace=ctx.trace)
+
+            logger.info(
+                "sql_generation.retrying attempt=%d error=%s",
+                attempt, ctx.sql_validation_error,
+            )
+
+        # Stages 6–7: execution, answer (linear, no retry)
+        for stage in self.stages[5:]:
+            if r := _to_response(await stage.run(ctx)):
+                return r
+            if r := _budget_response():
+                return r
 
         raise RuntimeError("pipeline exited without a response — AnswerStage must always return Success")

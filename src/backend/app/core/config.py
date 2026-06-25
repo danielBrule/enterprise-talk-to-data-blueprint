@@ -71,6 +71,9 @@ class Settings:
         # ── Cost control ──────────────────────────────────────────────────────
         # 0 = disabled. Set to a positive integer to enforce a per-request token budget.
         self.max_tokens_per_request: int = int(os.getenv("MAX_TOKENS_PER_REQUEST", "10000"))
+        # Number of additional SQL generation attempts after the first failure.
+        # Total attempts = 1 + MAX_SQL_RETRIES. Set to 0 to disable retries.
+        self.max_sql_retries: int = int(os.getenv("MAX_SQL_RETRIES", "2"))
 
         # ── Trace store ───────────────────────────────────────────────────────
         # Path for the JSONL trace file (relative to the working directory, i.e. repo root).

@@ -176,13 +176,47 @@ async def test_pipeline_refused_at_sql_validation(monkeypatch):
     response = await pipeline.run(AskRequest(question="Drop all articles"), _ANALYST)
 
     assert response.refused is True
-    assert "SQL validation failed" in response.refusal_reason
+    # After retry exhaustion the reason contains the last validation error
+    assert "could not be generated correctly" in response.refusal_reason
+    assert "Only SELECT" in response.refusal_reason
     trace = response.trace
     assert trace.validation_result is not None
     assert trace.validation_result.passed is False
     assert trace.execution_status == "refused"
     assert trace.executed_sql is None
     mock_exec.assert_not_awaited()
+
+
+async def test_pipeline_sql_retry_succeeds_on_second_attempt(monkeypatch):
+    """SQL generation fails validation on attempt 1, succeeds on attempt 2 — pipeline completes."""
+    pipeline = _build_pipeline(monkeypatch)
+
+    pipeline.intent_service.classify = AsyncMock(return_value=_make_intent(True))
+    pipeline.view_selection_service.select_views = AsyncMock(return_value={
+        "selected_views": ["analytics.vw_article_engagement"],
+        "confidence": 0.9,
+        "reason": "ok",
+    })
+    monkeypatch.setattr(metadata_stage_module, "get_context_for_views", AsyncMock(return_value=MOCK_METADATA))
+    # First call returns invalid SQL, second call returns valid SQL
+    pipeline.sql_generation_service.generate = AsyncMock(
+        side_effect=[_make_sql_result(UNSAFE_SQL), _make_sql_result(SAFE_SQL)]
+    )
+    monkeypatch.setattr(execution_stage_module, "execute_query", AsyncMock(return_value=MOCK_ROWS))
+    pipeline.answer_service.generate = AsyncMock(return_value=_make_answer_result())
+
+    response = await pipeline.run(AskRequest(question="top articles"), _ANALYST)
+
+    assert response.refused is False
+    assert response.answer == "Article A has 42 comments."
+    trace = response.trace
+    assert trace.sql_retries == 1
+    assert len(trace.sql_attempts) == 2
+    assert trace.sql_attempts[0] == UNSAFE_SQL   # bad first attempt preserved
+    assert trace.sql_attempts[1] == SAFE_SQL     # good second attempt
+    assert trace.generated_sql == SAFE_SQL
+    assert trace.validation_result.passed is True
+    assert pipeline.sql_generation_service.generate.await_count == 2
 
 
 async def test_pipeline_refused_when_no_sql_generated(monkeypatch):

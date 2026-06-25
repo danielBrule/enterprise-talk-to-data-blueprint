@@ -54,9 +54,12 @@ class TraceRecord(BaseModel):
     model_deployments: dict[str, str] = Field(default_factory=dict)
 
     # SQL
-    generated_sql: str | None = None
+    generated_sql: str | None = None  # final accepted SQL (last attempt)
+    sql_attempts: list[str] = Field(default_factory=list)  # all attempts including failed ones
     validation_result: ValidationResult | None = None
     executed_sql: str | None = None
+    # Number of SQL generation retries triggered by validation failures (0 = first attempt succeeded)
+    sql_retries: int = 0
 
     # Execution
     execution_status: str | None = None  # "success" | "failed" | "refused" | "skipped"

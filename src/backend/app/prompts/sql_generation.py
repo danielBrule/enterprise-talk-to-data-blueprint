@@ -1,7 +1,11 @@
 PROMPT_VERSION = "sql_gen_v5"
 
 
-def build_sql_generation_prompt(question: str, views_context: str) -> list[dict]:
+def build_sql_generation_prompt(
+    question: str,
+    views_context: str,
+    correction: str | None = None,
+) -> list[dict]:
     """
     Build the SQL generation prompt.
 
@@ -9,9 +13,12 @@ def build_sql_generation_prompt(question: str, views_context: str) -> list[dict]
         question:      the user's natural language question
         views_context: pre-formatted string produced by _build_views_context —
                        one block per view with purpose, available columns, and limitations
+        correction:    validation error from a previous attempt (optional). When provided,
+                       a simulated assistant turn + correction request is appended so the
+                       model understands exactly what went wrong and how to fix it.
 
-    Returns a two-message list (system + user) instructing the model to produce
-    a single JSON object {"sql": "<T-SQL SELECT TOP N statement>"}.
+    Returns a message list (system + user [+ assistant + correction user]) instructing
+    the model to produce a single JSON object {"sql": "<T-SQL SELECT TOP N statement>"}.
     """
     system = (
         "You generate T-SQL SELECT statements for Azure SQL Server. "
@@ -58,7 +65,23 @@ Respond with exactly this JSON:
 {{
   "sql": "<SELECT TOP N col1, col2 FROM analytics.vw_name [WHERE ...] [ORDER BY ...]>"
 }}"""
-    return [
+    messages = [
         {"role": "system", "content": system},
         {"role": "user", "content": user},
     ]
+
+    if correction:
+        messages.append({"role": "assistant", "content": '{"sql": "<invalid — see correction>"}'})
+        messages.append({
+            "role": "user",
+            "content": (
+                "CORRECTION REQUIRED — your previous query failed validation:\n\n"
+                f"ERROR: {correction}\n\n"
+                "Generate a corrected SQL query that fixes this exact error. "
+                "Do not repeat the same mistake. "
+                "Follow all original rules above. "
+                "Respond with only the JSON object."
+            ),
+        })
+
+    return messages

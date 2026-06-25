@@ -112,6 +112,12 @@ def _log_to_mlflow(report, mode: str, commit: str, eval_run: str, duration_s: fl
             token_metrics[f"prompt_tokens_{stage}"] = counts.get("prompt_tokens", 0)
             token_metrics[f"completion_tokens_{stage}"] = counts.get("completion_tokens", 0)
 
+        questions_with_retries = sum(
+            1 for r in report.records if r.trace and r.trace.sql_retries > 0
+        )
+        total_sql_retries = sum(
+            r.trace.sql_retries for r in report.records if r.trace
+        )
         mlflow.log_metrics({
             "pass_rate": round(report.pass_rate, 4),
             "passed": report.passed,
@@ -120,6 +126,8 @@ def _log_to_mlflow(report, mode: str, commit: str, eval_run: str, duration_s: fl
             "total": report.total,
             "partial_rate": round(report.partial / report.total, 4) if report.total else 0,
             "eval_duration_s": round(duration_s, 1),
+            "questions_with_sql_retries": questions_with_retries,
+            "total_sql_retries": total_sql_retries,
             **token_metrics,
         })
 
@@ -146,6 +154,7 @@ def _log_to_mlflow(report, mode: str, commit: str, eval_run: str, duration_s: fl
                 "failure_reasons": r.failure_reasons,
                 "latency_ms": r.latency_ms,
                 "trace_id": r.trace.trace_id if r.trace else None,
+                "sql_retries": r.trace.sql_retries if r.trace else 0,
                 "token_usage": {**stage_usage, "total": q_total},
             })
         mlflow.log_text(json.dumps(traces, indent=2, default=str), "traces.json")
