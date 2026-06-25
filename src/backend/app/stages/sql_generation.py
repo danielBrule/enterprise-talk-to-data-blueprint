@@ -4,6 +4,7 @@ import time
 from dataclasses import dataclass, field
 
 from ..services.llm_service import LLMService
+from ..services.metadata_service import get_approved_joins
 from ..prompts.sql_generation import PROMPT_VERSION, build_sql_generation_prompt
 from ..core.config import settings
 from ..core.logger import logger
@@ -29,12 +30,13 @@ class SQLGenerationService:
             self.llm = None
             self.llm_available = False
 
-    def _build_views_context(self, metadata_context: dict) -> str:
+    def _build_views_context(self, metadata_context: dict, joins: dict | None = None) -> str:
         """
         Format metadata_context into a plain-text block for the SQL generation prompt.
 
         Produces one section per view with purpose, grain, columns, allowed aggregations,
-        valid GROUP BY dimensions, and limitations.
+        valid GROUP BY dimensions, and limitations. Appends a cross-view join policy
+        section when joins data is provided.
         """
         parts = []
         for view_name, view_data in metadata_context.items():
@@ -63,9 +65,24 @@ class SQLGenerationService:
             if limitations:
                 part += f"  Limitations: {'; '.join(limitations)}\n"
             parts.append(part)
+
+        if joins is not None:
+            approved = joins.get("approved_joins") or []
+            join_lines = ["Cross-view join policy:"]
+            if approved:
+                for j in approved:
+                    views = " + ".join(j.get("views", []))
+                    key = j.get("join_key", "")
+                    join_lines.append(f"  APPROVED: {views} ON {key}")
+            else:
+                join_lines.append(
+                    "  No cross-view JOINs approved — query each view independently."
+                )
+            parts.append("\n".join(join_lines))
+
         return "\n".join(parts)
 
-    async def generate(self, question: str, metadata_context: dict) -> SQLGenResult:
+    async def generate(self, question: str, metadata_context: dict, joins: dict | None = None) -> SQLGenResult:
         start = time.perf_counter()
         deployment = settings.get_azure_openai_deployment("sql_generation")
 
@@ -78,7 +95,7 @@ class SQLGenerationService:
                 latency_ms=(time.perf_counter() - start) * 1000,
             )
 
-        views_context = self._build_views_context(metadata_context)
+        views_context = self._build_views_context(metadata_context, joins)
         messages = build_sql_generation_prompt(question, views_context)
 
         try:
@@ -118,8 +135,9 @@ class SQLGenerationStage(Stage):
 
     async def run(self, ctx: PipelineContext) -> Refusal | None:
         t0 = time.perf_counter()
+        joins = await get_approved_joins()
         result = await self.sql_generation_service.generate(
-            ctx.question, ctx.metadata_context or {}
+            ctx.question, ctx.metadata_context or {}, joins=joins
         )
         ctx.latency["sql_generation_ms"] = (time.perf_counter() - t0) * 1000
 

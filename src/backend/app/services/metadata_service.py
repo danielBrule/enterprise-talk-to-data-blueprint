@@ -73,6 +73,20 @@ async def get_view_aliases() -> dict[str, list[str]]:
     }
 
 
+async def get_approved_joins() -> dict[str, Any]:
+    """Load the cross-view join register (approved and forbidden pairs)."""
+    joins_file = _metadata_dir / "joins" / "approved_joins.yml"
+    if not joins_file.exists():
+        return {"approved_joins": [], "forbidden_joins": []}
+    try:
+        with open(joins_file, "r") as f:
+            data = yaml.safe_load(f)
+        return data or {"approved_joins": [], "forbidden_joins": []}
+    except Exception as e:
+        logger.warning("metadata.load_failed file=approved_joins.yml error=%s", e)
+        return {"approved_joins": [], "forbidden_joins": []}
+
+
 async def get_context_for_views(view_names: list[str]) -> dict[str, dict[str, Any]]:
     """
     Return merged schema and metric metadata for the specified views, keyed by view name.

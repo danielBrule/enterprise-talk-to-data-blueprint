@@ -34,7 +34,7 @@ Validated by a pure-Python rule engine in stage 5. No LLM involved. The query is
 | 8 | **No DDL / DML** — DROP, INSERT, UPDATE, DELETE, MERGE, TRUNCATE, EXECUTE, GRANT are blocked as dangerous keywords | ✅ | `app/core/sql_safety.py` |
 | 9 | **No multi-statement** — semicolons inside the query body are rejected | ✅ | `app/core/sql_safety.py` |
 | 10 | **Row limit required** — TOP / LIMIT clause is mandatory; max 500 rows enforced | ✅ | `app/core/sql_safety.py` |
-| 11 | **JOIN allowlist** — cross-view JOINs validated against an approved join register | 🔜 | `app/core/sql_safety.py` |
+| 11 | **JOIN allowlist** — cross-view JOINs validated against an approved join register | 🔜 | `app/core/sql_safety.py` (validation, Task 9) |
 | 12 | **Metric and filter validation** — generated SQL checked against mandatory filters declared in view metadata | 🔜 | planned |
 
 ---
@@ -91,7 +91,7 @@ handled uniformly.
 | 27 | **Data quality caveats** — freshness / NULL rate / row count health injected as caveats at answer time | 🔜 | planned |
 | 28 | **Persona-based access control** — `DemoAuthService` resolves `X-User-Role` header to one of three personas (analyst / editor / admin), each with an explicit allowed-views list. Role is stamped on the trace. **DEMO ONLY** — in production replace with Azure AD / OIDC JWT validation; never resolve permissions from a plain header. See `app/core/auth.py` module docstring for the production replacement pattern. | ✅ | `app/core/auth.py`, `app/api/routes.py` |
 | 29 | **Access enforcement at execution** — access context validated in the execution stage; query refused if it references views the user cannot see | 🔜 | planned |
-| 30 | **Approved join register** — cross-view joins blocked unless declared in a central join allowlist | 🔜 | planned |
+| 30 | **Approved join register** — `approved_joins.yml` declares which view pairs may be JOINed and which are forbidden, with reason and alternative for each forbidden pair. Loaded by `metadata_service.get_approved_joins()` and injected into the SQL generation prompt so the LLM never attempts a cross-view JOIN unless it is explicitly approved. Currently no cross-view JOINs are approved (all four views aggregate to different grains with no shared key). SQL validation enforcement is Task 9. | ✅ | `src/metadata/joins/approved_joins.yml`, `app/services/metadata_service.py`, `app/stages/sql_generation.py` |
 | 31 | **Clarification stage** — ambiguous questions returned with a clarifying question rather than a low-confidence guess | 🔜 | planned |
 
 ---

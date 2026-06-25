@@ -1,0 +1,71 @@
+# Cross-view join register for analytics schema
+#
+# All four analytics views aggregate to a different grain — one row per article,
+# keyword, contributor, or error event. Because the views expose no shared join key,
+# cross-view JOINs produce semantically incorrect results (cross-joins or cartesian
+# products) and are globally forbidden until a bridge key is explicitly approved here.
+#
+# approved_joins: view pairs that MAY be JOINed, with explicit join column and notes.
+# forbidden_joins: view pairs that MUST NEVER be JOINed, with reason and alternative.
+
+approved_joins: []
+
+forbidden_joins:
+  - views:
+      - analytics.vw_article_engagement
+      - analytics.vw_keyword_engagement
+    reason: >
+      Different grains (one row per article vs one row per keyword).
+      No shared join key exists in either view.
+      vw_article_engagement.keyword_count already captures keyword volume per article;
+      vw_keyword_engagement.article_count already captures article coverage per keyword.
+    alternative: >
+      Query each view independently.
+      For per-article keyword counts use keyword_count from vw_article_engagement.
+      For per-keyword article counts use article_count from vw_keyword_engagement.
+
+  - views:
+      - analytics.vw_article_engagement
+      - analytics.vw_top_contributors
+    reason: >
+      Different grains (one row per article vs one row per contributor).
+      No shared join key exists — the underlying comments bridge table is not exposed.
+    alternative: >
+      Query each view independently.
+      Do not attempt to correlate article-level and contributor-level metrics via a JOIN.
+
+  - views:
+      - analytics.vw_article_engagement
+      - analytics.vw_ingestion_errors
+    reason: >
+      Different grains and purposes.
+      vw_ingestion_errors.data_id is not typed as article_id and the mapping is unreliable
+      (data_id can reference articles, comments, or other entity types depending on stage).
+    alternative: >
+      Query each view independently.
+      Filter ingestion errors by stage or error_type without joining to article metadata.
+
+  - views:
+      - analytics.vw_keyword_engagement
+      - analytics.vw_top_contributors
+    reason: >
+      Different grains (one row per keyword vs one row per contributor).
+      No shared join key exists in either view.
+    alternative: >
+      Query each view independently.
+
+  - views:
+      - analytics.vw_keyword_engagement
+      - analytics.vw_ingestion_errors
+    reason: >
+      Different grains and purposes. No shared join key exists.
+    alternative: >
+      Query each view independently.
+
+  - views:
+      - analytics.vw_top_contributors
+      - analytics.vw_ingestion_errors
+    reason: >
+      Different grains and purposes. No shared join key exists.
+    alternative: >
+      Query each view independently.

@@ -1,4 +1,4 @@
-PROMPT_VERSION = "sql_gen_v4"
+PROMPT_VERSION = "sql_gen_v5"
 
 
 def build_sql_generation_prompt(question: str, views_context: str) -> list[dict]:
@@ -50,6 +50,9 @@ Do not re-aggregate a column if the grain context shows rows are already atomic.
 Never SUM a column listed as [AVG, MIN, MAX] only (e.g. avg_comment_sentiment, avg_sentiment).
 - GROUP BY only columns listed as valid dimensions for the view. \
 If no dimensions are listed, the view is already at grain level — do not add GROUP BY.
+- Do not JOIN analytics views unless the pair is listed as APPROVED in the cross-view join \
+policy above. If no approved joins are listed, every cross-view JOIN is forbidden — \
+query the single most relevant view instead.
 
 Respond with exactly this JSON:
 {{
