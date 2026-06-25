@@ -1,6 +1,6 @@
 import pytest
 
-from backend.app.core.sql_safety import validate_query, validate_sql_metadata, SQLSafetyError, MAX_LIMIT
+from backend.app.core.sql_safety import validate_query, validate_sql_metadata, extract_views, SQLSafetyError, MAX_LIMIT
 
 
 # Valid queries
@@ -394,3 +394,41 @@ def test_metadata_empty_context_skipped():
         "SELECT TOP 10 article_id FROM analytics.vw_article_engagement",
         {},
     )
+
+
+# ── extract_views ──────────────────────────────────────────────────────────────
+
+def test_extract_views_single_view():
+    views = extract_views(
+        "SELECT TOP 10 article_id FROM analytics.vw_article_engagement"
+    )
+    assert views == {"analytics.vw_article_engagement"}
+
+
+def test_extract_views_join_returns_both():
+    views = extract_views(
+        "SELECT TOP 10 a.article_id, k.keyword_id "
+        "FROM analytics.vw_article_engagement a "
+        "JOIN analytics.vw_keyword_engagement k ON a.article_id = k.article_id"
+    )
+    assert views == {"analytics.vw_article_engagement", "analytics.vw_keyword_engagement"}
+
+
+def test_extract_views_subquery():
+    views = extract_views(
+        "SELECT TOP 10 article_id FROM analytics.vw_article_engagement "
+        "WHERE article_id IN (SELECT article_id FROM analytics.vw_keyword_engagement LIMIT 5)"
+    )
+    assert views == {"analytics.vw_article_engagement", "analytics.vw_keyword_engagement"}
+
+
+def test_extract_views_no_schema_prefix_excluded():
+    """Views without a schema prefix are not returned (all analytics views are always qualified)."""
+    views = extract_views("SELECT TOP 10 article_id FROM vw_article_engagement")
+    assert views == set()
+
+
+def test_extract_views_parse_failure_returns_empty():
+    """A query that cannot be parsed returns an empty set (safe fallback: treat as denied)."""
+    views = extract_views("THIS IS NOT SQL AT ALL $$$$")
+    assert views == set()

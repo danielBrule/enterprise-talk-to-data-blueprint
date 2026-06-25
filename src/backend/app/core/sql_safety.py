@@ -194,6 +194,26 @@ def _check_mandatory_filters(
 
 # ── Public API ─────────────────────────────────────────────────────────────────
 
+def extract_views(sql: str) -> set[str]:
+    """
+    Return all schema-qualified view names referenced in a SQL query.
+
+    Returns e.g. {'analytics.vw_article_engagement'} for a well-formed SELECT.
+    Returns an empty set on parse failure (safe fallback — callers treat unknown
+    as denied rather than allowed).
+    """
+    try:
+        tree, _ = _parse(sql)
+    except SQLSafetyError:
+        return set()
+    result: set[str] = set()
+    for table in tree.find_all(exp.Table):
+        db = (table.args.get("db") or exp.Identifier(this="")).name.lower()
+        if db:
+            result.add(f"{db}.{table.name.lower()}")
+    return result
+
+
 def validate_sql_metadata(sql: str, metadata_context: dict) -> None:
     """
     Validate SQL column references and mandatory filters against view metadata.

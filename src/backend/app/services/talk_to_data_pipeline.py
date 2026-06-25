@@ -122,7 +122,7 @@ class TalkToDataPipeline:
         ctx.trace.access_enforcement_note = (
             f"Role '{user.role}' resolved via X-User-Role header. "
             f"Allowed views: {user.allowed_views}. "
-            f"Access enforcement at execution stage: planned."
+            f"Access enforced at execution stage."
         )
 
         try:

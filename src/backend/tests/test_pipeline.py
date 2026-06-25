@@ -32,6 +32,26 @@ SAFE_SQL = (
     "FROM analytics.vw_article_engagement ORDER BY comment_count DESC"
 )
 UNSAFE_SQL = "DROP TABLE analytics.vw_article_engagement"
+# SQL that is structurally valid but queries a view the editor role cannot see.
+INGESTION_SQL = (
+    "SELECT TOP 10 error_id, stage, error_type "
+    "FROM analytics.vw_ingestion_errors"
+)
+
+MOCK_INGESTION_METADATA = {
+    "analytics.vw_ingestion_errors": {
+        "purpose": "Ingestion errors",
+        "grain": "One row per ingestion error.",
+        "columns": [
+            {"name": "error_id"}, {"name": "stage"}, {"name": "error_type"},
+            {"name": "error_message"}, {"name": "data_id"}, {"name": "attempted_at"},
+        ],
+        "allowed_aggregations": {},
+        "mandatory_filters": [],
+        "dimensions": ["stage"],
+        "limitations": [],
+    }
+}
 
 MOCK_METADATA = {
     "analytics.vw_article_engagement": {
@@ -413,3 +433,35 @@ async def test_pipeline_trace_records_resolved_role(monkeypatch):
     response = await pipeline.run(AskRequest(question="test"), editor)
 
     assert "editor" in response.trace.access_enforcement_note
+
+
+async def test_pipeline_access_denied_at_execution(monkeypatch):
+    """Editor role cannot see vw_ingestion_errors — query must be refused before execution."""
+    pipeline = _build_pipeline(monkeypatch)
+    # Editor is allowed article_engagement and top_contributors, not ingestion_errors.
+    editor = ResolvedUser(
+        role="editor",
+        allowed_views=["analytics.vw_article_engagement", "analytics.vw_top_contributors"],
+    )
+
+    pipeline.intent_service.classify = AsyncMock(return_value=_make_intent(True, "ingestion_errors"))
+    pipeline.view_selection_service.select_views = AsyncMock(return_value={
+        "selected_views": ["analytics.vw_ingestion_errors"],
+        "confidence": 0.9,
+        "reason": "matches ingestion domain",
+    })
+    monkeypatch.setattr(
+        metadata_stage_module, "get_context_for_views",
+        AsyncMock(return_value=MOCK_INGESTION_METADATA),
+    )
+    pipeline.sql_generation_service.generate = AsyncMock(return_value=_make_sql_result(INGESTION_SQL))
+    mock_exec = AsyncMock(return_value=[])
+    monkeypatch.setattr(execution_stage_module, "execute_query", mock_exec)
+
+    response = await pipeline.run(AskRequest(question="show ingestion errors"), editor)
+
+    assert response.refused is True
+    assert "editor" in response.refusal_reason
+    assert "vw_ingestion_errors" in response.refusal_reason
+    assert response.trace.execution_status == "refused"
+    mock_exec.assert_not_awaited()  # database must never be called
