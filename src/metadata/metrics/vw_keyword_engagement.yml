@@ -1,5 +1,6 @@
 view_name: analytics.vw_keyword_engagement
 category: keyword trends
+grain: "One row per keyword. Counts are pre-aggregated over all articles and comments associated with each keyword."
 purpose: "Summarizes keyword performance across articles by measuring article coverage, comment volume, sentiment, and contributor engagement per keyword."
 business_meaning: |
   This view helps editorial and SEO teams understand which topics attract conversation, how sentiment varies by keyword,
@@ -17,6 +18,13 @@ columns:
     description: "Average sentiment score for comments on keyword-associated articles."
   - name: contributor_count
     description: "Number of distinct contributors who commented on keyword-associated articles."
+allowed_aggregations:
+  article_count: [SUM, AVG, MAX, MIN]
+  comment_count: [SUM, AVG, MAX, MIN]
+  avg_comment_sentiment: [AVG, MIN, MAX]
+  contributor_count: [SUM, AVG, MAX, MIN]
+mandatory_filters: []
+dimensions: []
 limitations:
   - "Keyword association is based on the core_article_keywords link table and may not capture implicit topic relevance."
   - "Sentiment is derived from comments, not the keyword or article text itself, so it reflects reader reaction rather than keyword tone."

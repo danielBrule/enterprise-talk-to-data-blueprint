@@ -85,6 +85,7 @@ handled uniformly.
 | 22 | **Intent classification** — question classified as in-scope / out-of-scope against the domain vocabulary before any data access | ✅ | `app/stages/intent.py` |
 | 23 | **View selection with confidence threshold** — questions with view-selection confidence < 0.4 are refused rather than guessed | ✅ | `app/stages/view_selection.py` |
 | 24 | **Metadata grounding** — SQL is generated from approved view definitions (column names, types, grain, limitations), not inferred from the user's wording | ✅ | `app/stages/metadata.py`, `app/stages/sql_generation.py` |
+| 24b | **Grain and aggregation contracts in view metadata** — each metric YAML declares `grain` (what one row represents), `allowed_aggregations` (permitted SQL aggregate functions per column — e.g. no SUM on pre-averaged sentiment), `dimensions` (valid GROUP BY targets), and `mandatory_filters`. These are injected into the SQL generation prompt to prevent double-counting and semantically invalid aggregations. | ✅ | `src/metadata/metrics/`, `app/stages/sql_generation.py`, `app/prompts/sql_generation.py` |
 | 25 | **Domain vocabulary aliases** — alternative names for metrics are loaded from view metadata so intent classification understands synonyms | ✅ | `app/stages/intent.py`, `src/metadata/metrics/` |
 | 26 | **Answer caveats from metadata** — answer stage injects the `limitations` declared in view YAML as explicit caveats | ✅ | `app/stages/answer.py` |
 | 27 | **Data quality caveats** — freshness / NULL rate / row count health injected as caveats at answer time | 🔜 | planned |

@@ -1,4 +1,4 @@
-PROMPT_VERSION = "sql_gen_v3"
+PROMPT_VERSION = "sql_gen_v4"
 
 
 def build_sql_generation_prompt(question: str, views_context: str) -> list[dict]:
@@ -44,6 +44,12 @@ use SELECT TOP 1 — the result is always one row.
 contributor_id for vw_top_contributors, error_id for vw_ingestion_errors).
 - Use descriptive aliases for aggregate results that reflect the metric, \
 e.g. total_comment_count, avg_sentiment, max_comment_count, error_count.
+- Respect grain: each view already has one row per its stated unit (article, keyword, contributor, error). \
+Do not re-aggregate a column if the grain context shows rows are already atomic.
+- Respect allowed aggregations: only apply the aggregate functions listed for each column. \
+Never SUM a column listed as [AVG, MIN, MAX] only (e.g. avg_comment_sentiment, avg_sentiment).
+- GROUP BY only columns listed as valid dimensions for the view. \
+If no dimensions are listed, the view is already at grain level — do not add GROUP BY.
 
 Respond with exactly this JSON:
 {{

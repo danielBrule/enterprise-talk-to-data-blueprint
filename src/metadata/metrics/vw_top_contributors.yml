@@ -1,5 +1,6 @@
 view_name: analytics.vw_top_contributors
 category: contributors
+grain: "One row per contributor. Counts are pre-aggregated over all comments made by each contributor."
 purpose: "Ranks contributors by activity and sentiment, summarizing comment volume, average sentiment, replies, and article reach."
 business_meaning: |
   This view supports community management and contributor analysis by identifying the most active commenters,
@@ -15,6 +16,13 @@ columns:
     description: "Aggregate number of replies received by the contributor's comments."
   - name: distinct_article_count
     description: "Number of distinct articles the contributor has commented on."
+allowed_aggregations:
+  comment_count: [SUM, AVG, MAX, MIN]
+  avg_sentiment: [AVG, MIN, MAX]
+  total_replies: [SUM, AVG, MAX, MIN]
+  distinct_article_count: [SUM, AVG, MAX, MIN]
+mandatory_filters: []
+dimensions: []
 limitations:
   - "This view does not distinguish between positive and negative comments beyond average sentiment."
   - "High comment volume may reflect controversial behavior rather than constructive engagement."

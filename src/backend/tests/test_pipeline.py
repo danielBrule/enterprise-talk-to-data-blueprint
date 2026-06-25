@@ -36,7 +36,11 @@ UNSAFE_SQL = "DROP TABLE analytics.vw_article_engagement"
 MOCK_METADATA = {
     "analytics.vw_article_engagement": {
         "purpose": "Article engagement",
+        "grain": "One row per article.",
         "columns": [{"name": "article_id"}, {"name": "comment_count"}],
+        "allowed_aggregations": {"comment_count": ["SUM", "AVG", "MAX", "MIN"]},
+        "mandatory_filters": [],
+        "dimensions": ["publication_date"],
         "limitations": ["Sentiment is averaged"],
     }
 }

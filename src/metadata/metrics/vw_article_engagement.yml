@@ -1,5 +1,6 @@
 view_name: analytics.vw_article_engagement
 category: article engagement
+grain: "One row per article. Numeric columns (comment_count, total_replies, keyword_count, avg_comment_sentiment) are pre-aggregated over all comments for that article — do not double-count by SUMming avg_comment_sentiment."
 purpose: "Provides article-level engagement metrics by aggregating comments, sentiment, replies, and keyword coverage for each article."
 business_meaning: |
   This view enables product and editorial teams to identify articles that generate the most reader interaction
@@ -22,6 +23,13 @@ columns:
     description: "Total number of replies to comments on the article."
   - name: keyword_count
     description: "Number of distinct keywords linked to the article."
+allowed_aggregations:
+  comment_count: [SUM, AVG, MAX, MIN]
+  avg_comment_sentiment: [AVG, MIN, MAX]
+  total_replies: [SUM, AVG, MAX, MIN]
+  keyword_count: [SUM, AVG, MAX, MIN]
+mandatory_filters: []
+dimensions: [publication_date, insert_date]
 limitations:
   - "Sentiment is averaged at the comment level and may mask variation across highly polarized comments."
   - "Keyword coverage only counts assigned keywords and does not measure how well keywords reflect article topic quality."

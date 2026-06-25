@@ -33,22 +33,33 @@ class SQLGenerationService:
         """
         Format metadata_context into a plain-text block for the SQL generation prompt.
 
-        Produces one section per view:
-            View: analytics.vw_name
-              Purpose: ...
-              Available columns: col1, col2, ...
-              Limitations: ...  (omitted when empty)
+        Produces one section per view with purpose, grain, columns, allowed aggregations,
+        valid GROUP BY dimensions, and limitations.
         """
         parts = []
         for view_name, view_data in metadata_context.items():
             columns = view_data.get("columns", [])
             col_list = ", ".join(c["name"] for c in columns if "name" in c)
             purpose = view_data.get("purpose", view_data.get("description", ""))
+            grain = view_data.get("grain", "")
+            allowed_aggs = view_data.get("allowed_aggregations", {})
+            dimensions = view_data.get("dimensions", [])
             limitations = view_data.get("limitations", [])
 
             part = f"View: {view_name}\n"
             part += f"  Purpose: {purpose}\n"
+            if grain:
+                part += f"  Grain: {grain}\n"
             part += f"  Available columns: {col_list}\n"
+            if allowed_aggs:
+                agg_lines = "; ".join(
+                    f"{col}: {', '.join(funcs)}" for col, funcs in allowed_aggs.items()
+                )
+                part += f"  Allowed aggregations: {agg_lines}\n"
+            if dimensions:
+                part += f"  Valid GROUP BY dimensions: {', '.join(dimensions)}\n"
+            else:
+                part += "  Valid GROUP BY dimensions: (none — this view is already at grain level)\n"
             if limitations:
                 part += f"  Limitations: {'; '.join(limitations)}\n"
             parts.append(part)

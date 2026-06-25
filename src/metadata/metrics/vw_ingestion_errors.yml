@@ -1,5 +1,6 @@
 view_name: analytics.vw_ingestion_errors
 category: ingestion errors
+grain: "One row per ingestion error event. Each row is a single failure record with its own error_id."
 purpose: "Provides a pipeline-level error log for ingestion operations, exposing stage, data identity, error type, message, and timestamp."
 business_meaning: |
   This view is critical for operations and engineering teams to monitor ingestion failures,
@@ -17,6 +18,14 @@ columns:
     description: "Detailed error message returned by the pipeline."
   - name: attempted_at
     description: "Timestamp when the ingestion attempt was made."
+allowed_aggregations:
+  error_id: [COUNT]
+  stage: [COUNT]
+  data_id: [COUNT]
+  error_type: [COUNT]
+  attempted_at: [MIN, MAX, COUNT]
+mandatory_filters: []
+dimensions: [stage, error_type, attempted_at]
 limitations:
   - "This view reflects recorded pipeline errors only; it does not include successful ingestions or warnings."
   - "Error details are stored as free text in error_message and may require additional parsing for structured analysis."

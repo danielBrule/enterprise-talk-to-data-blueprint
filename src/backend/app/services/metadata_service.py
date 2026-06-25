@@ -99,6 +99,10 @@ async def get_context_for_views(view_names: list[str]) -> dict[str, dict[str, An
             "purpose": metrics.get("purpose", ""),
             "business_meaning": metrics.get("business_meaning", ""),
             "columns": schema.get("columns") or metrics.get("columns", []),
+            "grain": metrics.get("grain", ""),
+            "allowed_aggregations": metrics.get("allowed_aggregations", {}),
+            "mandatory_filters": metrics.get("mandatory_filters", []),
+            "dimensions": metrics.get("dimensions", []),
             "limitations": metrics.get("limitations", []),
             "example_questions": metrics.get("example_questions", []),
         }
