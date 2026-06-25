@@ -1,0 +1,2444 @@
+[
+  {
+    "question": "Which articles have the highest comment volume and what is their average comment sentiment?",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 10 article_id, title, comment_count AS total_comment_count, avg_comment_sentiment AS avg_sentiment FROM analytics.vw_article_engagement WHERE comment_count > 0 ORDER BY comment_count DESC",
+    "expected_sql": "SELECT TOP 10 article_id, title, comment_count, avg_comment_sentiment\nFROM analytics.vw_article_engagement\nORDER BY comment_count DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "failed",
+    "failure_reasons": [
+      "Execution: Query execution failed \u2014 the database may be unavailable."
+    ],
+    "latency_ms": 42700.60549999471,
+    "trace_id": "18d2dbfb-b615-47c4-a9f4-61a0272f08b4",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 906,
+        "completion_tokens": 60,
+        "total_tokens": 966,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1418,
+        "completion_tokens": 80,
+        "total_tokens": 1498,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 770,
+        "completion_tokens": 51,
+        "total_tokens": 821,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3094,
+        "completion_tokens": 191,
+        "total_tokens": 3285
+      }
+    }
+  },
+  {
+    "question": "How many keywords are associated with articles published after 2025-01-01?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 1 SUM(keyword_count) AS total_keyword_count FROM analytics.vw_article_engagement WHERE publication_date > '2025-01-01'",
+    "expected_sql": "SELECT TOP 1 SUM(keyword_count) AS total_keyword_count\nFROM analytics.vw_article_engagement\nWHERE publication_date >= '2025-01-01'\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 20940.20029998501,
+    "trace_id": "99e78d85-ae83-44d5-90ac-4a4a213468f9",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 908,
+        "completion_tokens": 67,
+        "total_tokens": 975,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1420,
+        "completion_tokens": 71,
+        "total_tokens": 1491,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 772,
+        "completion_tokens": 39,
+        "total_tokens": 811,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 266,
+        "completion_tokens": 53,
+        "total_tokens": 319,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3366,
+        "completion_tokens": 230,
+        "total_tokens": 3596
+      }
+    }
+  },
+  {
+    "question": "Show low-engagement articles with fewer than 5 comments and average sentiment below 0.2.",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 500 article_id, title, publication_date, insert_date, comment_count, avg_comment_sentiment, total_replies, keyword_count FROM analytics.vw_article_engagement WHERE comment_count < 5 AND avg_comment_sentiment < 0.2",
+    "expected_sql": "SELECT TOP 500 article_id, title, comment_count, avg_comment_sentiment\nFROM analytics.vw_article_engagement\nWHERE comment_count < 5\n  AND avg_comment_sentiment < 0.2\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "failed",
+    "failure_reasons": [
+      "Execution: Query execution failed \u2014 the database may be unavailable."
+    ],
+    "latency_ms": 40405.29160000733,
+    "trace_id": "6b32b26c-6519-4bab-a0ff-09f86a78d953",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 911,
+        "completion_tokens": 62,
+        "total_tokens": 973,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1423,
+        "completion_tokens": 76,
+        "total_tokens": 1499,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 775,
+        "completion_tokens": 61,
+        "total_tokens": 836,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3109,
+        "completion_tokens": 199,
+        "total_tokens": 3308
+      }
+    }
+  },
+  {
+    "question": "Which keywords appear in the most articles and have the highest average comment sentiment?",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": "SELECT TOP 10 keyword_id, full_keyword, article_count, avg_comment_sentiment FROM analytics.vw_keyword_engagement ORDER BY article_count DESC, avg_comment_sentiment DESC",
+    "expected_sql": "SELECT TOP 10 keyword_id, full_keyword, article_count, avg_comment_sentiment\nFROM analytics.vw_keyword_engagement\nORDER BY article_count DESC, avg_comment_sentiment DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "failed",
+    "failure_reasons": [
+      "Execution: Query execution failed \u2014 the database may be unavailable."
+    ],
+    "latency_ms": 40723.77450001659,
+    "trace_id": "a1bee607-0c59-4bc2-971a-af3a420b58ac",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 906,
+        "completion_tokens": 59,
+        "total_tokens": 965,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1418,
+        "completion_tokens": 66,
+        "total_tokens": 1484,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 746,
+        "completion_tokens": 44,
+        "total_tokens": 790,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3070,
+        "completion_tokens": 169,
+        "total_tokens": 3239
+      }
+    }
+  },
+  {
+    "question": "For the keyword 'climate change', how many unique contributors commented on related articles?",
+    "case_type": "positive",
+    "status": "partial",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": "SELECT TOP 1 contributor_count AS unique_contributor_count FROM analytics.vw_keyword_engagement WHERE full_keyword = 'climate change'",
+    "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, contributor_count\nFROM analytics.vw_keyword_engagement\nWHERE full_keyword = 'climate change'\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": false,
+    "execution_status": "success",
+    "failure_reasons": [
+      "Metrics: missing ['KEYWORD_ID']"
+    ],
+    "latency_ms": 8645.042700023623,
+    "trace_id": "247f21ee-5578-4990-81d7-583d71cc3101",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 908,
+        "completion_tokens": 50,
+        "total_tokens": 958,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1420,
+        "completion_tokens": 62,
+        "total_tokens": 1482,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 747,
+        "completion_tokens": 35,
+        "total_tokens": 782,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 250,
+        "completion_tokens": 59,
+        "total_tokens": 309,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3325,
+        "completion_tokens": 206,
+        "total_tokens": 3531
+      }
+    }
+  },
+  {
+    "question": "Who are the top contributors by comment count?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 10 contributor_id, comment_count AS total_comment_count FROM analytics.vw_top_contributors ORDER BY comment_count DESC",
+    "expected_sql": "SELECT TOP 10 contributor_id, comment_count\nFROM analytics.vw_top_contributors\nORDER BY comment_count DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 36732.16409998713,
+    "trace_id": "b465078a-204a-4cc0-a3f2-7782ccaf41e0",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 900,
+        "completion_tokens": 48,
+        "total_tokens": 948,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1412,
+        "completion_tokens": 56,
+        "total_tokens": 1468,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 718,
+        "completion_tokens": 34,
+        "total_tokens": 752,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 414,
+        "completion_tokens": 146,
+        "total_tokens": 560,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3444,
+        "completion_tokens": 284,
+        "total_tokens": 3728
+      }
+    }
+  },
+  {
+    "question": "Which contributors have the highest average sentiment and at least 20 comments?",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 10 contributor_id, comment_count AS total_comment_count, avg_sentiment AS average_sentiment FROM analytics.vw_top_contributors WHERE comment_count >= 20 ORDER BY avg_sentiment DESC",
+    "expected_sql": "SELECT TOP 500 contributor_id, comment_count, avg_sentiment\nFROM analytics.vw_top_contributors\nWHERE comment_count >= 20\nORDER BY avg_sentiment DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "failed",
+    "failure_reasons": [
+      "Execution: Query execution failed \u2014 the database may be unavailable."
+    ],
+    "latency_ms": 40227.934199996525,
+    "trace_id": "f248b5d6-729a-42ea-a4db-c944d8e8565f",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 905,
+        "completion_tokens": 57,
+        "total_tokens": 962,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1417,
+        "completion_tokens": 66,
+        "total_tokens": 1483,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 723,
+        "completion_tokens": 49,
+        "total_tokens": 772,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3045,
+        "completion_tokens": 172,
+        "total_tokens": 3217
+      }
+    }
+  },
+  {
+    "question": "List the most recent ingestion errors by stage and error type.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 10 error_id, stage, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors ORDER BY attempted_at DESC",
+    "expected_sql": "SELECT TOP 20 error_id, stage, error_type, error_message, attempted_at\nFROM analytics.vw_ingestion_errors\nORDER BY attempted_at DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 7892.985499987844,
+    "trace_id": "bc3c6094-9a99-4cc2-bd5e-a3421529d5e9",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 903,
+        "completion_tokens": 58,
+        "total_tokens": 961,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1415,
+        "completion_tokens": 68,
+        "total_tokens": 1483,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 714,
+        "completion_tokens": 38,
+        "total_tokens": 752,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 1642,
+        "completion_tokens": 126,
+        "total_tokens": 1768,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 4674,
+        "completion_tokens": 290,
+        "total_tokens": 4964
+      }
+    }
+  },
+  {
+    "question": "Find ingestion errors for a specific data item ID 'article-12345'.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 500 error_id, stage, data_id, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors WHERE data_id = 'article-12345'",
+    "expected_sql": "SELECT TOP 500 error_id, stage, error_type, error_message, attempted_at\nFROM analytics.vw_ingestion_errors\nWHERE data_id = 'article-12345'\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 7149.800899991533,
+    "trace_id": "31009624-4f26-49d2-99eb-5756512d4c99",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 907,
+        "completion_tokens": 65,
+        "total_tokens": 972,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1419,
+        "completion_tokens": 68,
+        "total_tokens": 1487,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 718,
+        "completion_tokens": 45,
+        "total_tokens": 763,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 252,
+        "completion_tokens": 94,
+        "total_tokens": 346,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3296,
+        "completion_tokens": 272,
+        "total_tokens": 3568
+      }
+    }
+  },
+  {
+    "question": "What is the total number of comments across all articles?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 1 SUM(comment_count) AS total_comment_count FROM analytics.vw_article_engagement",
+    "expected_sql": "SELECT TOP 1 SUM(comment_count) AS total_comment_count\nFROM analytics.vw_article_engagement\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 10700.840800011065,
+    "trace_id": "612938d9-55b4-4f1a-ad15-f34977199964",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 902,
+        "completion_tokens": 49,
+        "total_tokens": 951,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1414,
+        "completion_tokens": 76,
+        "total_tokens": 1490,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 765,
+        "completion_tokens": 28,
+        "total_tokens": 793,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 250,
+        "completion_tokens": 50,
+        "total_tokens": 300,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3331,
+        "completion_tokens": 203,
+        "total_tokens": 3534
+      }
+    }
+  },
+  {
+    "question": "Which articles have more than 10 keywords associated?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 500 article_id, title, keyword_count FROM analytics.vw_article_engagement WHERE keyword_count > 10",
+    "expected_sql": "SELECT TOP 500 article_id, title, keyword_count\nFROM analytics.vw_article_engagement\nWHERE keyword_count > 10\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 8942.380199994659,
+    "trace_id": "354ad29f-9b11-47e5-a441-573b881f6668",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 901,
+        "completion_tokens": 59,
+        "total_tokens": 960,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 83,
+        "total_tokens": 1496,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 765,
+        "completion_tokens": 33,
+        "total_tokens": 798,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 570,
+        "completion_tokens": 195,
+        "total_tokens": 765,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3649,
+        "completion_tokens": 370,
+        "total_tokens": 4019
+      }
+    }
+  },
+  {
+    "question": "Show articles with the highest total replies.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 10 article_id, title, total_replies FROM analytics.vw_article_engagement ORDER BY total_replies DESC",
+    "expected_sql": "SELECT TOP 5 article_id, title, total_replies\nFROM analytics.vw_article_engagement\nORDER BY total_replies DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 39114.11379999481,
+    "trace_id": "78b963a9-c6cb-46be-8c03-1d54e5f124ab",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 899,
+        "completion_tokens": 52,
+        "total_tokens": 951,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1411,
+        "completion_tokens": 72,
+        "total_tokens": 1483,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 763,
+        "completion_tokens": 34,
+        "total_tokens": 797,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 572,
+        "completion_tokens": 150,
+        "total_tokens": 722,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3645,
+        "completion_tokens": 308,
+        "total_tokens": 3953
+      }
+    }
+  },
+  {
+    "question": "What is the average sentiment for articles published in 2025?",
+    "case_type": "positive",
+    "status": "partial",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 1 AVG(avg_comment_sentiment) AS avg_sentiment_2025 FROM analytics.vw_article_engagement WHERE YEAR(publication_date) = 2025",
+    "expected_sql": "SELECT TOP 1 AVG(avg_comment_sentiment) AS average_sentiment_2025\nFROM analytics.vw_article_engagement\nWHERE YEAR(publication_date) = 2025\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [
+      "Answer: no result values found in answer text"
+    ],
+    "latency_ms": 33723.96909998497,
+    "trace_id": "507fea91-b7c5-4591-b73f-e4abaa4a460d",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 904,
+        "completion_tokens": 60,
+        "total_tokens": 964,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1416,
+        "completion_tokens": 59,
+        "total_tokens": 1475,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 767,
+        "completion_tokens": 43,
+        "total_tokens": 810,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 267,
+        "completion_tokens": 92,
+        "total_tokens": 359,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3354,
+        "completion_tokens": 254,
+        "total_tokens": 3608
+      }
+    }
+  },
+  {
+    "question": "Which keywords have the lowest average comment sentiment?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": "SELECT TOP 10 keyword_id, full_keyword, avg_comment_sentiment FROM analytics.vw_keyword_engagement ORDER BY avg_comment_sentiment ASC",
+    "expected_sql": "SELECT TOP 10 keyword_id, full_keyword, avg_comment_sentiment\nFROM analytics.vw_keyword_engagement\nORDER BY avg_comment_sentiment ASC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 31753.11680001323,
+    "trace_id": "3d5801a3-640f-480d-b4ee-39aaabfe77cf",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 900,
+        "completion_tokens": 56,
+        "total_tokens": 956,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1412,
+        "completion_tokens": 65,
+        "total_tokens": 1477,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 740,
+        "completion_tokens": 37,
+        "total_tokens": 777,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 423,
+        "completion_tokens": 118,
+        "total_tokens": 541,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3475,
+        "completion_tokens": 276,
+        "total_tokens": 3751
+      }
+    }
+  },
+  {
+    "question": "How many articles are associated with each keyword?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": "SELECT TOP 500 keyword_id, full_keyword, article_count FROM analytics.vw_keyword_engagement",
+    "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, article_count\nFROM analytics.vw_keyword_engagement\nORDER BY article_count DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 16123.25969999074,
+    "trace_id": "c391ca7b-06c6-49a5-92d7-4f4642c7c9b5",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 900,
+        "completion_tokens": 56,
+        "total_tokens": 956,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1412,
+        "completion_tokens": 64,
+        "total_tokens": 1476,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 740,
+        "completion_tokens": 28,
+        "total_tokens": 768,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 393,
+        "completion_tokens": 109,
+        "total_tokens": 502,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3445,
+        "completion_tokens": 257,
+        "total_tokens": 3702
+      }
+    }
+  },
+  {
+    "question": "Which keywords have more than 100 comments?",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": null,
+    "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, comment_count\nFROM analytics.vw_keyword_engagement\nWHERE comment_count > 100\n",
+    "view_match": null,
+    "validation_pass": null,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [
+      "Intent: The available views do not include keyword names or identifiers to associate comment counts with specific keywords."
+    ],
+    "latency_ms": 1338.507500011474,
+    "trace_id": "28813dc3-8630-42e8-bf07-453ecdd291ad",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 900,
+        "completion_tokens": 42,
+        "total_tokens": 942,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 900,
+        "completion_tokens": 42,
+        "total_tokens": 942
+      }
+    }
+  },
+  {
+    "question": "Show contributors with the most distinct articles commented on.",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 10 contributor_id, distinct_article_count FROM analytics.vw_top_contributors ORDER BY distinct_article_count DESC",
+    "expected_sql": "SELECT TOP 10 contributor_id, distinct_article_count\nFROM analytics.vw_top_contributors\nORDER BY distinct_article_count DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "failed",
+    "failure_reasons": [
+      "Execution: Query execution failed \u2014 the database may be unavailable."
+    ],
+    "latency_ms": 40251.59749999875,
+    "trace_id": "c5f77072-cc77-48d1-8e16-076133046863",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 901,
+        "completion_tokens": 45,
+        "total_tokens": 946,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 73,
+        "total_tokens": 1486,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 719,
+        "completion_tokens": 32,
+        "total_tokens": 751,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3033,
+        "completion_tokens": 150,
+        "total_tokens": 3183
+      }
+    }
+  },
+  {
+    "question": "Which contributors have negative average sentiment?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 500 contributor_id, avg_sentiment FROM analytics.vw_top_contributors WHERE avg_sentiment < 0",
+    "expected_sql": "SELECT TOP 500 contributor_id, avg_sentiment\nFROM analytics.vw_top_contributors\nWHERE avg_sentiment < 0\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 38891.84969998314,
+    "trace_id": "04125b6c-5879-4a6d-96ec-7312da5770a8",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 898,
+        "completion_tokens": 55,
+        "total_tokens": 953,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1410,
+        "completion_tokens": 54,
+        "total_tokens": 1464,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 716,
+        "completion_tokens": 33,
+        "total_tokens": 749,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 220,
+        "completion_tokens": 71,
+        "total_tokens": 291,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3244,
+        "completion_tokens": 213,
+        "total_tokens": 3457
+      }
+    }
+  },
+  {
+    "question": "What is the total number of replies for top contributors?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 1 SUM(total_replies) AS total_replies FROM analytics.vw_top_contributors",
+    "expected_sql": "SELECT TOP 1 SUM(total_replies) AS total_replies\nFROM analytics.vw_top_contributors\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 22286.940899997717,
+    "trace_id": "cb39fd83-da14-46c7-bf8b-b280f94e71bf",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 902,
+        "completion_tokens": 66,
+        "total_tokens": 968,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1414,
+        "completion_tokens": 76,
+        "total_tokens": 1490,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 719,
+        "completion_tokens": 29,
+        "total_tokens": 748,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 235,
+        "completion_tokens": 70,
+        "total_tokens": 305,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3270,
+        "completion_tokens": 241,
+        "total_tokens": 3511
+      }
+    }
+  },
+  {
+    "question": "List ingestion errors from the last 7 days.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 500 error_id, stage, data_id, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors WHERE attempted_at >= DATEADD(DAY, -7, GETUTCDATE()) ORDER BY attempted_at DESC",
+    "expected_sql": "SELECT TOP 500 error_id, stage, error_type, attempted_at\nFROM analytics.vw_ingestion_errors\nWHERE attempted_at >= DATEADD(DAY, -7, GETDATE())\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 7999.096000014106,
+    "trace_id": "a9e3211d-06b6-4b7f-90fd-3e18325c17a1",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 901,
+        "completion_tokens": 66,
+        "total_tokens": 967,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 68,
+        "total_tokens": 1481,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 712,
+        "completion_tokens": 58,
+        "total_tokens": 770,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 1751,
+        "completion_tokens": 145,
+        "total_tokens": 1896,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 4777,
+        "completion_tokens": 337,
+        "total_tokens": 5114
+      }
+    }
+  },
+  {
+    "question": "Which stages have the most ingestion errors?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 10 stage, COUNT(error_id) AS error_count FROM analytics.vw_ingestion_errors GROUP BY stage ORDER BY error_count DESC",
+    "expected_sql": "SELECT TOP 500 stage, COUNT(*) AS error_count\nFROM analytics.vw_ingestion_errors\nGROUP BY stage\nORDER BY error_count DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 7239.949699986028,
+    "trace_id": "4d33149d-cf22-4029-a204-b1b653ad25db",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 899,
+        "completion_tokens": 53,
+        "total_tokens": 952,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1411,
+        "completion_tokens": 62,
+        "total_tokens": 1473,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 710,
+        "completion_tokens": 37,
+        "total_tokens": 747,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 342,
+        "completion_tokens": 108,
+        "total_tokens": 450,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3362,
+        "completion_tokens": 260,
+        "total_tokens": 3622
+      }
+    }
+  },
+  {
+    "question": "Show articles with publication date in the last month.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 500 article_id, title, publication_date FROM analytics.vw_article_engagement WHERE publication_date >= DATEADD(MONTH, -1, CAST(GETDATE() AS DATE))",
+    "expected_sql": "SELECT TOP 500 article_id, title, publication_date\nFROM analytics.vw_article_engagement\nWHERE publication_date >= DATEADD(MONTH, -1, GETDATE())\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 7899.8047999921255,
+    "trace_id": "e1854654-2966-4ae0-b094-548bb90d1f3e",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 901,
+        "completion_tokens": 49,
+        "total_tokens": 950,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 59,
+        "total_tokens": 1472,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 765,
+        "completion_tokens": 47,
+        "total_tokens": 812,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 610,
+        "completion_tokens": 191,
+        "total_tokens": 801,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3689,
+        "completion_tokens": 346,
+        "total_tokens": 4035
+      }
+    }
+  },
+  {
+    "question": "Which articles have no comments?",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": null,
+    "expected_sql": "SELECT TOP 500 article_id, title\nFROM analytics.vw_article_engagement\nWHERE comment_count = 0\n",
+    "view_match": null,
+    "validation_pass": null,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [
+      "Intent: The available views do not provide article-level identifiers or details to identify which specific articles have no comments."
+    ],
+    "latency_ms": 1488.47989999922,
+    "trace_id": "fa3754ec-8997-47ac-9d39-2a9b5130694d",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 897,
+        "completion_tokens": 44,
+        "total_tokens": 941,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 897,
+        "completion_tokens": 44,
+        "total_tokens": 941
+      }
+    }
+  },
+  {
+    "question": "What is the average keyword count per article?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 1 AVG(keyword_count) AS avg_keyword_count_per_article FROM analytics.vw_article_engagement",
+    "expected_sql": "SELECT TOP 1 AVG(keyword_count) AS avg_keyword_count\nFROM analytics.vw_article_engagement\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 12402.507100021467,
+    "trace_id": "0706741a-185e-4a90-944e-5b75a9daf425",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 900,
+        "completion_tokens": 51,
+        "total_tokens": 951,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1412,
+        "completion_tokens": 56,
+        "total_tokens": 1468,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 763,
+        "completion_tokens": 30,
+        "total_tokens": 793,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 250,
+        "completion_tokens": 43,
+        "total_tokens": 293,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3325,
+        "completion_tokens": 180,
+        "total_tokens": 3505
+      }
+    }
+  },
+  {
+    "question": "Which keywords have the highest contributor count?",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": "SELECT TOP 10 keyword_id, full_keyword, contributor_count FROM analytics.vw_keyword_engagement ORDER BY contributor_count DESC",
+    "expected_sql": "SELECT TOP 10 keyword_id, full_keyword, contributor_count\nFROM analytics.vw_keyword_engagement\nORDER BY contributor_count DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "failed",
+    "failure_reasons": [
+      "Execution: Query execution failed \u2014 the database may be unavailable."
+    ],
+    "latency_ms": 39675.94429999008,
+    "trace_id": "c1e534e7-ef0c-43b0-aad7-02e94ff41d13",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 899,
+        "completion_tokens": 54,
+        "total_tokens": 953,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1411,
+        "completion_tokens": 69,
+        "total_tokens": 1480,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 739,
+        "completion_tokens": 33,
+        "total_tokens": 772,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3049,
+        "completion_tokens": 156,
+        "total_tokens": 3205
+      }
+    }
+  },
+  {
+    "question": "Show contributors with comment count between 10 and 50.",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 500 contributor_id, comment_count, avg_sentiment, total_replies, distinct_article_count FROM analytics.vw_top_contributors WHERE comment_count BETWEEN 10 AND 50",
+    "expected_sql": "SELECT TOP 500 contributor_id, comment_count, avg_sentiment\nFROM analytics.vw_top_contributors\nWHERE comment_count BETWEEN 10 AND 50\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "failed",
+    "failure_reasons": [
+      "Execution: Query execution failed \u2014 the database may be unavailable."
+    ],
+    "latency_ms": 39626.309399987804,
+    "trace_id": "5ab3a0e6-8ba9-4556-91c2-2b7c217d7fca",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 903,
+        "completion_tokens": 48,
+        "total_tokens": 951,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1415,
+        "completion_tokens": 61,
+        "total_tokens": 1476,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 721,
+        "completion_tokens": 46,
+        "total_tokens": 767,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3039,
+        "completion_tokens": 155,
+        "total_tokens": 3194
+      }
+    }
+  },
+  {
+    "question": "List all ingestion errors with error type 'validation'.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 500 error_id, stage, data_id, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors WHERE error_type = 'validation'",
+    "expected_sql": "SELECT TOP 500 error_id, data_id, error_message\nFROM analytics.vw_ingestion_errors\nWHERE error_type = 'validation'\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 8282.398400013335,
+    "trace_id": "2d25e8bf-5c89-4c19-8a0e-14505146cff5",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 902,
+        "completion_tokens": 56,
+        "total_tokens": 958,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1414,
+        "completion_tokens": 75,
+        "total_tokens": 1489,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 713,
+        "completion_tokens": 42,
+        "total_tokens": 755,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 244,
+        "completion_tokens": 95,
+        "total_tokens": 339,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3273,
+        "completion_tokens": 268,
+        "total_tokens": 3541
+      }
+    }
+  },
+  {
+    "question": "How many keywords have no associated comments?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": "SELECT TOP 1 COUNT(*) AS keywords_with_no_comments FROM analytics.vw_keyword_engagement WHERE comment_count = 0",
+    "expected_sql": "SELECT TOP 1 COUNT(*) AS keywords_with_no_comments\nFROM analytics.vw_keyword_engagement\nWHERE comment_count = 0\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 25701.392399991164,
+    "trace_id": "3e1cdadf-cb28-48a1-89de-fcf48db56fc9",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 899,
+        "completion_tokens": 63,
+        "total_tokens": 962,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1411,
+        "completion_tokens": 55,
+        "total_tokens": 1466,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 739,
+        "completion_tokens": 33,
+        "total_tokens": 772,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 255,
+        "completion_tokens": 47,
+        "total_tokens": 302,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3304,
+        "completion_tokens": 198,
+        "total_tokens": 3502
+      }
+    }
+  },
+  {
+    "question": "Show top contributors by total replies.",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 10 contributor_id, total_replies AS total_replies FROM analytics.vw_top_contributors ORDER BY total_replies DESC",
+    "expected_sql": "SELECT TOP 5 contributor_id, total_replies\nFROM analytics.vw_top_contributors\nORDER BY total_replies DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "failed",
+    "failure_reasons": [
+      "Execution: Query execution failed \u2014 the database may be unavailable."
+    ],
+    "latency_ms": 39820.86189999245,
+    "trace_id": "3010325a-1200-4d66-9238-e1c8c0f04af6",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 898,
+        "completion_tokens": 45,
+        "total_tokens": 943,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1410,
+        "completion_tokens": 66,
+        "total_tokens": 1476,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 716,
+        "completion_tokens": 36,
+        "total_tokens": 752,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3024,
+        "completion_tokens": 147,
+        "total_tokens": 3171
+      }
+    }
+  },
+  {
+    "question": "What are the most common error types in ingestion?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 10 error_type, COUNT(error_id) AS error_count FROM analytics.vw_ingestion_errors GROUP BY error_type ORDER BY error_count DESC",
+    "expected_sql": "SELECT TOP 500 error_type, COUNT(*) AS count\nFROM analytics.vw_ingestion_errors\nGROUP BY error_type\nORDER BY count DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 9492.199400003301,
+    "trace_id": "f4328f0e-aed9-48bb-9acf-c2ff749c14b5",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 901,
+        "completion_tokens": 51,
+        "total_tokens": 952,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 63,
+        "total_tokens": 1476,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 711,
+        "completion_tokens": 39,
+        "total_tokens": 750,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 347,
+        "completion_tokens": 108,
+        "total_tokens": 455,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3372,
+        "completion_tokens": 261,
+        "total_tokens": 3633
+      }
+    }
+  },
+  {
+    "question": "Which articles were inserted in the last week?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 500 article_id, title, publication_date, insert_date FROM analytics.vw_article_engagement WHERE insert_date >= DATEADD(day, -7, CAST(GETDATE() AS date)) ORDER BY insert_date DESC",
+    "expected_sql": "SELECT TOP 500 article_id, title, insert_date\nFROM analytics.vw_article_engagement\nWHERE insert_date >= DATEADD(WEEK, -1, GETDATE())\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 11497.998100006953,
+    "trace_id": "43063b42-4dbb-4d83-bd2d-607cdc7c1554",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 900,
+        "completion_tokens": 55,
+        "total_tokens": 955,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1412,
+        "completion_tokens": 56,
+        "total_tokens": 1468,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 764,
+        "completion_tokens": 53,
+        "total_tokens": 817,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 728,
+        "completion_tokens": 190,
+        "total_tokens": 918,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3804,
+        "completion_tokens": 354,
+        "total_tokens": 4158
+      }
+    }
+  },
+  {
+    "question": "Show keywords with average sentiment above 0.5.",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": "SELECT TOP 500 keyword_id, full_keyword, avg_comment_sentiment FROM analytics.vw_keyword_engagement WHERE avg_comment_sentiment > 0.5",
+    "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, avg_comment_sentiment\nFROM analytics.vw_keyword_engagement\nWHERE avg_comment_sentiment > 0.5\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "failed",
+    "failure_reasons": [
+      "Execution: Query execution failed \u2014 the database may be unavailable."
+    ],
+    "latency_ms": 40096.48800001014,
+    "trace_id": "b499a931-ef15-43b6-b518-0bfc96bbc49b",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 902,
+        "completion_tokens": 54,
+        "total_tokens": 956,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1414,
+        "completion_tokens": 64,
+        "total_tokens": 1478,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 742,
+        "completion_tokens": 40,
+        "total_tokens": 782,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3058,
+        "completion_tokens": 158,
+        "total_tokens": 3216
+      }
+    }
+  },
+  {
+    "question": "Which contributors have commented on more than 20 distinct articles?",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 500 contributor_id, distinct_article_count FROM analytics.vw_top_contributors WHERE distinct_article_count > 20",
+    "expected_sql": "SELECT TOP 500 contributor_id, distinct_article_count\nFROM analytics.vw_top_contributors\nWHERE distinct_article_count > 20\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "failed",
+    "failure_reasons": [
+      "Execution: Query execution failed \u2014 the database may be unavailable."
+    ],
+    "latency_ms": 39907.03940001549,
+    "trace_id": "5ea9c928-f9e0-4466-b648-1a544f859748",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 903,
+        "completion_tokens": 51,
+        "total_tokens": 954,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1415,
+        "completion_tokens": 80,
+        "total_tokens": 1495,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 721,
+        "completion_tokens": 33,
+        "total_tokens": 754,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3039,
+        "completion_tokens": 164,
+        "total_tokens": 3203
+      }
+    }
+  },
+  {
+    "question": "List ingestion errors with messages containing 'timeout'.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 500 error_id, stage, data_id, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors WHERE error_message LIKE '%timeout%'",
+    "expected_sql": "SELECT TOP 500 error_id, error_message, attempted_at\nFROM analytics.vw_ingestion_errors\nWHERE error_message LIKE '%timeout%'\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 9398.185400001239,
+    "trace_id": "481e8cba-a9c4-4178-8a03-3c951382c654",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 901,
+        "completion_tokens": 66,
+        "total_tokens": 967,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 61,
+        "total_tokens": 1474,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 712,
+        "completion_tokens": 43,
+        "total_tokens": 755,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 244,
+        "completion_tokens": 95,
+        "total_tokens": 339,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3270,
+        "completion_tokens": 265,
+        "total_tokens": 3535
+      }
+    }
+  },
+  {
+    "question": "What is the total keyword count across all articles?",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 1 SUM(keyword_count) AS total_keyword_count FROM analytics.vw_article_engagement",
+    "expected_sql": "SELECT TOP 1 SUM(keyword_count) AS total_keyword_count\nFROM analytics.vw_article_engagement\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "failed",
+    "failure_reasons": [
+      "Execution: Query execution failed \u2014 the database may be unavailable."
+    ],
+    "latency_ms": 39759.484399983194,
+    "trace_id": "62177b3e-ac1d-44ba-a1b7-10f4655159df",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 901,
+        "completion_tokens": 52,
+        "total_tokens": 953,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 68,
+        "total_tokens": 1481,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 764,
+        "completion_tokens": 28,
+        "total_tokens": 792,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3078,
+        "completion_tokens": 148,
+        "total_tokens": 3226
+      }
+    }
+  },
+  {
+    "question": "Which keywords have the most comments?",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": "SELECT TOP 10 keyword_id, full_keyword, comment_count FROM analytics.vw_keyword_engagement ORDER BY comment_count DESC",
+    "expected_sql": "SELECT TOP 10 keyword_id, full_keyword, comment_count\nFROM analytics.vw_keyword_engagement\nORDER BY comment_count DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "failed",
+    "failure_reasons": [
+      "Execution: Query execution failed \u2014 the database may be unavailable."
+    ],
+    "latency_ms": 40660.49050001311,
+    "trace_id": "04b57418-7b6d-4ab0-95c7-ae5c590d017e",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 898,
+        "completion_tokens": 53,
+        "total_tokens": 951,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1410,
+        "completion_tokens": 55,
+        "total_tokens": 1465,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 738,
+        "completion_tokens": 33,
+        "total_tokens": 771,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3046,
+        "completion_tokens": 141,
+        "total_tokens": 3187
+      }
+    }
+  },
+  {
+    "question": "Show contributors with average sentiment between 0.1 and 0.3.",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 500 contributor_id, avg_sentiment FROM analytics.vw_top_contributors WHERE avg_sentiment BETWEEN 0.1 AND 0.3",
+    "expected_sql": "SELECT TOP 500 contributor_id, avg_sentiment\nFROM analytics.vw_top_contributors\nWHERE avg_sentiment BETWEEN 0.1 AND 0.3\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "failed",
+    "failure_reasons": [
+      "Execution: Query execution failed \u2014 the database may be unavailable."
+    ],
+    "latency_ms": 40508.326400013175,
+    "trace_id": "888a5714-dff4-4b1d-a847-8fedca09a649",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 907,
+        "completion_tokens": 60,
+        "total_tokens": 967,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1419,
+        "completion_tokens": 78,
+        "total_tokens": 1497,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 725,
+        "completion_tokens": 40,
+        "total_tokens": 765,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3051,
+        "completion_tokens": 178,
+        "total_tokens": 3229
+      }
+    }
+  },
+  {
+    "question": "How many ingestion errors occurred in each stage?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 500 error_id, stage, COUNT(error_id) AS error_count FROM analytics.vw_ingestion_errors GROUP BY stage, error_id",
+    "expected_sql": "SELECT TOP 500 stage, COUNT(*) AS error_count\nFROM analytics.vw_ingestion_errors\nGROUP BY stage\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 7788.382300001103,
+    "trace_id": "11c35c9a-4999-4415-8b24-5913805d58c2",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 900,
+        "completion_tokens": 57,
+        "total_tokens": 957,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1412,
+        "completion_tokens": 66,
+        "total_tokens": 1478,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 711,
+        "completion_tokens": 38,
+        "total_tokens": 749,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 384,
+        "completion_tokens": 124,
+        "total_tokens": 508,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3407,
+        "completion_tokens": 285,
+        "total_tokens": 3692
+      }
+    }
+  },
+  {
+    "question": "Which articles have the oldest publication dates?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 10 article_id, title, publication_date FROM analytics.vw_article_engagement ORDER BY publication_date ASC",
+    "expected_sql": "SELECT TOP 5 article_id, title, publication_date\nFROM analytics.vw_article_engagement\nORDER BY publication_date ASC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 8586.037200002465,
+    "trace_id": "7fb192f9-450b-4426-9874-aceaaa22ee1b",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 899,
+        "completion_tokens": 47,
+        "total_tokens": 946,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1411,
+        "completion_tokens": 54,
+        "total_tokens": 1465,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 763,
+        "completion_tokens": 32,
+        "total_tokens": 795,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 564,
+        "completion_tokens": 195,
+        "total_tokens": 759,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3637,
+        "completion_tokens": 328,
+        "total_tokens": 3965
+      }
+    }
+  },
+  {
+    "question": "Show keywords with article count less than 5.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": "SELECT TOP 500 keyword_id, full_keyword, article_count FROM analytics.vw_keyword_engagement WHERE article_count < 5",
+    "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, article_count\nFROM analytics.vw_keyword_engagement\nWHERE article_count < 5\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 13185.969099984504,
+    "trace_id": "1a96f91e-ab5c-4ac6-9299-f54220527cff",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 901,
+        "completion_tokens": 47,
+        "total_tokens": 948,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 73,
+        "total_tokens": 1486,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 741,
+        "completion_tokens": 34,
+        "total_tokens": 775,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 395,
+        "completion_tokens": 132,
+        "total_tokens": 527,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3450,
+        "completion_tokens": 286,
+        "total_tokens": 3736
+      }
+    }
+  },
+  {
+    "question": "Which contributors have the lowest comment count?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 10 contributor_id, comment_count FROM analytics.vw_top_contributors ORDER BY comment_count ASC",
+    "expected_sql": "SELECT TOP 10 contributor_id, comment_count\nFROM analytics.vw_top_contributors\nORDER BY comment_count ASC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 16035.400499997195,
+    "trace_id": "2b8c0f3d-e9b3-4846-b74c-a5c0f1bafa6f",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 899,
+        "completion_tokens": 58,
+        "total_tokens": 957,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1411,
+        "completion_tokens": 56,
+        "total_tokens": 1467,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 717,
+        "completion_tokens": 30,
+        "total_tokens": 747,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 412,
+        "completion_tokens": 177,
+        "total_tokens": 589,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3439,
+        "completion_tokens": 321,
+        "total_tokens": 3760
+      }
+    }
+  },
+  {
+    "question": "List ingestion errors attempted after a specific date.",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 500 error_id, stage, data_id, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors WHERE attempted_at > @specific_date ORDER BY attempted_at DESC",
+    "expected_sql": "SELECT TOP 500 error_id, attempted_at\nFROM analytics.vw_ingestion_errors\nWHERE attempted_at > '2025-01-01'\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "failed",
+    "failure_reasons": [
+      "Execution: Query execution failed \u2014 the database may be unavailable."
+    ],
+    "latency_ms": 6133.655699988594,
+    "trace_id": "c7a57871-004e-440c-a989-f51f856067e3",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 900,
+        "completion_tokens": 74,
+        "total_tokens": 974,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1412,
+        "completion_tokens": 63,
+        "total_tokens": 1475,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 711,
+        "completion_tokens": 48,
+        "total_tokens": 759,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3023,
+        "completion_tokens": 185,
+        "total_tokens": 3208
+      }
+    }
+  },
+  {
+    "question": "What is the maximum comment count for any article?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 1 MAX(comment_count) AS max_comment_count FROM analytics.vw_article_engagement",
+    "expected_sql": "SELECT TOP 1 MAX(comment_count) AS max_comment_count\nFROM analytics.vw_article_engagement\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 9561.809300008463,
+    "trace_id": "db77e76e-ff76-4e49-ab61-8c0b654782e9",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 901,
+        "completion_tokens": 46,
+        "total_tokens": 947,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 55,
+        "total_tokens": 1468,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 764,
+        "completion_tokens": 28,
+        "total_tokens": 792,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 248,
+        "completion_tokens": 47,
+        "total_tokens": 295,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3326,
+        "completion_tokens": 176,
+        "total_tokens": 3502
+      }
+    }
+  },
+  {
+    "question": "Which keywords have contributor count greater than 50?",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": "SELECT TOP 500 keyword_id, full_keyword, contributor_count FROM analytics.vw_keyword_engagement WHERE contributor_count > 50",
+    "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, contributor_count\nFROM analytics.vw_keyword_engagement\nWHERE contributor_count > 50\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "failed",
+    "failure_reasons": [
+      "Execution: Query execution failed \u2014 the database may be unavailable."
+    ],
+    "latency_ms": 41465.41159998742,
+    "trace_id": "937c9bde-3a99-4d92-a708-9a0845895296",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 901,
+        "completion_tokens": 53,
+        "total_tokens": 954,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 74,
+        "total_tokens": 1487,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 741,
+        "completion_tokens": 34,
+        "total_tokens": 775,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3055,
+        "completion_tokens": 161,
+        "total_tokens": 3216
+      }
+    }
+  },
+  {
+    "question": "Show contributors with total replies less than 10.",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 500 contributor_id, comment_count, avg_sentiment, total_replies, distinct_article_count FROM analytics.vw_top_contributors WHERE total_replies < 10",
+    "expected_sql": "SELECT TOP 500 contributor_id, total_replies\nFROM analytics.vw_top_contributors\nWHERE total_replies < 10\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "failed",
+    "failure_reasons": [
+      "Execution: Query execution failed \u2014 the database may be unavailable."
+    ],
+    "latency_ms": 40804.953399987426,
+    "trace_id": "71a779bc-d243-4628-9322-7b23efbcf6fb",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 901,
+        "completion_tokens": 51,
+        "total_tokens": 952,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 77,
+        "total_tokens": 1490,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 719,
+        "completion_tokens": 44,
+        "total_tokens": 763,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3033,
+        "completion_tokens": 172,
+        "total_tokens": 3205
+      }
+    }
+  },
+  {
+    "question": "How many ingestion errors have error type 'network'?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 1 COUNT(error_id) AS network_error_count FROM analytics.vw_ingestion_errors WHERE error_type = 'network'",
+    "expected_sql": "SELECT TOP 1 COUNT(*) AS error_count\nFROM analytics.vw_ingestion_errors\nWHERE error_type = 'network'\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 7951.0774000082165,
+    "trace_id": "ed59b6e8-cea1-41ed-8a7e-4c2a3622e421",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 902,
+        "completion_tokens": 54,
+        "total_tokens": 956,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1414,
+        "completion_tokens": 70,
+        "total_tokens": 1484,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 713,
+        "completion_tokens": 34,
+        "total_tokens": 747,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 250,
+        "completion_tokens": 57,
+        "total_tokens": 307,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3279,
+        "completion_tokens": 215,
+        "total_tokens": 3494
+      }
+    }
+  },
+  {
+    "question": "Which articles have publication date in 2024?",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_article_engagement",
+    "generated_sql": "SELECT TOP 500 article_id, title, publication_date FROM analytics.vw_article_engagement WHERE YEAR(publication_date) = 2024",
+    "expected_sql": "SELECT TOP 500 article_id, title, publication_date\nFROM analytics.vw_article_engagement\nWHERE YEAR(publication_date) = 2024\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 8063.135300006252,
+    "trace_id": "11d824c0-f75c-4d70-aba9-cd443248b776",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 901,
+        "completion_tokens": 53,
+        "total_tokens": 954,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 60,
+        "total_tokens": 1473,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 765,
+        "completion_tokens": 37,
+        "total_tokens": 802,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 242,
+        "completion_tokens": 51,
+        "total_tokens": 293,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3321,
+        "completion_tokens": 201,
+        "total_tokens": 3522
+      }
+    }
+  },
+  {
+    "question": "Show keywords ordered by average sentiment descending.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_keyword_engagement",
+    "generated_sql": "SELECT TOP 10 keyword_id, full_keyword, avg_comment_sentiment AS avg_sentiment FROM analytics.vw_keyword_engagement ORDER BY avg_comment_sentiment DESC",
+    "expected_sql": "SELECT TOP 500 keyword_id, full_keyword, avg_comment_sentiment\nFROM analytics.vw_keyword_engagement\nORDER BY avg_comment_sentiment DESC\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 35359.98510001809,
+    "trace_id": "38e2798e-3a84-459c-aa35-6c89d22c1e43",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 899,
+        "completion_tokens": 56,
+        "total_tokens": 955,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1411,
+        "completion_tokens": 59,
+        "total_tokens": 1470,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 739,
+        "completion_tokens": 41,
+        "total_tokens": 780,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 421,
+        "completion_tokens": 127,
+        "total_tokens": 548,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3470,
+        "completion_tokens": 283,
+        "total_tokens": 3753
+      }
+    }
+  },
+  {
+    "question": "Which contributors have distinct article count equal to 1?",
+    "case_type": "positive",
+    "status": "fail",
+    "expected_view": "analytics.vw_top_contributors",
+    "generated_sql": "SELECT TOP 500 contributor_id, distinct_article_count FROM analytics.vw_top_contributors WHERE distinct_article_count = 1",
+    "expected_sql": "SELECT TOP 500 contributor_id, distinct_article_count\nFROM analytics.vw_top_contributors\nWHERE distinct_article_count = 1\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "failed",
+    "failure_reasons": [
+      "Execution: Query execution failed \u2014 the database may be unavailable."
+    ],
+    "latency_ms": 40156.32409998216,
+    "trace_id": "ca5c6c40-5151-4c4e-9c69-348d4fdd83d6",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 902,
+        "completion_tokens": 56,
+        "total_tokens": 958,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1414,
+        "completion_tokens": 69,
+        "total_tokens": 1483,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 720,
+        "completion_tokens": 33,
+        "total_tokens": 753,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3036,
+        "completion_tokens": 158,
+        "total_tokens": 3194
+      }
+    }
+  },
+  {
+    "question": "List ingestion errors with stage 'extraction'.",
+    "case_type": "positive",
+    "status": "pass",
+    "expected_view": "analytics.vw_ingestion_errors",
+    "generated_sql": "SELECT TOP 500 error_id, stage, data_id, error_type, error_message, attempted_at FROM analytics.vw_ingestion_errors WHERE stage = 'extraction'",
+    "expected_sql": "SELECT TOP 500 error_id, data_id, error_message\nFROM analytics.vw_ingestion_errors\nWHERE stage = 'extraction'\n",
+    "view_match": true,
+    "validation_pass": true,
+    "metric_present": true,
+    "execution_status": "success",
+    "failure_reasons": [],
+    "latency_ms": 9301.766699994914,
+    "trace_id": "8e665bec-dcd3-4ae1-aa04-b02fb0044cc4",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 901,
+        "completion_tokens": 57,
+        "total_tokens": 958,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "view_selection": {
+        "prompt_tokens": 1413,
+        "completion_tokens": 84,
+        "total_tokens": 1497,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "sql_generation": {
+        "prompt_tokens": 712,
+        "completion_tokens": 42,
+        "total_tokens": 754,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "answer_generation": {
+        "prompt_tokens": 243,
+        "completion_tokens": 96,
+        "total_tokens": 339,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 3269,
+        "completion_tokens": 279,
+        "total_tokens": 3548
+      }
+    }
+  },
+  {
+    "question": "What will article engagement look like next quarter?",
+    "case_type": "negative_question",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "",
+    "view_match": null,
+    "validation_pass": null,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 1329.4731999922078,
+    "trace_id": "5131b1ba-2710-486d-9d86-e0b76013eecc",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 900,
+        "completion_tokens": 47,
+        "total_tokens": 947,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 900,
+        "completion_tokens": 47,
+        "total_tokens": 947
+      }
+    }
+  },
+  {
+    "question": "Why do some articles generate more comments than others?",
+    "case_type": "negative_question",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "",
+    "view_match": null,
+    "validation_pass": null,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 1041.5324000059627,
+    "trace_id": "2b6a31e1-ba9a-4f6a-9e96-3f45f24506ba",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 901,
+        "completion_tokens": 42,
+        "total_tokens": 943,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 901,
+        "completion_tokens": 42,
+        "total_tokens": 943
+      }
+    }
+  },
+  {
+    "question": "Show me the stock price for articles published today",
+    "case_type": "negative_question",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "",
+    "view_match": null,
+    "validation_pass": null,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": 1096.7193999968003,
+    "trace_id": "7b6077b4-ce7c-499c-81a4-fd89fb4ec891",
+    "token_usage": {
+      "intent": {
+        "prompt_tokens": 901,
+        "completion_tokens": 37,
+        "total_tokens": 938,
+        "model_name": "gpt-4.1-mini-2025-04-14"
+      },
+      "total": {
+        "prompt_tokens": 901,
+        "completion_tokens": 37,
+        "total_tokens": 938
+      }
+    }
+  },
+  {
+    "question": "INSERT not allowed",
+    "case_type": "negative_sql",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "INSERT INTO analytics.vw_article_engagement VALUES (1)",
+    "view_match": null,
+    "validation_pass": true,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": null,
+    "trace_id": "1a5fd16c-99de-431e-ae24-9928f8fb0773",
+    "token_usage": {
+      "total": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  },
+  {
+    "question": "DDL not allowed",
+    "case_type": "negative_sql",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "DROP TABLE analytics.vw_article_engagement",
+    "view_match": null,
+    "validation_pass": true,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": null,
+    "trace_id": "41ea9869-94ef-4d57-ab20-0943fb1ab2c3",
+    "token_usage": {
+      "total": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  },
+  {
+    "question": "Raw dbo.* table access not allowed",
+    "case_type": "negative_sql",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "SELECT * FROM dbo.core_articles",
+    "view_match": null,
+    "validation_pass": true,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": null,
+    "trace_id": "64d006f0-1f56-47c1-b577-d0159378c1c3",
+    "token_usage": {
+      "total": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  },
+  {
+    "question": "Missing TOP/LIMIT clause",
+    "case_type": "negative_sql",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "SELECT * FROM analytics.vw_article_engagement",
+    "view_match": null,
+    "validation_pass": true,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": null,
+    "trace_id": "c023802e-8518-4432-8b66-8c2027bb5a31",
+    "token_usage": {
+      "total": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  },
+  {
+    "question": "DML not allowed",
+    "case_type": "negative_sql",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "UPDATE analytics.vw_article_engagement SET comment_count = 0",
+    "view_match": null,
+    "validation_pass": true,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": null,
+    "trace_id": "181eacc0-69a0-4bc3-96aa-7939f0189533",
+    "token_usage": {
+      "total": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  },
+  {
+    "question": "Exceeds row limit",
+    "case_type": "negative_sql",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "SELECT TOP 501 * FROM analytics.vw_article_engagement",
+    "view_match": null,
+    "validation_pass": true,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": null,
+    "trace_id": "8f701f0e-1989-4155-8ce8-0319b824ac5f",
+    "token_usage": {
+      "total": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  },
+  {
+    "question": "Multi-statement query not allowed",
+    "case_type": "negative_sql",
+    "status": "pass",
+    "expected_view": "none",
+    "generated_sql": null,
+    "expected_sql": "SELECT TOP 10 article_id FROM analytics.vw_article_engagement; SELECT TOP 5 keyword_id FROM analytics.vw_keyword_engagement",
+    "view_match": null,
+    "validation_pass": true,
+    "metric_present": null,
+    "execution_status": null,
+    "failure_reasons": [],
+    "latency_ms": null,
+    "trace_id": "99f769dd-e36a-4d22-9ff9-88297755255f",
+    "token_usage": {
+      "total": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  }
+]
