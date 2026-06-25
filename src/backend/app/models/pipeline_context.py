@@ -39,3 +39,8 @@ class PipelineContext:
     # Read by SQLGenerationStage on retry to inject the error as a correction hint into
     # the prompt. Cleared to None when validation passes.
     sql_validation_error: str | None = None
+
+    # Pre-fetched once by the pipeline before the SQL retry loop and shared with both
+    # SQLGenerationStage (prompt) and SQLValidationStage (enforcement) to avoid
+    # reloading approved_joins.yml on every retry attempt.
+    joins_config: dict | None = None

@@ -3,7 +3,6 @@ import time
 from ..core.sql_safety import validate_query, validate_sql_metadata, SQLSafetyError
 from ..models.pipeline_context import PipelineContext
 from ..models.trace import ValidationResult
-from ..services.metadata_service import get_approved_joins
 from .base import Stage
 
 
@@ -19,7 +18,8 @@ class SQLValidationStage(Stage):
         """
         t0 = time.perf_counter()
 
-        joins_config = await get_approved_joins()
+        # joins_config is pre-fetched once by the pipeline before the retry loop
+        joins_config = ctx.joins_config or {}
         approved_pairs: set[frozenset] = {
             frozenset(entry["views"])
             for entry in joins_config.get("approved_joins", [])

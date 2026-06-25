@@ -174,12 +174,16 @@ def _check_columns_exist(
             )
 
 
-def _check_mandatory_filters(tree: exp.Expression, metadata_context: dict) -> None:
+def _check_mandatory_filters(
+    tree: exp.Expression, metadata_context: dict, views_in_query: set[str]
+) -> None:
     where = tree.find(exp.Where)
     where_cols: set[str] = (
         {col.name.lower() for col in where.find_all(exp.Column)} if where else set()
     )
     for view_name, view_data in metadata_context.items():
+        if view_name.lower() not in views_in_query:
+            continue  # view not referenced in this query — its filters are irrelevant
         for required in (view_data.get("mandatory_filters") or []):
             if required.lower() not in where_cols:
                 raise SQLSafetyError(
@@ -211,9 +215,11 @@ def validate_sql_metadata(sql: str, metadata_context: dict) -> None:
 
     # alias → full view name (e.g. "a" → "analytics.vw_article_engagement")
     alias_to_view: dict[str, str] = {}
+    views_in_query: set[str] = set()
     for table in tree.find_all(exp.Table):
         db = (table.args.get("db") or exp.Identifier(this="")).name.lower()
         full = f"{db}.{table.name.lower()}" if db else table.name.lower()
+        views_in_query.add(full)
         if table.alias:
             alias_to_view[table.alias.lower()] = full
 
@@ -232,7 +238,7 @@ def validate_sql_metadata(sql: str, metadata_context: dict) -> None:
     if not tree.find(exp.Star):
         _check_columns_exist(tree, alias_to_view, known_columns, all_known, select_aliases)
 
-    _check_mandatory_filters(tree, metadata_context)
+    _check_mandatory_filters(tree, metadata_context, views_in_query)
 
 
 def validate_query(

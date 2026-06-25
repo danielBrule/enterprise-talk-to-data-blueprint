@@ -21,6 +21,7 @@ from ..core.input_safety import validate_user_input, InputSafetyError
 from ..core.logger import logger
 from ..core.trace_store import TraceStore
 from ..services.llm_service import APITimeoutError
+from ..services.metadata_service import get_approved_joins
 from ..db.data_quality_store import DataQualityStore
 from ..stages.answer import AnswerService, AnswerStage
 
@@ -87,15 +88,24 @@ class TalkToDataPipeline:
         self._trace_store = trace_store or TraceStore()
         self._quality_store = quality_store or DataQualityStore()
 
-        self.stages: "list[Stage]" = [
+        # Named references for the SQL retry sub-loop — avoids brittle positional indexing
+        self._pre_sql_stages: "list[Stage]" = [
             IntentStage(self.intent_service),
             ViewSelectionStage(self.view_selection_service),
             MetadataStage(),
-            SQLGenerationStage(self.sql_generation_service),
-            SQLValidationStage(),
+        ]
+        self._sql_gen_stage = SQLGenerationStage(self.sql_generation_service)
+        self._sql_val_stage = SQLValidationStage()
+        self._post_sql_stages: "list[Stage]" = [
             ExecutionStage(),
             AnswerStage(self.answer_service, self._quality_store),
         ]
+        # Kept for test introspection (monkeypatch.setattr targets this attribute)
+        self.stages = (
+            self._pre_sql_stages
+            + [self._sql_gen_stage, self._sql_val_stage]
+            + self._post_sql_stages
+        )
 
     async def run(self, request: AskRequest, user: ResolvedUser) -> AskResponse:
         ctx = PipelineContext(
@@ -161,23 +171,26 @@ class TalkToDataPipeline:
             return None
 
         # Stages 1–3: intent, view_selection, metadata (linear, no retry)
-        for stage in self.stages[:3]:
+        for stage in self._pre_sql_stages:
             if r := _to_response(await stage.run(ctx)):
                 return r
             if r := _budget_response():
                 return r
 
+        # Load join policy once — shared with both sql_gen (prompt) and sql_val (enforcement)
+        # so approved_joins.yml is not re-read on every retry attempt.
+        ctx.joins_config = await get_approved_joins()
+
         # Stages 4–5: SQL generation + validation with self-correction retry loop.
         # SQLValidationStage stores the error in ctx.sql_validation_error rather than
         # refusing directly, so the generation stage can receive it as a correction hint.
-        sql_gen_stage, sql_val_stage = self.stages[3], self.stages[4]
         for attempt in range(1, max_sql_retries + 2):
-            if r := _to_response(await sql_gen_stage.run(ctx)):
+            if r := _to_response(await self._sql_gen_stage.run(ctx)):
                 return r
             if r := _budget_response():
                 return r
 
-            await sql_val_stage.run(ctx)
+            await self._sql_val_stage.run(ctx)
 
             if ctx.sql_validation_error is None:
                 break  # validation passed — proceed to execution
@@ -202,7 +215,7 @@ class TalkToDataPipeline:
             )
 
         # Stages 6–7: execution, answer (linear, no retry)
-        for stage in self.stages[5:]:
+        for stage in self._post_sql_stages:
             if r := _to_response(await stage.run(ctx)):
                 return r
             if r := _budget_response():

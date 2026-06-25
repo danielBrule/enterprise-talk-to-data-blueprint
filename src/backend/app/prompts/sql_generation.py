@@ -1,4 +1,4 @@
-PROMPT_VERSION = "sql_gen_v5"
+PROMPT_VERSION = "sql_gen_v6"
 
 
 def build_sql_generation_prompt(

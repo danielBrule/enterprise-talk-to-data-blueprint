@@ -4,7 +4,6 @@ import time
 from dataclasses import dataclass, field
 
 from ..services.llm_service import LLMService
-from ..services.metadata_service import get_approved_joins
 from ..prompts.sql_generation import PROMPT_VERSION, build_sql_generation_prompt
 from ..core.config import settings
 from ..core.logger import logger
@@ -104,7 +103,7 @@ class SQLGenerationService:
             result = json.loads(clean)
             sql = result.get("sql", "").strip()
             logger.info(
-                "sql_generation.complete question=%s sql_preview=%s",
+                "sql_generation.generated question=%s sql_preview=%s",
                 question[:60],
                 sql[:80],
             )
@@ -136,16 +135,19 @@ class SQLGenerationStage(Stage):
     async def run(self, ctx: PipelineContext) -> Refusal | None:
         t0 = time.perf_counter()
 
-        # Track retries: first call has no error, subsequent calls have a correction hint
         is_retry = ctx.sql_validation_error is not None
         if is_retry:
             ctx.trace.sql_retries += 1
+        attempt_num = ctx.trace.sql_retries + 1  # 1-based; sql_retries=0 on first attempt
+        logger.info(
+            "sql_generation.attempt attempt=%d is_retry=%s question=%s",
+            attempt_num, is_retry, ctx.question[:60],
+        )
 
-        joins = await get_approved_joins()
         result = await self.sql_generation_service.generate(
             ctx.question,
             ctx.metadata_context or {},
-            joins=joins,
+            joins=ctx.joins_config,  # pre-fetched once by the pipeline before the retry loop
             correction=ctx.sql_validation_error,
         )
 
@@ -160,8 +162,7 @@ class SQLGenerationStage(Stage):
             "total_tokens": prev.get("total_tokens", 0) + result.token_usage.get("total_tokens", 0),
         }
 
-        if result.sql:
-            ctx.trace.sql_attempts.append(result.sql)
+        ctx.trace.sql_attempts.append(result.sql)  # always recorded — empty string included for debug
         ctx.trace.generated_sql = result.sql  # overwritten each attempt; final value = last attempt
         ctx.trace.prompt_versions["sql_generation"] = result.prompt_version
         ctx.trace.model_deployments["sql_generation"] = result.model_deployment

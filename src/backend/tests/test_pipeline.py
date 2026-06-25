@@ -103,6 +103,41 @@ def _build_pipeline(monkeypatch):
     )
 
 
+def test_pipeline_stage_order(monkeypatch):
+    """
+    Pipeline must expose exactly 7 stages in the correct order, and the named
+    retry-loop references must point to the same objects as their list positions.
+    A failed assertion here means a stage was added, removed, or reordered without
+    updating the retry sub-loop wiring.
+    """
+    from backend.app.stages.intent import IntentStage
+    from backend.app.stages.view_selection import ViewSelectionStage
+    from backend.app.stages.metadata import MetadataStage
+    from backend.app.stages.sql_generation import SQLGenerationStage
+    from backend.app.stages.sql_validation import SQLValidationStage
+    from backend.app.stages.execution import ExecutionStage
+    from backend.app.stages.answer import AnswerStage
+
+    pipeline = _build_pipeline(monkeypatch)
+
+    expected_order = [
+        IntentStage, ViewSelectionStage, MetadataStage,
+        SQLGenerationStage, SQLValidationStage,
+        ExecutionStage, AnswerStage,
+    ]
+    assert len(pipeline.stages) == len(expected_order), (
+        f"Expected {len(expected_order)} stages, got {len(pipeline.stages)}"
+    )
+    for i, (stage, cls) in enumerate(zip(pipeline.stages, expected_order)):
+        assert isinstance(stage, cls), (
+            f"stages[{i}] is {type(stage).__name__}, expected {cls.__name__}"
+        )
+
+    # Named retry-loop stages must be the same objects as their positions in the list
+    assert pipeline._sql_gen_stage is pipeline.stages[3]
+    assert pipeline._sql_val_stage is pipeline.stages[4]
+
+
 async def test_pipeline_happy_path(monkeypatch):
     pipeline = _build_pipeline(monkeypatch)
 
