@@ -34,7 +34,7 @@ Validated by a pure-Python rule engine in stage 5. No LLM involved. The query is
 | 8 | **No DDL / DML** — DROP, INSERT, UPDATE, DELETE, MERGE, TRUNCATE, EXECUTE, GRANT are blocked as dangerous keywords | ✅ | `app/core/sql_safety.py` |
 | 9 | **No multi-statement** — semicolons inside the query body are rejected | ✅ | `app/core/sql_safety.py` |
 | 10 | **Row limit required** — TOP / LIMIT clause is mandatory; max 500 rows enforced | ✅ | `app/core/sql_safety.py` |
-| 11 | **JOIN allowlist** — cross-view JOINs validated against an approved join register | 🔜 | `app/core/sql_safety.py` (validation, Task 9) |
+| 11 | **JOIN allowlist** — cross-view JOINs validated against an approved join register. Scans the full SQL string (not just JOIN clauses) so subquery and CTE references are caught. Blocked when any view pair is not in `approved_joins.yml`; skips check when no policy is loaded (backward compat). Currently all cross-view pairs are forbidden. | ✅ | `app/core/sql_safety.py`, `app/stages/sql_validation.py` |
 | 12 | **Metric and filter validation** — generated SQL checked against mandatory filters declared in view metadata | 🔜 | planned |
 
 ---

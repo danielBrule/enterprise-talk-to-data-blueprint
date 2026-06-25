@@ -184,3 +184,66 @@ def test_validate_query_multi_statement_rejected():
 def test_validate_query_trailing_semicolon_allowed():
     """Valid: A lone trailing semicolon is permitted (not a multi-statement)"""
     validate_query("SELECT TOP 10 article_id FROM analytics.vw_article_engagement;")
+
+
+# ── Join register (Rule 6) ──────────────────────────────────────────────────────
+
+_AE = "analytics.vw_article_engagement"
+_KE = "analytics.vw_keyword_engagement"
+_TC = "analytics.vw_top_contributors"
+
+_APPROVED_AE_KE: set[frozenset] = {frozenset({_AE, _KE})}
+_EMPTY_REGISTER: set[frozenset] = set()
+
+
+def test_join_policy_single_view_passes():
+    """Valid: single view always passes even with an empty register"""
+    validate_query(
+        "SELECT TOP 10 article_id FROM analytics.vw_article_engagement",
+        approved_pairs=_EMPTY_REGISTER,
+    )
+
+
+def test_join_policy_cross_view_blocked_by_empty_register():
+    """Invalid: explicit JOIN blocked when pair not in approved list"""
+    with pytest.raises(SQLSafetyError, match="Cross-view query not allowed"):
+        validate_query(
+            f"SELECT TOP 50 a.article_id FROM {_AE} a JOIN {_KE} k ON a.id = k.id",
+            approved_pairs=_EMPTY_REGISTER,
+        )
+
+
+def test_join_policy_cross_view_allowed_by_register():
+    """Valid: JOIN passes when pair is explicitly approved"""
+    validate_query(
+        f"SELECT TOP 50 a.article_id FROM {_AE} a JOIN {_KE} k ON a.id = k.id",
+        approved_pairs=_APPROVED_AE_KE,
+    )
+
+
+def test_join_policy_subquery_cross_view_blocked():
+    """Invalid: cross-view reference inside a subquery is also blocked"""
+    with pytest.raises(SQLSafetyError, match="Cross-view query not allowed"):
+        validate_query(
+            f"SELECT TOP 50 article_id FROM {_AE} "
+            f"WHERE article_id IN (SELECT article_id FROM {_KE})",
+            approved_pairs=_EMPTY_REGISTER,
+        )
+
+
+def test_join_policy_three_views_partial_approval_blocked():
+    """Invalid: three views where only one pair is approved — second pair still blocked"""
+    with pytest.raises(SQLSafetyError, match="Cross-view query not allowed"):
+        validate_query(
+            f"SELECT TOP 50 a.article_id FROM {_AE} a "
+            f"JOIN {_KE} k ON a.id = k.id "
+            f"JOIN {_TC} t ON t.id = a.id",
+            approved_pairs=_APPROVED_AE_KE,
+        )
+
+
+def test_join_policy_skipped_when_no_policy_provided():
+    """Valid: cross-view JOIN passes when approved_pairs=None (backward compat)"""
+    validate_query(
+        f"SELECT TOP 50 a.article_id FROM {_AE} a JOIN {_KE} k ON a.id = k.id"
+    )

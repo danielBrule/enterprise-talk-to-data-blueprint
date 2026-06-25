@@ -1,4 +1,5 @@
 import re
+from itertools import combinations
 
 from .config import settings
 from .logger import logger
@@ -94,9 +95,32 @@ def _check_row_limit(normalized: str, params: dict | None) -> None:
         raise SQLSafetyError(f"{clause} value {value} exceeds maximum of {MAX_LIMIT}")
 
 
+def _check_no_forbidden_joins(sql: str, approved_pairs: set[frozenset]) -> None:
+    """
+    Block any SQL that references more than one analytics view unless every
+    view pair it touches is listed in the approved join register.
+
+    Scans the full SQL string (not just JOIN clauses) so subquery and CTE
+    cross-view references are caught alongside explicit JOINs.
+    """
+    found = {m.lower() for m in re.findall(r"analytics\.\w+", sql, re.IGNORECASE)}
+    if len(found) < 2:
+        return
+    for a, b in combinations(sorted(found), 2):
+        if frozenset({a, b}) not in approved_pairs:
+            raise SQLSafetyError(
+                f"Cross-view query not allowed: {a} and {b} cannot be used together. "
+                "Query each view independently."
+            )
+
+
 # ── Public API ─────────────────────────────────────────────────────────────────
 
-def validate_query(query: str, params: dict | None = None) -> None:
+def validate_query(
+    query: str,
+    params: dict | None = None,
+    approved_pairs: set[frozenset] | None = None,
+) -> None:
     """
     Validate that a SQL query is safe to execute against the analytics views.
 
@@ -106,6 +130,8 @@ def validate_query(query: str, params: dict | None = None) -> None:
     - Rule 2b : No dangerous keywords (INSERT, UPDATE, DELETE, DROP, MERGE, …)
     - Rule 3  : No direct dbo.* table access (analytics.* views only)
     - Rule 4/5: Must include SELECT TOP or LIMIT; value must be 1–MAX_LIMIT
+    - Rule 6  : Cross-view references only allowed for approved pairs (when
+                approved_pairs is provided — skipped if None for backward compat)
     """
     if not query or not isinstance(query, str):
         raise SQLSafetyError("Query must be a non-empty string")
@@ -117,3 +143,5 @@ def validate_query(query: str, params: dict | None = None) -> None:
     _check_no_dangerous_keywords(normalized)
     _check_no_dbo_access(normalized)
     _check_row_limit(normalized, params)
+    if approved_pairs is not None:
+        _check_no_forbidden_joins(query, approved_pairs)
