@@ -82,7 +82,7 @@ handled uniformly.
 
 | # | Practice | Status | File |
 |---|---|---|---|
-| 22 | **Intent classification** — question classified as in-scope / out-of-scope against the domain vocabulary before any data access | ✅ | `app/stages/intent.py` |
+| 22 | **Intent classification** — question classified as in-scope / out-of-scope against the domain vocabulary before any data access. The domain listing in the prompt includes both identifier columns (article_id, full_keyword, contributor_id, error_id) and metric columns so the classifier can correctly resolve questions that filter by identifier (e.g. "which articles have no comments?"). | ✅ | `app/stages/intent.py` |
 | 23 | **View selection with confidence threshold** — questions with view-selection confidence < 0.4 are refused rather than guessed | ✅ | `app/stages/view_selection.py` |
 | 24 | **Metadata grounding** — SQL is generated from approved view definitions (column names, types, grain, limitations), not inferred from the user's wording | ✅ | `app/stages/metadata.py`, `app/stages/sql_generation.py` |
 | 24b | **Grain and aggregation contracts in view metadata** — each metric YAML declares `grain` (what one row represents), `allowed_aggregations` (permitted SQL aggregate functions per column — e.g. no SUM on pre-averaged sentiment), `dimensions` (valid GROUP BY targets), and `mandatory_filters`. These are injected into the SQL generation prompt to prevent double-counting and semantically invalid aggregations. | ✅ | `src/metadata/metrics/`, `app/stages/sql_generation.py`, `app/prompts/sql_generation.py` |

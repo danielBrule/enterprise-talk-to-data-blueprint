@@ -1,14 +1,14 @@
 from datetime import date
 import json
 
-PROMPT_VERSION = "intent_v9"
+PROMPT_VERSION = "intent_v10"
 
 
 _KNOWN_DOMAINS = (
-    "article_engagement (comment_count, avg_comment_sentiment, total_replies, keyword_count, publication_date, insert_date), "
-    "keyword_engagement (article_count, comment_count, avg_comment_sentiment, contributor_count), "
-    "contributor_behaviour (comment_count, avg_sentiment, distinct_article_count, total_replies), "
-    "ingestion_errors (stage, data_id, error_type, error_message, attempted_at)"
+    "article_engagement (article_id, title, publication_date, insert_date, comment_count, avg_comment_sentiment, total_replies, keyword_count), "
+    "keyword_engagement (keyword_id, full_keyword, article_count, comment_count, avg_comment_sentiment, contributor_count), "
+    "contributor_behaviour (contributor_id, comment_count, avg_sentiment, distinct_article_count, total_replies), "
+    "ingestion_errors (error_id, stage, data_id, error_type, error_message, attempted_at)"
 )
 
 _KNOWN_VIEWS = (

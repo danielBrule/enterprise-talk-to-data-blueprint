@@ -515,12 +515,12 @@
       - comment_count
     row_count: list
 
-- natural_language_question: "List ingestion errors attempted after a specific date."
+- natural_language_question: "List ingestion errors attempted after 2026-01-01."
   expected_view: analytics.vw_ingestion_errors
   expected_sql: |
     SELECT TOP 500 error_id, attempted_at
     FROM analytics.vw_ingestion_errors
-    WHERE attempted_at > '2025-01-01'
+    WHERE attempted_at > '2026-01-01'
   expected_result_shape:
     columns:
       - error_id
