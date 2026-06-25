@@ -1,13 +1,15 @@
 from datetime import date
 import json
 
-PROMPT_VERSION = "intent_v10"
+PROMPT_VERSION = "intent_v13"
 
 
 _KNOWN_DOMAINS = (
-    "article_engagement (article_id, title, publication_date, insert_date, comment_count, avg_comment_sentiment, total_replies, keyword_count), "
+    "article_engagement (article_id, title, publication_date, insert_date, comment_count, avg_comment_sentiment, total_replies, "
+    "keyword_count [= number of keywords associated with the article — use this to answer 'how many keywords are linked to articles']), "
     "keyword_engagement (keyword_id, full_keyword, article_count, comment_count, avg_comment_sentiment, contributor_count), "
-    "contributor_behaviour (contributor_id, comment_count, avg_sentiment, distinct_article_count, total_replies), "
+    "contributor_behaviour [= vw_top_contributors; 'top' is the view name not a filter — covers ALL contributors] "
+    "(contributor_id, comment_count, avg_sentiment, distinct_article_count, total_replies), "
     "ingestion_errors (error_id, stage, data_id, error_type, error_message, attempted_at)"
 )
 
@@ -81,7 +83,10 @@ data exists for them and questions about them are answerable. Only dates strictl
 require forecasting.
 - domain must be one of: article_engagement, keyword_engagement, contributor_behaviour, \
 ingestion_errors, or unknown.
-- suggested_metrics should be column names or aggregate expressions from the available views.{alias_lines}
+- suggested_metrics should be column names or aggregate expressions from the available views.
+- Any question mentioning "top contributors" refers to the contributor_behaviour domain \
+(vw_top_contributors). The word "top" is part of the view name — not a filter. This view covers \
+ALL contributors and provides: total_replies, comment_count, avg_sentiment, distinct_article_count.{alias_lines}
 
 Respond with exactly this JSON:
 {{

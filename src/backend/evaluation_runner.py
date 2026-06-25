@@ -218,7 +218,7 @@ def main() -> None:
         type=int,
         default=5,
         metavar="N",
-        help="Number of questions to evaluate in parallel (default 5)",
+        help="Number of questions to evaluate in parallel (default 5; use 3-5 for full mode to avoid DB contention)",
     )
     args = parser.parse_args()
     sys.exit(asyncio.run(_run(args.mode, args.output, args.limit, args.eval_run, args.concurrency)))

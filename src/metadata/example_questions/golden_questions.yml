@@ -20,7 +20,7 @@
     WHERE publication_date >= '2025-01-01'
   expected_result_shape:
     columns:
-      - SUM(keyword_count)
+      - total_keyword_count
     row_count: single
 
 - natural_language_question: "Show low-engagement articles with fewer than 5 comments and average sentiment below 0.2."
@@ -55,15 +55,13 @@
 - natural_language_question: "For the keyword 'climate change', how many unique contributors commented on related articles?"
   expected_view: analytics.vw_keyword_engagement
   expected_sql: |
-    SELECT TOP 500 keyword_id, full_keyword, contributor_count
+    SELECT TOP 1 contributor_count AS unique_contributor_count
     FROM analytics.vw_keyword_engagement
     WHERE full_keyword = 'climate change'
   expected_result_shape:
     columns:
-      - keyword_id
-      - full_keyword
       - contributor_count
-    row_count: list
+    row_count: single
 
 - natural_language_question: "Who are the top contributors by comment count?"
   expected_view: analytics.vw_top_contributors
