@@ -1,6 +1,6 @@
 import time
 
-from ..core.sql_safety import validate_query, SQLSafetyError
+from ..core.sql_safety import validate_query, validate_sql_metadata, SQLSafetyError
 from ..models.pipeline_context import PipelineContext
 from ..models.trace import ValidationResult
 from ..services.metadata_service import get_approved_joins
@@ -19,6 +19,7 @@ class SQLValidationStage(Stage):
 
         try:
             validate_query(ctx.sql or "", approved_pairs=approved_pairs)
+            validate_sql_metadata(ctx.sql or "", ctx.metadata_context or {})
             passed, reason = True, None
         except SQLSafetyError as e:
             passed, reason = False, str(e)

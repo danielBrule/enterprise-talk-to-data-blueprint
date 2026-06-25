@@ -1,6 +1,6 @@
 import pytest
 
-from backend.app.core.sql_safety import validate_query, SQLSafetyError, MAX_LIMIT
+from backend.app.core.sql_safety import validate_query, validate_sql_metadata, SQLSafetyError, MAX_LIMIT
 
 
 # Valid queries
@@ -244,4 +244,153 @@ def test_join_policy_skipped_when_no_policy_provided():
     """Valid: cross-view JOIN passes when approved_pairs=None (backward compat)"""
     validate_query(
         f"SELECT TOP 50 a.article_id FROM {_AE} a JOIN {_KE} k ON a.id = k.id"
+    )
+
+
+# ── Metadata validation (validate_sql_metadata) ────────────────────────────────
+
+_META_AE = {
+    "analytics.vw_article_engagement": {
+        "columns": [
+            {"name": "article_id"},
+            {"name": "title"},
+            {"name": "publication_date"},
+            {"name": "insert_date"},
+            {"name": "comment_count"},
+            {"name": "avg_comment_sentiment"},
+            {"name": "total_replies"},
+            {"name": "keyword_count"},
+        ],
+        "mandatory_filters": [],
+    }
+}
+
+_META_WITH_FILTER = {
+    "analytics.vw_article_engagement": {
+        "columns": [{"name": "article_id"}, {"name": "tenant_id"}, {"name": "comment_count"}],
+        "mandatory_filters": ["tenant_id"],
+    }
+}
+
+
+def test_metadata_valid_columns_pass():
+    """Valid: all columns exist in the view metadata"""
+    validate_sql_metadata(
+        "SELECT TOP 10 article_id, title, comment_count FROM analytics.vw_article_engagement",
+        _META_AE,
+    )
+
+
+def test_metadata_unknown_column_blocked():
+    """Invalid: hallucinated column name rejected with the valid list"""
+    with pytest.raises(SQLSafetyError, match="article_sentiment"):
+        validate_sql_metadata(
+            "SELECT TOP 10 article_id, article_sentiment FROM analytics.vw_article_engagement",
+            _META_AE,
+        )
+
+
+def test_metadata_error_message_includes_valid_list():
+    """Invalid: error message lists all valid column names for LLM self-correction"""
+    with pytest.raises(SQLSafetyError, match="article_id"):
+        validate_sql_metadata(
+            "SELECT TOP 10 bad_col FROM analytics.vw_article_engagement",
+            _META_AE,
+        )
+
+
+def test_metadata_select_star_skips_column_check():
+    """Valid: SELECT * bypasses column validation"""
+    validate_sql_metadata(
+        "SELECT TOP 10 * FROM analytics.vw_article_engagement",
+        _META_AE,
+    )
+
+
+def test_metadata_alias_qualified_column_validated():
+    """Valid: table alias resolved to view — column checked against correct view"""
+    validate_sql_metadata(
+        "SELECT TOP 10 a.article_id, a.comment_count FROM analytics.vw_article_engagement a",
+        _META_AE,
+    )
+
+
+def test_metadata_alias_qualified_unknown_column_blocked():
+    """Invalid: alias-qualified column that doesn't exist in the view"""
+    with pytest.raises(SQLSafetyError, match="ghost_col"):
+        validate_sql_metadata(
+            "SELECT TOP 10 a.ghost_col FROM analytics.vw_article_engagement a",
+            _META_AE,
+        )
+
+
+def test_metadata_subquery_alias_column_skipped():
+    """Valid: column qualified by a subquery alias is not validated (unresolvable)"""
+    validate_sql_metadata(
+        "SELECT TOP 10 sub.article_id FROM "
+        "(SELECT TOP 100 article_id FROM analytics.vw_article_engagement) sub",
+        _META_AE,
+    )
+
+
+def test_metadata_select_alias_in_having_skipped():
+    """Valid: column name that matches a SELECT-list alias is not rejected"""
+    validate_sql_metadata(
+        "SELECT TOP 10 comment_count, COUNT(*) AS cnt "
+        "FROM analytics.vw_article_engagement "
+        "GROUP BY comment_count HAVING cnt > 5",
+        _META_AE,
+    )
+
+
+def test_metadata_column_in_where_validated():
+    """Invalid: unknown column in WHERE clause is caught"""
+    with pytest.raises(SQLSafetyError, match="mystery_filter"):
+        validate_sql_metadata(
+            "SELECT TOP 10 article_id FROM analytics.vw_article_engagement "
+            "WHERE mystery_filter = 1",
+            _META_AE,
+        )
+
+
+def test_metadata_column_in_function_validated():
+    """Invalid: column inside a function call is still validated"""
+    with pytest.raises(SQLSafetyError, match="bad_date_col"):
+        validate_sql_metadata(
+            "SELECT TOP 10 article_id FROM analytics.vw_article_engagement "
+            "WHERE YEAR(bad_date_col) = 2025",
+            _META_AE,
+        )
+
+
+def test_metadata_mandatory_filter_present_passes():
+    """Valid: mandatory filter column appears in WHERE clause"""
+    validate_sql_metadata(
+        "SELECT TOP 10 article_id FROM analytics.vw_article_engagement WHERE tenant_id = 1",
+        _META_WITH_FILTER,
+    )
+
+
+def test_metadata_mandatory_filter_missing_blocked():
+    """Invalid: mandatory filter absent from WHERE clause"""
+    with pytest.raises(SQLSafetyError, match="tenant_id"):
+        validate_sql_metadata(
+            "SELECT TOP 10 article_id, comment_count FROM analytics.vw_article_engagement",
+            _META_WITH_FILTER,
+        )
+
+
+def test_metadata_no_mandatory_filters_passes():
+    """Valid: view with empty mandatory_filters always passes the filter check"""
+    validate_sql_metadata(
+        "SELECT TOP 10 article_id FROM analytics.vw_article_engagement",
+        _META_AE,
+    )
+
+
+def test_metadata_empty_context_skipped():
+    """Valid: no metadata context — check is skipped entirely"""
+    validate_sql_metadata(
+        "SELECT TOP 10 article_id FROM analytics.vw_article_engagement",
+        {},
     )

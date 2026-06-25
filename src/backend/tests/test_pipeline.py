@@ -37,7 +37,11 @@ MOCK_METADATA = {
     "analytics.vw_article_engagement": {
         "purpose": "Article engagement",
         "grain": "One row per article.",
-        "columns": [{"name": "article_id"}, {"name": "comment_count"}],
+        "columns": [
+            {"name": "article_id"}, {"name": "title"}, {"name": "comment_count"},
+            {"name": "publication_date"}, {"name": "insert_date"},
+            {"name": "avg_comment_sentiment"}, {"name": "total_replies"}, {"name": "keyword_count"},
+        ],
         "allowed_aggregations": {"comment_count": ["SUM", "AVG", "MAX", "MIN"]},
         "mandatory_filters": [],
         "dimensions": ["publication_date"],

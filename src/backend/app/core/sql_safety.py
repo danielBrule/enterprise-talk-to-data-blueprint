@@ -140,7 +140,100 @@ def _check_no_forbidden_joins(
             )
 
 
+def _check_columns_exist(
+    tree: exp.Expression,
+    alias_to_view: dict[str, str],
+    known_columns: dict[str, set[str]],
+    all_known: set[str],
+    select_aliases: set[str],
+) -> None:
+    for col in tree.find_all(exp.Column):
+        col_name = col.name.lower()
+        if not col_name or col_name == "*":
+            continue
+        # Column is a SELECT-list alias used downstream (e.g. in HAVING) — skip
+        if col_name in select_aliases:
+            continue
+
+        table_part = col.args.get("table")
+        table_qualifier = table_part.name.lower() if table_part else None
+
+        if table_qualifier:
+            view_key = alias_to_view.get(table_qualifier)
+            if view_key is None:
+                # Unresolvable qualifier (subquery alias, CTE name, etc.) — skip
+                continue
+            valid_cols = known_columns.get(view_key, all_known)
+        else:
+            valid_cols = all_known
+
+        if col_name not in valid_cols:
+            raise SQLSafetyError(
+                f"Column '{col_name}' does not exist in the selected view. "
+                f"Valid columns are: {', '.join(sorted(valid_cols))}."
+            )
+
+
+def _check_mandatory_filters(tree: exp.Expression, metadata_context: dict) -> None:
+    where = tree.find(exp.Where)
+    where_cols: set[str] = (
+        {col.name.lower() for col in where.find_all(exp.Column)} if where else set()
+    )
+    for view_name, view_data in metadata_context.items():
+        for required in (view_data.get("mandatory_filters") or []):
+            if required.lower() not in where_cols:
+                raise SQLSafetyError(
+                    f"Mandatory filter '{required}' is missing from the WHERE clause "
+                    f"(required by {view_name})."
+                )
+
+
 # ── Public API ─────────────────────────────────────────────────────────────────
+
+def validate_sql_metadata(sql: str, metadata_context: dict) -> None:
+    """
+    Validate SQL column references and mandatory filters against view metadata.
+
+    Should be called after validate_query() which guarantees the SQL is parseable.
+    Two checks:
+    - Every explicit column reference must exist in the view's declared column list.
+      Skipped when SELECT * is used. Columns qualified by an unresolvable alias
+      (subquery result, CTE) are skipped rather than rejected.
+    - Every mandatory_filter declared in view YAML must appear in the WHERE clause.
+
+    Raises SQLSafetyError with a precise, LLM-actionable message on failure so
+    the error can be fed back to the SQL generation stage for self-correction.
+    """
+    if not sql or not metadata_context:
+        return
+
+    tree, _ = _parse(sql)
+
+    # alias → full view name (e.g. "a" → "analytics.vw_article_engagement")
+    alias_to_view: dict[str, str] = {}
+    for table in tree.find_all(exp.Table):
+        db = (table.args.get("db") or exp.Identifier(this="")).name.lower()
+        full = f"{db}.{table.name.lower()}" if db else table.name.lower()
+        if table.alias:
+            alias_to_view[table.alias.lower()] = full
+
+    # known columns per view, normalised to lowercase
+    known_columns: dict[str, set[str]] = {
+        vname.lower(): {c["name"].lower() for c in (vdata.get("columns") or [])}
+        for vname, vdata in metadata_context.items()
+    }
+    all_known: set[str] = set().union(*known_columns.values()) if known_columns else set()
+
+    # SELECT-list aliases (e.g. COUNT(*) AS cnt) — excluded from column validation
+    select_aliases: set[str] = {
+        node.alias.lower() for node in tree.find_all(exp.Alias) if node.alias
+    }
+
+    if not tree.find(exp.Star):
+        _check_columns_exist(tree, alias_to_view, known_columns, all_known, select_aliases)
+
+    _check_mandatory_filters(tree, metadata_context)
+
 
 def validate_query(
     query: str,
