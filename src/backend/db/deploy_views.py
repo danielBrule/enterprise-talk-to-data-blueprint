@@ -64,7 +64,7 @@ def get_connection():
     return pyodbc.connect(connection_string)
 
 
-def deploy_views(views_dir: str = "sql/views"):
+def deploy_views(views_dir: str = "src/sql/views"):
     """Deploy all SQL view files from the views directory."""
     views_path = Path(views_dir)
 
