@@ -42,6 +42,72 @@ function ThinkingDots() {
   )
 }
 
+const STAGE_ROWS = [
+  { key: 'intent',         label: 'Intent',      latKey: 'intent_ms' },
+  { key: 'view_selection', label: 'View sel.',    latKey: 'view_selection_ms' },
+  { key: 'sql_generation', label: 'SQL gen',      latKey: 'sql_generation_ms' },
+  { key: 'execution',      label: 'Execution',    latKey: 'execution_ms' },
+  { key: 'answer',         label: 'Answer',       latKey: 'answer_generation_ms' },
+]
+
+function DetailsPanel({ latencyMs, tokenUsage, confidence, rowCount }) {
+  const rows = STAGE_ROWS.filter(s => latencyMs?.[s.latKey] != null || tokenUsage?.[s.key])
+  const totalTokens = Object.values(tokenUsage ?? {}).reduce((sum, s) => sum + (s?.total_tokens ?? 0), 0)
+
+  if (!rows.length && confidence == null && rowCount == null) return null
+
+  return (
+    <details className="px-1">
+      <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-600 select-none">
+        Details
+      </summary>
+      <div className="mt-1.5 text-xs bg-gray-50 border border-gray-100 rounded-lg p-3">
+        {rows.length > 0 && (
+          <table className="w-full mb-2">
+            <thead>
+              <tr className="text-gray-400">
+                <th className="text-left font-normal pb-1 w-1/2">Stage</th>
+                <th className="text-right font-normal pb-1">Latency</th>
+                <th className="text-right font-normal pb-1">Tokens</th>
+              </tr>
+            </thead>
+            <tbody className="text-gray-600">
+              {rows.map(s => (
+                <tr key={s.key}>
+                  <td className="py-0.5">{s.label}</td>
+                  <td className="text-right py-0.5">
+                    {latencyMs?.[s.latKey] != null ? `${Math.round(latencyMs[s.latKey])}ms` : '—'}
+                  </td>
+                  <td className="text-right py-0.5">
+                    {tokenUsage?.[s.key]?.total_tokens ?? '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t border-gray-200 text-gray-500 font-medium">
+                <td className="pt-1">Total</td>
+                <td className="text-right pt-1">
+                  {latencyMs?.total_ms != null ? `${Math.round(latencyMs.total_ms)}ms` : '—'}
+                </td>
+                <td className="text-right pt-1">
+                  {totalTokens > 0 ? totalTokens : '—'}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        )}
+        {(confidence != null || rowCount != null) && (
+          <div className="flex gap-4 text-gray-500 border-t border-gray-100 pt-2">
+            {rowCount != null && <span>{rowCount} rows</span>}
+            {confidence != null && <span>{Math.round(confidence * 100)}% confidence</span>}
+          </div>
+        )}
+      </div>
+    </details>
+  )
+}
+
 function Message({ msg, onFeedback }) {
   if (msg.role === 'user') {
     return (
@@ -66,7 +132,7 @@ function Message({ msg, onFeedback }) {
           {msg.text}
         </div>
 
-        {/* Metadata row */}
+        {/* Metadata row — source view + filters + feedback */}
         <div className="flex items-center gap-3 px-1 flex-wrap">
           {!msg.refused && (
             <>
@@ -78,14 +144,6 @@ function Message({ msg, onFeedback }) {
               {msg.filtersApplied?.length > 0 && (
                 <span className="text-xs text-gray-400 truncate max-w-[200px]">
                   {msg.filtersApplied.join(' · ')}
-                </span>
-              )}
-              {msg.rowCount != null && (
-                <span className="text-xs text-gray-400">{msg.rowCount} rows</span>
-              )}
-              {msg.confidence != null && (
-                <span className="text-xs text-gray-400">
-                  {Math.round(msg.confidence * 100)}% conf.
                 </span>
               )}
             </>
@@ -115,6 +173,14 @@ function Message({ msg, onFeedback }) {
             </pre>
           </details>
         )}
+
+        {/* Details panel — latency, tokens, confidence, row count */}
+        <DetailsPanel
+          latencyMs={msg.latencyMs}
+          tokenUsage={msg.tokenUsage}
+          confidence={msg.confidence}
+          rowCount={msg.rowCount}
+        />
 
       </div>
     </div>
@@ -162,6 +228,8 @@ export default function App() {
         filtersApplied: data.filters_applied ?? [],
         rowCount: data.row_count ?? null,
         confidence: data.confidence ?? null,
+        latencyMs: data.latency_ms ?? null,
+        tokenUsage: data.token_usage ?? {},
         feedback: null,
       }
       setMessages(prev => [...prev, assistantMsg])
@@ -182,6 +250,8 @@ export default function App() {
         traceId: null,
         sql: null,
         filtersApplied: [],
+        latencyMs: null,
+        tokenUsage: {},
         feedback: null,
       }])
     } finally {
