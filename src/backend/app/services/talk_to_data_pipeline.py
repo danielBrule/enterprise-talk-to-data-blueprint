@@ -1,5 +1,6 @@
 import asyncio
 import time
+import uuid
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -109,13 +110,14 @@ class TalkToDataPipeline:
         )
 
     async def run(self, request: AskRequest, user: ResolvedUser) -> AskResponse:
+        session_id = request.session_id or str(uuid.uuid4())
         ctx = PipelineContext(
             question=request.question,
             user_context=request.user_context,
             trace=TraceRecord(
                 question=request.question,
                 user_context=request.user_context,
-                session_id=request.session_id,
+                session_id=session_id,
             ),
             latency={},
             pipeline_start=time.perf_counter(),
@@ -138,31 +140,31 @@ class TalkToDataPipeline:
                 reason = str(e)
                 ctx.trace.refusal_reason = reason
                 ctx.trace.execution_status = "refused"
-                return AskResponse(refused=True, refusal_reason=reason, trace=ctx.trace)
+                return AskResponse(refused=True, refusal_reason=reason, session_id=session_id, trace=ctx.trace)
 
             timeout = settings.pipeline_timeout_seconds
             try:
-                return await asyncio.wait_for(self._run_stages(ctx), timeout=timeout)
+                return await asyncio.wait_for(self._run_stages(ctx, session_id=session_id), timeout=timeout)
             except (asyncio.TimeoutError, APITimeoutError):
                 reason = f"Request timed out after {timeout}s — please try a simpler question."
                 ctx.trace.refusal_reason = reason
                 ctx.trace.execution_status = "failed"
-                return AskResponse(refused=True, refusal_reason=reason, trace=ctx.trace)
+                return AskResponse(refused=True, refusal_reason=reason, session_id=session_id, trace=ctx.trace)
         finally:
             # Append the trace on every code path: answered, refused, and timed out.
             # Python's finally guarantee fires this even when the try block contains
             # a return statement, so a single call here covers all exit points.
             self._trace_store.append(ctx.trace)
 
-    async def _run_stages(self, ctx: PipelineContext) -> AskResponse:
+    async def _run_stages(self, ctx: PipelineContext, session_id: str) -> AskResponse:
         budget = settings.max_tokens_per_request
         max_sql_retries = settings.max_sql_retries
 
         def _to_response(outcome) -> AskResponse | None:
             if isinstance(outcome, Refusal):
-                return AskResponse(refused=True, refusal_reason=outcome.reason, trace=outcome.trace)
+                return AskResponse(refused=True, refusal_reason=outcome.reason, session_id=session_id, trace=outcome.trace)
             if isinstance(outcome, Success):
-                return AskResponse(answer=outcome.answer, caveats=outcome.caveats, refused=False, trace=outcome.trace)
+                return AskResponse(answer=outcome.answer, caveats=outcome.caveats, refused=False, session_id=session_id, trace=outcome.trace)
             return None
 
         def _budget_response() -> AskResponse | None:
@@ -173,7 +175,7 @@ class TalkToDataPipeline:
                     logger.warning("cost.budget_exceeded total_tokens=%s limit=%s", used, budget)
                     ctx.trace.refusal_reason = reason
                     ctx.trace.execution_status = "refused"
-                    return AskResponse(refused=True, refusal_reason=reason, trace=ctx.trace)
+                    return AskResponse(refused=True, refusal_reason=reason, session_id=session_id, trace=ctx.trace)
             return None
 
         # Stages 1–3: intent, view_selection, metadata (linear, no retry)
@@ -213,7 +215,7 @@ class TalkToDataPipeline:
                 )
                 ctx.trace.refusal_reason = reason
                 ctx.trace.execution_status = "refused"
-                return AskResponse(refused=True, refusal_reason=reason, trace=ctx.trace)
+                return AskResponse(refused=True, refusal_reason=reason, session_id=session_id, trace=ctx.trace)
 
             logger.info(
                 "sql_generation.retrying attempt=%d error=%s",

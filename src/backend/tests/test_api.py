@@ -208,6 +208,50 @@ def test_ask_endpoint_missing_question_returns_422():
     assert response.status_code == 422
 
 
+def test_ask_endpoint_returns_session_id_when_none_provided(monkeypatch):
+    """Server generates a session_id when the client does not provide one."""
+    from backend.app.services.talk_to_data_pipeline import TalkToDataPipeline
+    from backend.app.models.talk_to_data import AskRequest, AskResponse
+    from backend.app.models.trace import TraceRecord
+    import uuid
+
+    async def mock_run(self, request: AskRequest, user) -> AskResponse:
+        generated = request.session_id or str(uuid.uuid4())
+        trace = TraceRecord(question=request.question, execution_status="success", answerable=True, session_id=generated)
+        return AskResponse(answer="Some answer.", refused=False, session_id=generated, trace=trace)
+
+    monkeypatch.setattr(TalkToDataPipeline, "run", mock_run)
+    response = client.post("/api/v0/ask", json={"question": "Which articles have the most comments?"})
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["session_id"] is not None
+    assert len(data["session_id"]) == 36  # UUID format
+
+
+def test_ask_endpoint_echoes_client_session_id(monkeypatch):
+    """When the client sends a session_id it is echoed back in the response."""
+    from backend.app.services.talk_to_data_pipeline import TalkToDataPipeline
+    from backend.app.models.talk_to_data import AskRequest, AskResponse
+    from backend.app.models.trace import TraceRecord
+
+    client_session_id = "my-custom-session-id-123"
+
+    async def mock_run(self, request: AskRequest, user) -> AskResponse:
+        sid = request.session_id or "should-not-be-used"
+        trace = TraceRecord(question=request.question, execution_status="success", answerable=True, session_id=sid)
+        return AskResponse(answer="Some answer.", refused=False, session_id=sid, trace=trace)
+
+    monkeypatch.setattr(TalkToDataPipeline, "run", mock_run)
+    response = client.post(
+        "/api/v0/ask",
+        json={"question": "Which articles have the most comments?", "session_id": client_session_id},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["session_id"] == client_session_id
+
+
 def test_ask_endpoint_accepts_conversation_history(monkeypatch):
     """conversation_history is forwarded to the pipeline without error."""
     from backend.app.services.talk_to_data_pipeline import TalkToDataPipeline
