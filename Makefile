@@ -2,6 +2,7 @@
 #
 # Requires: poetry (https://python-poetry.org/docs/#installation)
 #           make   (choco install make on Windows)
+#           node   (https://nodejs.org — LTS, for frontend targets)
 #
 # PowerShell auto-detection:
 #   Windows     -> powershell (Windows PowerShell 5.1, always present)
@@ -14,7 +15,7 @@ else
     PWSH ?= pwsh
 endif
 
-.PHONY: help env pdf clean-pdf install check start-backend apply-sql-views apply-sql-indexes infra-init infra-apply tests eval mlflow-ui
+.PHONY: help env pdf clean-pdf install check start-backend apply-sql-views apply-sql-indexes infra-init infra-apply tests eval mlflow-ui install-frontend start-frontend build-frontend
 
 help:   ## show this help
 	@echo ""
@@ -35,6 +36,12 @@ help:   ## show this help
 	@echo "  eval             run golden evaluation  MODE=fast|full  OUTPUT=path  LIMIT=N"
 	@echo "  mlflow-ui        launch MLflow UI at http://localhost:5000"
 	@echo "  start-backend    start the FastAPI backend server"
+	@echo ""
+	@echo "  Frontend  (requires Node.js LTS)"
+	@echo "  --------"
+	@echo "  install-frontend  npm install in src/frontend"
+	@echo "  start-frontend    vite dev server at http://localhost:5173"
+	@echo "  build-frontend    production build to src/frontend/dist"
 	@echo ""
 	@echo "  SQL"
 	@echo "  ---"
@@ -82,6 +89,17 @@ mlflow-ui:  ## launch MLflow UI at http://localhost:5000 (no install needed)
 
 start-backend: install  ## start the FastAPI backend server
 	@$(PWSH) -NoProfile -Command "$$env:PATH = \"$$env:APPDATA\Python\Scripts;$$env:PATH\"; $$env:PYTHONPATH = 'src'; poetry run python -m backend.main"
+
+# ── Frontend ──────────────────────────────────────────────────────────────────
+
+install-frontend:  ## npm install in src/frontend (requires Node.js LTS)
+	cd src/frontend && npm install
+
+start-frontend:  ## start Vite dev server at http://localhost:5173
+	cd src/frontend && npm run dev
+
+build-frontend:  ## production build to src/frontend/dist
+	cd src/frontend && npm run build
 
 # ── SQL ───────────────────────────────────────────────────────────────────────
 

@@ -38,7 +38,8 @@ src/
       stages/        — one file per pipeline step: service + stage + result type
     tests/
       integration/   — endpoint smoke tests (requires running server)
-      test_*.py      — unit tests (87 tests, no external dependencies)
+      test_*.py      — unit tests (218 tests, no external dependencies)
+  frontend/          — React + Vite + Tailwind chat UI (see Frontend section below)
   metadata/
     schema_descriptions/  — column-level view documentation (YAML)
     metrics/              — view purpose, business meaning, limitations (YAML)
@@ -78,7 +79,7 @@ terraform -chdir=src/infra/terraform output   # shows endpoint and deployment na
 
 ## Running locally
 
-**Prerequisites:** Python 3.12+, Poetry, `make` (`choco install make` on Windows).
+**Prerequisites:** Python 3.12+, Poetry, `make` (`choco install make` on Windows), Node.js LTS (`winget install OpenJS.NodeJS.LTS` on Windows).
 
 Install Poetry once:
 ```powershell
@@ -110,6 +111,31 @@ The API is then available at `http://localhost:8000`.
 | `http://localhost:8000/api/v0/metadata/metrics` | Metrics metadata |
 | `http://localhost:8000/api/v0/metadata/glossary` | Domain glossary |
 
+## Frontend
+
+A React + Vite + Tailwind chat UI lives in `src/frontend/`. It talks to the backend at `http://localhost:8000`.
+
+**Prerequisite:** Node.js LTS — `winget install OpenJS.NodeJS.LTS` on Windows.
+
+```powershell
+# First time
+make install-frontend
+
+# Start the dev server (keep backend running in a separate terminal)
+make start-frontend
+```
+
+The UI is then available at `http://localhost:5173`.
+
+| Feature | Version |
+|---|---|
+| Chat with role selector (analyst / editor / admin) | v1 |
+| Thumbs up / down feedback per answer | v1 |
+| Right panel: source view, filters, SQL, row count, confidence | v2 |
+| Conversation context panel | v3 |
+
+For production, build the static bundle (`make build-frontend`) and serve from FastAPI via `StaticFiles`.
+
 **Example request:**
 
 ```bash
@@ -125,7 +151,7 @@ curl -X POST http://localhost:8000/api/v0/ask \
 ## Testing
 
 ```powershell
-make tests   # 87 unit tests, no external dependencies required
+make tests   # 218 unit tests, no external dependencies required
 make eval    # golden runner — requires a live .env with Azure OpenAI credentials
 ```
 
