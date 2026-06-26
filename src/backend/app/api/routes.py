@@ -4,7 +4,9 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query
 
 from ..core.auth import AuthError, DemoAuthService, ResolvedUser
 from ..core.config import API_PREFIX, API_VERSION
-from ..core.trace_store import TraceStore
+from ..core.feedback_store import FeedbackStore
+from ..db.analytics_store import AnalyticsStore
+from ..models.feedback import FeedbackRecord, FeedbackRequest
 from ..models.talk_to_data import AskRequest, AskResponse
 from ..models.trace import RecentTraceItem
 from ..services.article_service import get_article, list_articles
@@ -141,13 +143,42 @@ async def get_recent_traces(
     Used by the UI recent-questions panel. Each item is a compact summary —
     full trace detail (SQL, token usage, per-stage latency) is omitted.
     """
-    store = TraceStore()
-    raw_records = store.read_recent(limit=limit)
+    raw_records = AnalyticsStore().get_recent_traces(limit=limit)
     return [_to_recent_item(r) for r in raw_records]
 
 
+@router.post("/feedback", status_code=201, tags=["talk-to-data"])
+async def submit_feedback(
+    request: FeedbackRequest,
+    user: Annotated[ResolvedUser, Depends(get_current_user)],
+) -> dict:
+    """
+    Submit thumbs-up (1) or thumbs-down (-1) feedback on a pipeline answer.
+
+    Stored in data/analytics/feedback.jsonl (raw log) and data/analytics/analytics.db
+    (queryable, JOIN-able with the traces table via trace_id).
+    """
+    record = FeedbackRecord(
+        trace_id=request.trace_id,
+        rating=request.rating,
+        comment=request.comment,
+        user_role=user.role,
+    )
+    FeedbackStore(analytics_store=AnalyticsStore()).append(record)
+    return {"feedback_id": record.feedback_id}
+
+
 def _to_recent_item(raw: dict) -> RecentTraceItem:
-    latency = raw.get("latency_ms") or {}
+    import json as _json
+    # selected_views is stored as a JSON string in SQLite
+    selected_views = raw.get("selected_views") or []
+    if isinstance(selected_views, str):
+        selected_views = _json.loads(selected_views)
+    # latency_total_ms is a direct float column in SQLite (not a nested dict)
+    latency_total_ms = raw.get("latency_total_ms")
+    if latency_total_ms is None:
+        latency = raw.get("latency_ms") or {}
+        latency_total_ms = latency.get("total_ms") if isinstance(latency, dict) else None
     answer = raw.get("answer")
     if answer and len(answer) > 200:
         answer = answer[:200] + "…"
@@ -157,10 +188,10 @@ def _to_recent_item(raw: dict) -> RecentTraceItem:
         question=raw.get("question", ""),
         execution_status=raw.get("execution_status"),
         intent=raw.get("intent"),
-        selected_views=raw.get("selected_views") or [],
+        selected_views=selected_views,
         answer=answer,
         refusal_reason=raw.get("refusal_reason"),
-        latency_total_ms=latency.get("total_ms") if isinstance(latency, dict) else None,
+        latency_total_ms=latency_total_ms,
         user_context=raw.get("user_context"),
     )
 

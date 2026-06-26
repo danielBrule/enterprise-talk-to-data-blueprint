@@ -79,7 +79,9 @@ class Settings:
         # Path for the JSONL trace file (relative to the working directory, i.e. repo root).
         # In production, replace TraceStore._write() with an Azure SQL or App Insights call;
         # this path setting becomes irrelevant once the backend is swapped.
-        self.trace_file: str = os.getenv("TRACE_FILE", "traces/pipeline_traces.jsonl")
+        self.trace_file: str = os.getenv("TRACE_FILE", "data/analytics/traces.jsonl")
+        self.feedback_file: str = os.getenv("FEEDBACK_FILE", "data/analytics/feedback.jsonl")
+        self.analytics_db: str = os.getenv("ANALYTICS_DB", "data/analytics/analytics.db")
         # When true, SHA-256-hashes the question and drops user_context before writing.
         # Default false: this system handles internal analytics queries with no personal data.
         # Enable in domains where questions could carry PII (HR, finance, customer data).

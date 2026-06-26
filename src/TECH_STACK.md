@@ -43,7 +43,7 @@
 | Library | Version | Role |
 |---|---|---|
 | **MLflow** | ≥ 3.14 | Experiment tracking — every golden eval run logs pass/fail, token usage per stage, model names and latency. SQLite backend (`mlflow.db`) committed to git so the UI works after clone |
-| **SQLite** | stdlib | Local store for MLflow and data quality results (`data_quality.db`) |
+| **SQLite** | stdlib | Local store for MLflow (`mlflow.db`), analytics traces + feedback (`data/analytics/analytics.db`), and data quality results (`data/data_quality/data_quality.db`) |
 
 ---
 

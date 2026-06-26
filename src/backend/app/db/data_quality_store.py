@@ -6,7 +6,7 @@ from pathlib import Path
 
 from ..core.logger import logger
 
-_DEFAULT_DB_PATH = Path("data_quality.db")
+_DEFAULT_DB_PATH = Path("data/data_quality/data_quality.db")
 
 
 @dataclass
@@ -41,6 +41,7 @@ class DataQualityStore:
 
     def _ensure_schema(self) -> None:
         try:
+            self._db_path.parent.mkdir(parents=True, exist_ok=True)
             with sqlite3.connect(self._db_path) as conn:
                 conn.execute(_CREATE_TABLE)
         except Exception as e:

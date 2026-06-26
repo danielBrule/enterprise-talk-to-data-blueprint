@@ -8,41 +8,37 @@ from .pii_filter import PiiFilter
 
 if TYPE_CHECKING:
     from ..models.trace import TraceRecord
+    from ..db.analytics_store import AnalyticsStore
 
 
 class TraceStore:
     """
-    Appends pipeline TraceRecords to a JSONL file after every run (answered or refused).
+    Appends pipeline TraceRecords to data/analytics/traces.jsonl (JSONL) and,
+    when an AnalyticsStore is provided, also inserts into data/analytics/analytics.db.
 
-    Designed as a single-method interface so the storage backend can be swapped
-    without touching the pipeline. Only _write() needs to change.
+    JSONL: append-only raw log, human-readable, replay source.
+    SQLite: queryable; supports JOIN with feedback table via trace_id.
 
-    Current backend — local JSONL file:
-      Sufficient for a demo or single-instance deployment. Zero infrastructure
-      overhead; human-readable; easy to ingest into any downstream tool.
-
-    Production backend options (Azure):
-      - Azure SQL INSERT into a pipeline_traces table (same DB already used for
-        analytics — natural home for query-level telemetry, easy to join with
-        view-level metrics, queryable with standard SQL for pass-rate trends and
-        refusal analysis).
-      - Application Insights custom event (recommended for real-time operational
-        monitoring: latency alerts, cost spike detection, error-rate dashboards).
-        Complementary to SQL, not a replacement — ops teams use App Insights,
-        data/product teams use SQL.
-      Both patterns share this interface; only _write() changes.
-
-    See PRODUCTION_PRACTICES.md §Observability for the full rationale.
+    DEMO ONLY — in production:
+    - Replace _write() with an Azure Application Insights / Log Analytics call for
+      real-time operational monitoring and alerting.
+    - Replace AnalyticsStore's SQLite connection with an Azure SQL pool so traces,
+      feedback, and quality checks are all JOIN-able with the source analytics views
+      in one database. AnalyticsStore uses standard SQL — only _get_conn() changes.
+    Both backends are complementary, not alternatives: App Insights for ops,
+    Azure SQL for analytical queries.
     """
 
     def __init__(
         self,
         path: str | None = None,
         anonymize: bool | None = None,
+        analytics_store: "AnalyticsStore | None" = None,
     ) -> None:
         self._path = pathlib.Path(path or settings.trace_file)
         _anonymize = anonymize if anonymize is not None else settings.trace_anonymize
         self._filter = PiiFilter(enabled=_anonymize)
+        self._analytics = analytics_store
 
     def append(self, trace: "TraceRecord") -> None:
         """
@@ -50,51 +46,22 @@ class TraceStore:
         swallowed so that a disk or network error never bubbles up to the user.
         The pipeline's primary job is answering questions, not storing telemetry.
         """
+        raw = None
         try:
             raw = json.loads(trace.model_dump_json())
-            # Stamp the execution environment before filtering so eval runs and
-            # manual dev calls can be filtered out of production analytics.
-            # This is a store-level concern, not a TraceRecord concern — the
-            # pipeline itself does not need to know where its output will land.
             raw["pipeline_env"] = settings.pipeline_env
             filtered = self._filter.apply(raw)
             self._write(json.dumps(filtered))
         except Exception as exc:
             logger.warning("trace_store.write_failed error=%s", exc)
 
-    def read_recent(self, limit: int = 20) -> list[dict]:
-        """
-        Return the last `limit` records from the JSONL file, newest-first.
-
-        Reads the whole file into memory — acceptable for the demo JSONL backend
-        where the trace file is small. A production SQL backend would do
-        SELECT ... ORDER BY timestamp DESC LIMIT N instead.
-        """
-        if not self._path.exists():
-            return []
-        try:
-            lines = self._path.read_text(encoding="utf-8").splitlines()
-            records: list[dict] = []
-            for line in reversed(lines):
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    records.append(json.loads(line))
-                except json.JSONDecodeError:
-                    continue
-                if len(records) >= limit:
-                    break
-            return records
-        except Exception as exc:
-            logger.warning("trace_store.read_failed error=%s", exc)
-            return []
+        if self._analytics is not None and raw is not None:
+            try:
+                self._analytics.insert_trace(raw)
+            except Exception as exc:
+                logger.warning("analytics_store.write_failed error=%s", exc)
 
     def _write(self, line: str) -> None:
-        """
-        Write one JSON line to the JSONL file.
-        Override or replace this method to swap the storage backend.
-        """
         self._path.parent.mkdir(parents=True, exist_ok=True)
         with self._path.open("a", encoding="utf-8") as f:
             f.write(line + "\n")

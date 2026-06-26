@@ -210,28 +210,28 @@ def test_ask_endpoint_missing_question_returns_422():
 
 # ── GET /api/v0/traces/recent ─────────────────────────────────────────────────
 
-def test_traces_recent_returns_200_with_records(monkeypatch):
-    import backend.app.api.routes as routes_module
-    from backend.app.core.trace_store import TraceStore
+def _patch_analytics_store(monkeypatch, return_value):
+    """Patch AnalyticsStore so tests don't touch the filesystem."""
+    from backend.app.db.analytics_store import AnalyticsStore
+    monkeypatch.setattr(AnalyticsStore, "__init__", lambda self, db_path=None: None)
+    monkeypatch.setattr(AnalyticsStore, "get_recent_traces", lambda self, limit: return_value)
 
-    monkeypatch.setattr(
-        TraceStore,
-        "read_recent",
-        lambda self, limit: [
-            {
-                "trace_id": "abc-123",
-                "timestamp": "2026-06-25T20:00:00+00:00",
-                "question": "Which articles have the most comments?",
-                "execution_status": "success",
-                "intent": "article_engagement",
-                "selected_views": ["analytics.vw_article_engagement"],
-                "answer": "Article A has the most comments.",
-                "refusal_reason": None,
-                "latency_ms": {"total_ms": 1234.5},
-                "user_context": "role=analyst",
-            }
-        ],
-    )
+
+def test_traces_recent_returns_200_with_records(monkeypatch):
+    _patch_analytics_store(monkeypatch, [
+        {
+            "trace_id": "abc-123",
+            "timestamp": "2026-06-25T20:00:00+00:00",
+            "question": "Which articles have the most comments?",
+            "execution_status": "success",
+            "intent": "article_engagement",
+            "selected_views": '["analytics.vw_article_engagement"]',  # SQLite JSON string
+            "answer": "Article A has the most comments.",
+            "refusal_reason": None,
+            "latency_total_ms": 1234.5,
+            "user_context": "role=analyst",
+        }
+    ])
     response = client.get("/api/v0/traces/recent")
     assert response.status_code == 200
     data = response.json()
@@ -243,36 +243,28 @@ def test_traces_recent_returns_200_with_records(monkeypatch):
 
 
 def test_traces_recent_returns_empty_list_when_no_traces(monkeypatch):
-    from backend.app.core.trace_store import TraceStore
-
-    monkeypatch.setattr(TraceStore, "read_recent", lambda self, limit: [])
+    _patch_analytics_store(monkeypatch, [])
     response = client.get("/api/v0/traces/recent")
     assert response.status_code == 200
     assert response.json() == []
 
 
 def test_traces_recent_truncates_long_answers(monkeypatch):
-    from backend.app.core.trace_store import TraceStore
-
     long_answer = "x" * 300
-    monkeypatch.setattr(
-        TraceStore,
-        "read_recent",
-        lambda self, limit: [
-            {
-                "trace_id": "t1",
-                "timestamp": "2026-06-25T20:00:00+00:00",
-                "question": "q",
-                "execution_status": "success",
-                "intent": "article_engagement",
-                "selected_views": [],
-                "answer": long_answer,
-                "refusal_reason": None,
-                "latency_ms": {"total_ms": 100.0},
-                "user_context": None,
-            }
-        ],
-    )
+    _patch_analytics_store(monkeypatch, [
+        {
+            "trace_id": "t1",
+            "timestamp": "2026-06-25T20:00:00+00:00",
+            "question": "q",
+            "execution_status": "success",
+            "intent": "article_engagement",
+            "selected_views": "[]",
+            "answer": long_answer,
+            "refusal_reason": None,
+            "latency_total_ms": 100.0,
+            "user_context": None,
+        }
+    ])
     response = client.get("/api/v0/traces/recent")
     assert response.status_code == 200
     returned_answer = response.json()[0]["answer"]
@@ -284,3 +276,47 @@ def test_traces_recent_limit_param_rejected_out_of_range():
     """limit must be 1–100; outside that range FastAPI returns 422."""
     assert client.get("/api/v0/traces/recent?limit=0").status_code == 422
     assert client.get("/api/v0/traces/recent?limit=101").status_code == 422
+
+
+# ── POST /api/v0/feedback ─────────────────────────────────────────────────────
+
+def test_submit_feedback_returns_201_with_feedback_id(monkeypatch):
+    from backend.app.core.feedback_store import FeedbackStore
+    from backend.app.db.analytics_store import AnalyticsStore
+
+    monkeypatch.setattr(AnalyticsStore, "__init__", lambda self, db_path=None: None)
+    monkeypatch.setattr(FeedbackStore, "__init__", lambda self, path=None, analytics_store=None: None)
+    monkeypatch.setattr(FeedbackStore, "append", lambda self, record: None)
+
+    response = client.post(
+        "/api/v0/feedback",
+        json={"trace_id": "abc-123", "rating": 1, "comment": "Very helpful!"},
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert "feedback_id" in data
+    assert len(data["feedback_id"]) > 0
+
+
+def test_submit_feedback_negative_rating(monkeypatch):
+    from backend.app.core.feedback_store import FeedbackStore
+    from backend.app.db.analytics_store import AnalyticsStore
+
+    monkeypatch.setattr(AnalyticsStore, "__init__", lambda self, db_path=None: None)
+    monkeypatch.setattr(FeedbackStore, "__init__", lambda self, path=None, analytics_store=None: None)
+    monkeypatch.setattr(FeedbackStore, "append", lambda self, record: None)
+
+    response = client.post(
+        "/api/v0/feedback",
+        json={"trace_id": "abc-123", "rating": -1},
+    )
+    assert response.status_code == 201
+
+
+def test_submit_feedback_invalid_rating_returns_422():
+    """rating must be exactly -1 or 1; 0 or 2 must be rejected by Pydantic."""
+    response = client.post("/api/v0/feedback", json={"trace_id": "t1", "rating": 0})
+    assert response.status_code == 422
+
+    response = client.post("/api/v0/feedback", json={"trace_id": "t1", "rating": 2})
+    assert response.status_code == 422

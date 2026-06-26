@@ -22,6 +22,7 @@ from ..core.logger import logger
 from ..core.trace_store import TraceStore
 from ..services.llm_service import APITimeoutError
 from ..services.metadata_service import get_approved_joins
+from ..db.analytics_store import AnalyticsStore
 from ..db.data_quality_store import DataQualityStore
 from ..stages.answer import AnswerService, AnswerStage
 
@@ -85,7 +86,7 @@ class TalkToDataPipeline:
         self.sql_generation_service = sql_generation_service or SQLGenerationService()
         self.answer_service = answer_service or AnswerService()
         # Injectable so tests can pass a MagicMock() and avoid writing to disk.
-        self._trace_store = trace_store or TraceStore()
+        self._trace_store = trace_store or TraceStore(analytics_store=AnalyticsStore())
         self._quality_store = quality_store or DataQualityStore()
 
         # Named references for the SQL retry sub-loop — avoids brittle positional indexing
