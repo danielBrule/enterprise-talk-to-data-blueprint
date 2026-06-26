@@ -5,8 +5,6 @@ All tests use tmp_path so no files are written to the working tree.
 import json
 import sqlite3
 
-import pytest
-
 from backend.app.db.analytics_store import AnalyticsStore
 from backend.app.models.feedback import FeedbackRecord
 

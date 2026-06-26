@@ -4,7 +4,6 @@ Feedback store — dual-write: JSONL append-only log + SQLite analytics DB.
 JSONL (data/analytics/feedback.jsonl): raw log, human-readable, replay source.
 SQLite (data/analytics/analytics.db):  queryable, JOIN-able with traces table.
 """
-import json
 from pathlib import Path
 from typing import TYPE_CHECKING
 
