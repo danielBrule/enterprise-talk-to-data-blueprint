@@ -522,3 +522,29 @@ async def test_pipeline_refused_enrichment_fields_default_empty(monkeypatch):
     assert response.sql is None
     assert response.row_count is None
     assert response.confidence is None
+
+
+async def test_pipeline_system_info_short_circuits(monkeypatch):
+    """system_info intent returns a view listing without going through SQL stages."""
+    pipeline = _build_pipeline(monkeypatch)
+    pipeline.intent_service.classify = AsyncMock(
+        return_value=_make_intent(True, domain="system_info")
+    )
+
+    mock_views = [
+        {"view_name": "analytics.vw_article_engagement", "description": "Article engagement metrics."},
+        {"view_name": "analytics.vw_keyword_engagement", "description": "Keyword engagement metrics."},
+    ]
+    monkeypatch.setattr(pipeline_module, "get_views_metadata", AsyncMock(return_value=mock_views))
+
+    # View selection, SQL generation, and execution must NOT be called
+    pipeline.view_selection_service.select_views = AsyncMock()
+    pipeline.sql_generation_service.generate = AsyncMock()
+
+    response = await pipeline.run(AskRequest(question="Which views are available?"), _ANALYST)
+
+    assert response.refused is False
+    assert "analytics.vw_article_engagement" in response.answer
+    assert "analytics.vw_keyword_engagement" in response.answer
+    pipeline.view_selection_service.select_views.assert_not_called()
+    pipeline.sql_generation_service.generate.assert_not_called()

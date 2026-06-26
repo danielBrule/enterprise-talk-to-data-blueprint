@@ -23,7 +23,7 @@ from ..core.input_safety import validate_user_input, InputSafetyError
 from ..core.logger import logger
 from ..core.trace_store import TraceStore
 from ..services.llm_service import APITimeoutError
-from ..services.metadata_service import get_approved_joins
+from ..services.metadata_service import get_approved_joins, get_views_metadata
 from ..db.analytics_store import AnalyticsStore
 from ..db.data_quality_store import DataQualityStore
 from ..stages.answer import AnswerService, AnswerStage
@@ -205,8 +205,33 @@ class TalkToDataPipeline:
                     return AskResponse(refused=True, refusal_reason=reason, session_id=session_id, trace=ctx.trace, **_enrichment())
             return None
 
-        # Stages 1–3: intent, view_selection, metadata (linear, no retry)
-        for stage in self._pre_sql_stages:
+        # Stage 1: intent (separate so we can branch on system_info before view selection)
+        if r := _to_response(await self._pre_sql_stages[0].run(ctx)):
+            return r
+
+        # Short-circuit for meta-questions about the system itself
+        if ctx.trace.intent == "system_info":
+            views = await get_views_metadata()
+            lines = ["This system can answer questions about the following data domains:\n"]
+            for v in views:
+                view_name = v.get("view_name", "")
+                desc = v.get("description", "")
+                lines.append(f"- **{view_name}**: {desc}")
+            ctx.trace.execution_status = "answered"
+            ctx.trace.latency_ms = build_latency(ctx)
+            return AskResponse(
+                answer="\n".join(lines),
+                refused=False,
+                session_id=session_id,
+                trace=ctx.trace,
+                **_enrichment(),
+            )
+
+        if r := _budget_response():
+            return r
+
+        # Stages 2–3: view_selection, metadata (linear, no retry)
+        for stage in self._pre_sql_stages[1:]:
             if r := _to_response(await stage.run(ctx)):
                 return r
             if r := _budget_response():

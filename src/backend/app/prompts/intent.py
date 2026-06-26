@@ -1,7 +1,7 @@
 from datetime import date
 import json
 
-PROMPT_VERSION = "intent_v13"
+PROMPT_VERSION = "intent_v14"
 
 
 _KNOWN_DOMAINS = (
@@ -32,14 +32,15 @@ Rules:
 - If the question requires forecasting future values, causal explanation ("why", "what causes"), external data, or data not covered by the views above, set answerable to false.
 - Date filtering on publication_date or insert_date is supported and should be classified as answerable.
 - Today's date is 2026-06-24. The current year is 2026. Years before 2026 (e.g. 2025, 2024, 2023) are in the past — historical data exists for them and questions about them are answerable. Only dates strictly after today require forecasting.
-- domain must be one of: article_engagement, keyword_engagement, contributor_behaviour, ingestion_errors, or unknown.
+- domain must be one of: article_engagement, keyword_engagement, contributor_behaviour, ingestion_errors, system_info, or unknown.
+- Use domain=system_info (and answerable=true) when the question asks about the system itself: what views or data are available, what topics can be queried, what questions can be asked, etc.
 - suggested_metrics should be column names or aggregate expressions from the available views.
 
 Respond with exactly this JSON:
 {{
   "answerable": "<boolean>",
   "reason": "<brief explanation>",
-  "domain": "<article_engagement | keyword_engagement | contributor_behaviour | ingestion_errors | unknown>",
+  "domain": "<article_engagement | keyword_engagement | contributor_behaviour | ingestion_errors | system_info | unknown>",
   "suggested_metrics": ["<column_name_or_aggregate_expression>"]
 }}""".format(domains=_KNOWN_DOMAINS, views=_KNOWN_VIEWS)
 
@@ -99,7 +100,9 @@ external data, or data not covered by the views above, set answerable to false.
 data exists for them and questions about them are answerable. Only dates strictly after today \
 require forecasting.
 - domain must be one of: article_engagement, keyword_engagement, contributor_behaviour, \
-ingestion_errors, or unknown.
+ingestion_errors, system_info, or unknown.
+- Use domain=system_info (and answerable=true) when the question asks about the system itself: \
+what views or data are available, what topics can be queried, what questions can be asked, etc.
 - suggested_metrics should be column names or aggregate expressions from the available views.
 - Any question mentioning "top contributors" refers to the contributor_behaviour domain \
 (vw_top_contributors). The word "top" is part of the view name — not a filter. This view covers \

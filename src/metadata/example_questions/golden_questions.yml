@@ -621,3 +621,18 @@
       - data_id
       - error_message
     row_count: list
+
+# System-info questions — answered from YAML metadata without SQL (intent domain: system_info).
+# These cannot be run by the standard golden runner (no SQL to validate);
+# coverage is provided by test_pipeline_system_info_short_circuits in test_pipeline.py.
+- natural_language_question: "Which views are available?"
+  expected_intent: system_info
+  notes: "Must not be refused. Answer lists all analytics.* view names from schema_descriptions YAML."
+
+- natural_language_question: "What data can you answer questions about?"
+  expected_intent: system_info
+  notes: "Paraphrase of 'which views are available' — same system_info short-circuit path."
+
+- natural_language_question: "What topics or domains does this system cover?"
+  expected_intent: system_info
+  notes: "Another phrasing — must route to system_info, not unknown/refused."
