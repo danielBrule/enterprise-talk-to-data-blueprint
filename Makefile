@@ -119,5 +119,4 @@ infra-init:  ## terraform init  (src/infra/terraform)
 	terraform -chdir=src/infra/terraform init
 
 infra-apply:  ## terraform apply  (ENV=dev|prod)
-	@if not defined ENV (echo ENV is not set. Use ENV=dev or ENV=prod && exit 1)
-	terraform -chdir=src/infra/terraform apply -parallelism=1 -var-file=envs/$(ENV)/terraform.tfvars -auto-approve
+	@$(PWSH) -NoProfile -Command "if (-not '$(ENV)') { Write-Error 'ENV is not set. Use: make infra-apply ENV=dev'; exit 1 }; terraform -chdir=src/infra/terraform apply -parallelism=1 -var-file=envs/$(ENV)/terraform.tfvars -auto-approve"
