@@ -1,0 +1,26 @@
+view_name: analytics.vw_article_keywords
+description: "Direct article-to-keyword mapping — one row per article-keyword pair. Use to list the keywords associated with a specific article, or the articles tagged with a specific keyword."
+columns:
+  - name: article_id
+    description: "Article identifier — matches article_id in vw_article_engagement."
+  - name: title
+    description: "Article title — use for filtering by article name."
+  - name: publication_date
+    description: "Original publication date of the article."
+  - name: keyword_id
+    description: "Keyword identifier — matches keyword_id in vw_keyword_engagement."
+  - name: full_keyword
+    description: "The keyword text — use for filtering or listing keywords."
+allowed_aggregations:
+  article_id:
+    - COUNT
+  keyword_id:
+    - COUNT
+mandatory_filters: []
+limitations:
+  - "Returns one row per article-keyword pair — aggregate if you need keyword counts per article (prefer vw_article_engagement.keyword_count for that)."
+aliases:
+  - "article keywords"
+  - "keywords for article"
+  - "articles by keyword"
+  - "keyword mapping"

@@ -1,12 +1,15 @@
 from datetime import date
 import json
 
-PROMPT_VERSION = "intent_v14"
+PROMPT_VERSION = "intent_v15"
 
 
 _KNOWN_DOMAINS = (
     "article_engagement (article_id, title, publication_date, insert_date, comment_count, avg_comment_sentiment, total_replies, "
     "keyword_count [= number of keywords associated with the article — use this to answer 'how many keywords are linked to articles']), "
+    "article_keywords [= vw_article_keywords; one row per article-keyword pair — use to LIST the specific keywords for a given article, "
+    "or to LIST articles that have a specific keyword; do NOT use article_engagement for listing keyword names] "
+    "(article_id, title, publication_date, keyword_id, full_keyword), "
     "keyword_engagement (keyword_id, full_keyword, article_count, comment_count, avg_comment_sentiment, contributor_count), "
     "contributor_behaviour [= vw_top_contributors; 'top' is the view name not a filter — covers ALL contributors] "
     "(contributor_id, comment_count, avg_sentiment, distinct_article_count, total_replies), "
@@ -15,6 +18,7 @@ _KNOWN_DOMAINS = (
 
 _KNOWN_VIEWS = (
     "analytics.vw_article_engagement, "
+    "analytics.vw_article_keywords, "
     "analytics.vw_keyword_engagement, "
     "analytics.vw_top_contributors, "
     "analytics.vw_ingestion_errors"
@@ -32,7 +36,9 @@ Rules:
 - If the question requires forecasting future values, causal explanation ("why", "what causes"), external data, or data not covered by the views above, set answerable to false.
 - Date filtering on publication_date or insert_date is supported and should be classified as answerable.
 - Today's date is 2026-06-24. The current year is 2026. Years before 2026 (e.g. 2025, 2024, 2023) are in the past — historical data exists for them and questions about them are answerable. Only dates strictly after today require forecasting.
-- domain must be one of: article_engagement, keyword_engagement, contributor_behaviour, ingestion_errors, system_info, or unknown.
+- domain must be one of: article_engagement, article_keywords, keyword_engagement, contributor_behaviour, ingestion_errors, system_info, or unknown.
+- Use domain=article_keywords when the question asks for the list of keywords associated with a specific article, or the list of articles tagged with a specific keyword.
+- Use domain=article_engagement when the question asks for keyword COUNT on an article (keyword_count column) — NOT article_keywords.
 - Use domain=system_info (and answerable=true) when the question asks about the system itself: what views or data are available, what topics can be queried, what questions can be asked, etc.
 - suggested_metrics should be column names or aggregate expressions from the available views.
 
@@ -40,7 +46,7 @@ Respond with exactly this JSON:
 {{
   "answerable": "<boolean>",
   "reason": "<brief explanation>",
-  "domain": "<article_engagement | keyword_engagement | contributor_behaviour | ingestion_errors | system_info | unknown>",
+  "domain": "<article_engagement | article_keywords | keyword_engagement | contributor_behaviour | ingestion_errors | system_info | unknown>",
   "suggested_metrics": ["<column_name_or_aggregate_expression>"]
 }}""".format(domains=_KNOWN_DOMAINS, views=_KNOWN_VIEWS)
 
@@ -99,8 +105,12 @@ external data, or data not covered by the views above, set answerable to false.
 (e.g. {current_year - 1}, {current_year - 2}, {current_year - 3}) are in the past — historical \
 data exists for them and questions about them are answerable. Only dates strictly after today \
 require forecasting.
-- domain must be one of: article_engagement, keyword_engagement, contributor_behaviour, \
-ingestion_errors, system_info, or unknown.
+- domain must be one of: article_engagement, article_keywords, keyword_engagement, \
+contributor_behaviour, ingestion_errors, system_info, or unknown.
+- Use domain=article_keywords when the question asks for the list of keywords for a specific \
+article, or the list of articles tagged with a specific keyword.
+- Use domain=article_engagement when the question asks for keyword COUNT on an article \
+(keyword_count column) — NOT article_keywords.
 - Use domain=system_info (and answerable=true) when the question asks about the system itself: \
 what views or data are available, what topics can be queried, what questions can be asked, etc.
 - suggested_metrics should be column names or aggregate expressions from the available views.

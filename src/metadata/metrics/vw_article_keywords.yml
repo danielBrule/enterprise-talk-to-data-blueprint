@@ -1,0 +1,62 @@
+view_name: analytics.vw_article_keywords
+category: article-keyword mapping
+grain: "One row per article-keyword pair. An article with N keywords produces N rows."
+purpose: "Exposes the direct many-to-many relationship between articles and keywords — use to list keywords for a specific article, or articles tagged with a specific keyword."
+business_meaning: |
+  This view enables keyword discovery at the article level. Editorial teams can inspect
+  which topics are associated with a given article, and SEO teams can find all articles
+  covering a given keyword — neither of which is possible from vw_article_engagement
+  (which only exposes keyword_count) or vw_keyword_engagement (which only exposes article_count).
+columns:
+  - name: article_id
+    description: "Article identifier — matches article_id in vw_article_engagement."
+  - name: title
+    description: "Article title — use for filtering by article name."
+  - name: publication_date
+    description: "Original publication date of the article."
+  - name: keyword_id
+    description: "Keyword identifier — matches keyword_id in vw_keyword_engagement."
+  - name: full_keyword
+    description: "The keyword text — use for filtering or listing keywords."
+health_checks:
+  freshness_column: null
+  monitor_null_rate: []
+  sanity_non_negative: []
+  sanity_sentiment_range: []
+  high_row_count_is_bad: false
+allowed_aggregations:
+  article_id:
+    - COUNT
+  keyword_id:
+    - COUNT
+mandatory_filters: []
+dimensions:
+  - full_keyword
+  - publication_date
+limitations:
+  - "Returns one row per article-keyword pair — do not use for keyword counts per article; use vw_article_engagement.keyword_count instead."
+  - "No sentiment or comment data — join with vw_article_engagement or vw_keyword_engagement for those metrics."
+example_questions:
+  - natural_language_question: "Which keywords are associated with article X?"
+    expected_view: analytics.vw_article_keywords
+    expected_sql: |
+      SELECT TOP 500 keyword_id, full_keyword
+      FROM analytics.vw_article_keywords
+      WHERE title = 'X'
+    expected_result_shape:
+      columns:
+        - keyword_id
+        - full_keyword
+      row_count: list
+  - natural_language_question: "Which articles are tagged with the keyword 'politique'?"
+    expected_view: analytics.vw_article_keywords
+    expected_sql: |
+      SELECT TOP 500 article_id, title, publication_date
+      FROM analytics.vw_article_keywords
+      WHERE full_keyword = 'politique'
+    expected_result_shape:
+      columns:
+        - article_id
+        - title
+        - publication_date
+      row_count: list

@@ -33,6 +33,7 @@ from dataclasses import dataclass, field
 # granted to a role.
 _ALL_VIEWS: list[str] = [
     "analytics.vw_article_engagement",
+    "analytics.vw_article_keywords",
     "analytics.vw_keyword_engagement",
     "analytics.vw_top_contributors",
     "analytics.vw_ingestion_errors",
@@ -42,6 +43,7 @@ _ALL_VIEWS: list[str] = [
 # data (ingestion_errors) which is only relevant to the data engineering team.
 _ANALYST_VIEWS: list[str] = [
     "analytics.vw_article_engagement",
+    "analytics.vw_article_keywords",
     "analytics.vw_keyword_engagement",
     "analytics.vw_top_contributors",
 ]
@@ -50,6 +52,7 @@ _ANALYST_VIEWS: list[str] = [
 # strategic/commercial data outside editorial scope.
 _EDITOR_VIEWS: list[str] = [
     "analytics.vw_article_engagement",
+    "analytics.vw_article_keywords",
     "analytics.vw_top_contributors",
 ]
 

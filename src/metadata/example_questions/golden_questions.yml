@@ -622,6 +622,45 @@
       - error_message
     row_count: list
 
+# Article-keyword mapping questions (vw_article_keywords)
+- natural_language_question: "Which keywords are associated with the article 'Saint-Denis : Mélenchon, Panot, Tondelier attendus au rassemblement contre le racisme organisé par le maire Bally Bagayoko'?"
+  expected_view: analytics.vw_article_keywords
+  expected_sql: |
+    SELECT TOP 500 keyword_id, full_keyword
+    FROM analytics.vw_article_keywords
+    WHERE title = 'Saint-Denis : Mélenchon, Panot, Tondelier attendus au rassemblement contre le racisme organisé par le maire Bally Bagayoko'
+  expected_result_shape:
+    columns:
+      - keyword_id
+      - full_keyword
+    row_count: list
+
+- natural_language_question: "List all keywords associated with the article that has the most comments."
+  expected_view: analytics.vw_article_keywords
+  expected_sql: |
+    SELECT TOP 500 ak.keyword_id, ak.full_keyword
+    FROM analytics.vw_article_keywords AS ak
+    JOIN analytics.vw_article_engagement AS ae ON ae.article_id = ak.article_id
+    ORDER BY ae.comment_count DESC
+  expected_result_shape:
+    columns:
+      - keyword_id
+      - full_keyword
+    row_count: list
+
+- natural_language_question: "Which articles are tagged with the keyword 'politique'?"
+  expected_view: analytics.vw_article_keywords
+  expected_sql: |
+    SELECT TOP 500 article_id, title, publication_date
+    FROM analytics.vw_article_keywords
+    WHERE full_keyword = 'politique'
+  expected_result_shape:
+    columns:
+      - article_id
+      - title
+      - publication_date
+    row_count: list
+
 # System-info questions — answered from YAML metadata without SQL (intent domain: system_info).
 # These cannot be run by the standard golden runner (no SQL to validate);
 # coverage is provided by test_pipeline_system_info_short_circuits in test_pipeline.py.
