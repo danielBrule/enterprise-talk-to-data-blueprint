@@ -541,10 +541,35 @@ async def test_pipeline_system_info_short_circuits(monkeypatch):
     pipeline.view_selection_service.select_views = AsyncMock()
     pipeline.sql_generation_service.generate = AsyncMock()
 
-    response = await pipeline.run(AskRequest(question="Which views are available?"), _ANALYST)
+    # Admin has access to all views
+    admin = ResolvedUser(role="admin", allowed_views=[
+        "analytics.vw_article_engagement", "analytics.vw_keyword_engagement",
+    ])
+    response = await pipeline.run(AskRequest(question="Which views are available?"), admin)
 
     assert response.refused is False
     assert "analytics.vw_article_engagement" in response.answer
     assert "analytics.vw_keyword_engagement" in response.answer
     pipeline.view_selection_service.select_views.assert_not_called()
     pipeline.sql_generation_service.generate.assert_not_called()
+
+
+async def test_pipeline_system_info_filters_by_role(monkeypatch):
+    """system_info answer only lists views the user's role is allowed to access."""
+    pipeline = _build_pipeline(monkeypatch)
+    pipeline.intent_service.classify = AsyncMock(
+        return_value=_make_intent(True, domain="system_info")
+    )
+
+    mock_views = [
+        {"view_name": "analytics.vw_article_engagement", "description": "Article engagement."},
+        {"view_name": "analytics.vw_ingestion_errors", "description": "Ingestion errors."},
+    ]
+    monkeypatch.setattr(pipeline_module, "get_views_metadata", AsyncMock(return_value=mock_views))
+
+    # _ANALYST only has access to vw_article_engagement, not vw_ingestion_errors
+    response = await pipeline.run(AskRequest(question="Which views are available?"), _ANALYST)
+
+    assert response.refused is False
+    assert "analytics.vw_article_engagement" in response.answer
+    assert "analytics.vw_ingestion_errors" not in response.answer

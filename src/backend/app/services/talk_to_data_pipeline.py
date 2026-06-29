@@ -212,9 +212,12 @@ class TalkToDataPipeline:
         # Short-circuit for meta-questions about the system itself
         if ctx.trace.intent == "system_info":
             views = await get_views_metadata()
+            allowed = set(ctx.user.allowed_views)
             lines = ["This system can answer questions about the following data domains:\n"]
             for v in views:
                 view_name = v.get("view_name", "")
+                if view_name not in allowed:
+                    continue
                 desc = v.get("description", "")
                 lines.append(f"- **{view_name}**: {desc}")
             ctx.trace.execution_status = "answered"
