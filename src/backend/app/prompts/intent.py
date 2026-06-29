@@ -1,7 +1,7 @@
 from datetime import date
 import json
 
-PROMPT_VERSION = "intent_v15"
+PROMPT_VERSION = "intent_v16"
 
 
 _KNOWN_DOMAINS = (
@@ -33,6 +33,7 @@ Available views: {views}
 
 Rules:
 - answerable is true only if the question can be answered from the available views above.
+- If the question is a follow-up (uses vague references like "top 10", "more", "same", "these", "it", "them" without an explicit subject), resolve the subject from the prior conversation and classify as answerable with the same domain as the prior question.
 - If the question requires forecasting future values, causal explanation ("why", "what causes"), external data, or data not covered by the views above, set answerable to false.
 - Date filtering on publication_date or insert_date is supported and should be classified as answerable.
 - Today's date is 2026-06-24. The current year is 2026. Years before 2026 (e.g. 2025, 2024, 2023) are in the past — historical data exists for them and questions about them are answerable. Only dates strictly after today require forecasting.
@@ -62,16 +63,20 @@ def _format_history(conversation_history: list) -> str:
     if not conversation_history:
         return ""
     from ..core.config import settings
-    turns = conversation_history[-settings.max_history_turns:]
-    prior = [
-        f'"{getattr(t, "question", "") or ""}"'
-        for t in reversed(turns)
-    ]
-    return (
-        "Prior conversation (this question may be a follow-up — use for context):\n"
-        + "\n".join(f"- {q}" for q in prior)
-        + "\n\n"
-    )
+    max_turns = settings.max_history_turns
+    max_answer_chars = settings.max_history_answer_chars
+    turns = conversation_history[-max_turns:]
+    lines = ["Prior conversation (resolve follow-up references using this context):"]
+    for i, turn in enumerate(reversed(turns)):
+        label = "Most recent" if i == 0 else f"Turn -{i + 1}"
+        q = getattr(turn, "question", "") or ""
+        ans = getattr(turn, "answer", None) or ""
+        if ans and len(ans) > max_answer_chars:
+            ans = ans[:max_answer_chars] + "…"
+        lines.append(f"[{label}] Q: \"{q}\"")
+        if ans:
+            lines.append(f"         A: {ans}")
+    return "\n".join(lines) + "\n\n"
 
 
 def build_intent_prompt(question: str, aliases: dict[str, list[str]] | None = None, conversation_history: list | None = None) -> list[dict]:
@@ -98,6 +103,9 @@ Available views: {_KNOWN_VIEWS}
 
 Rules:
 - answerable is true only if the question can be answered from the available views above.
+- If the question is a follow-up (uses pronouns or vague references like "top 10", "more", \
+"same", "these", "it", "them" without an explicit subject), resolve the subject from the \
+prior conversation and classify as answerable with the same domain as the prior question.
 - If the question requires forecasting future values, causal explanation ("why", "what causes"), \
 external data, or data not covered by the views above, set answerable to false.
 - Date filtering on publication_date or insert_date is supported and should be classified as answerable.
