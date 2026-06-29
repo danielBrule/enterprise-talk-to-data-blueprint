@@ -64,3 +64,36 @@
     expected_sql_contains:
       - "comment_count"
       - "20"
+
+- description: "URL follow-up after listing top articles by comment count"
+  turn_1:
+    natural_language_question: "Which articles have the most comments?"
+    expected_view: analytics.vw_article_engagement
+    expected_sql: >
+      SELECT TOP 10 article_id, title, comment_count
+      FROM analytics.vw_article_engagement
+      ORDER BY comment_count DESC
+    expected_result_shape:
+      columns: []
+  turn_2:
+    natural_language_question: "Can I have the urls of each of these articles?"
+    expected_view: analytics.vw_article_engagement
+    expected_sql_contains:
+      - "url"
+      - "comment_count"
+
+- description: "Resolve vague 'top 10' follow-up from a single-result keyword question"
+  turn_1:
+    natural_language_question: "Which subject has the most comments?"
+    expected_view: analytics.vw_keyword_engagement
+    expected_sql: >
+      SELECT TOP 1 keyword_id, full_keyword, comment_count
+      FROM analytics.vw_keyword_engagement
+      ORDER BY comment_count DESC
+    expected_result_shape:
+      columns: []
+  turn_2:
+    natural_language_question: "Can you give me the top 10?"
+    expected_view: analytics.vw_keyword_engagement
+    expected_sql_contains:
+      - "comment_count"

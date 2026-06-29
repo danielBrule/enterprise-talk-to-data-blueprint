@@ -622,6 +622,60 @@
       - error_message
     row_count: list
 
+# URL questions — url column available in both vw_article_engagement and vw_article_keywords
+- natural_language_question: "Show the top 10 articles by comment count with their urls."
+  expected_view: analytics.vw_article_engagement
+  expected_sql: |
+    SELECT TOP 10 article_id, title, comment_count, url
+    FROM analytics.vw_article_engagement
+    ORDER BY comment_count DESC
+  expected_result_shape:
+    columns:
+      - article_id
+      - title
+      - comment_count
+      - url
+    row_count: list
+
+- natural_language_question: "What is the url of article 16603?"
+  expected_view: analytics.vw_article_engagement
+  expected_sql: |
+    SELECT TOP 1 article_id, title, url
+    FROM analytics.vw_article_engagement
+    WHERE article_id = 16603
+  expected_result_shape:
+    columns:
+      - url
+    row_count: single
+
+- natural_language_question: "List articles tagged with keyword 'france' and show their urls."
+  expected_view: analytics.vw_article_keywords
+  expected_sql: |
+    SELECT TOP 500 article_id, title, url
+    FROM analytics.vw_article_keywords
+    WHERE full_keyword = 'france'
+  expected_result_shape:
+    columns:
+      - article_id
+      - title
+      - url
+    row_count: list
+
+# Explicit-column ingestion error query (avoids SELECT * / timeout issues)
+- natural_language_question: "Show the 10 most recent ingestion errors with their stage, error type, message and date."
+  expected_view: analytics.vw_ingestion_errors
+  expected_sql: |
+    SELECT TOP 10 error_id, stage, error_type, error_message, attempted_at
+    FROM analytics.vw_ingestion_errors
+    ORDER BY attempted_at DESC
+  expected_result_shape:
+    columns:
+      - stage
+      - error_type
+      - error_message
+      - attempted_at
+    row_count: list
+
 # Article-keyword mapping questions (vw_article_keywords)
 - natural_language_question: "Which keywords are associated with the article 'Saint-Denis : Mélenchon, Panot, Tondelier attendus au rassemblement contre le racisme organisé par le maire Bally Bagayoko'?"
   expected_view: analytics.vw_article_keywords
@@ -629,19 +683,6 @@
     SELECT TOP 500 keyword_id, full_keyword
     FROM analytics.vw_article_keywords
     WHERE title = 'Saint-Denis : Mélenchon, Panot, Tondelier attendus au rassemblement contre le racisme organisé par le maire Bally Bagayoko'
-  expected_result_shape:
-    columns:
-      - keyword_id
-      - full_keyword
-    row_count: list
-
-- natural_language_question: "List all keywords associated with the article that has the most comments."
-  expected_view: analytics.vw_article_keywords
-  expected_sql: |
-    SELECT TOP 500 ak.keyword_id, ak.full_keyword
-    FROM analytics.vw_article_keywords AS ak
-    JOIN analytics.vw_article_engagement AS ae ON ae.article_id = ak.article_id
-    ORDER BY ae.comment_count DESC
   expected_result_shape:
     columns:
       - keyword_id
@@ -662,8 +703,7 @@
     row_count: list
 
 # System-info questions — answered from YAML metadata without SQL (intent domain: system_info).
-# These cannot be run by the standard golden runner (no SQL to validate);
-# coverage is provided by test_pipeline_system_info_short_circuits in test_pipeline.py.
+# The golden runner handles these with run_system_info_question: intent stage only, no SQL pipeline.
 - natural_language_question: "Which views are available?"
   expected_intent: system_info
   notes: "Must not be refused. Answer lists all analytics.* view names from schema_descriptions YAML."

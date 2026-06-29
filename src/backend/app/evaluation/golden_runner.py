@@ -168,6 +168,8 @@ class EvaluationReport:
     access_tests_total: int = 0
     conversation_tests_passed: int = 0
     conversation_tests_total: int = 0
+    system_info_tests_passed: int = 0
+    system_info_tests_total: int = 0
 
     @property
     def pass_rate(self) -> float:
@@ -186,6 +188,8 @@ class EvaluationReport:
             lines.append(f"  Access:       {self.access_tests_passed}/{self.access_tests_total} passed")
         if self.conversation_tests_total:
             lines.append(f"  Conversation: {self.conversation_tests_passed}/{self.conversation_tests_total} passed")
+        if self.system_info_tests_total:
+            lines.append(f"  System-info:  {self.system_info_tests_passed}/{self.system_info_tests_total} passed")
         lines.append(f"  Note: {self.access_enforcement_note}")
         return lines
 
@@ -206,6 +210,8 @@ class EvaluationReport:
             "access_tests_total": self.access_tests_total,
             "conversation_tests_passed": self.conversation_tests_passed,
             "conversation_tests_total": self.conversation_tests_total,
+            "system_info_tests_passed": self.system_info_tests_passed,
+            "system_info_tests_total": self.system_info_tests_total,
             "records": [
                 {
                     "question": r.question,
@@ -648,6 +654,58 @@ class GoldenRunner:
         record.latency_ms = ctx.trace.latency_ms.total_ms
         return record
 
+    async def run_system_info_question(self, q: dict) -> GoldenEvalRecord:
+        """Run a system_info question — intent stage only; no SQL pipeline."""
+        record = GoldenEvalRecord(
+            question=q["natural_language_question"],
+            expected_view="",
+            expected_sql="",
+            case_type="system_info",
+        )
+        ctx = _make_ctx(record.question)
+
+        outcome = await self._intent_stage.run(ctx)
+        record.intent_answerable = ctx.trace.answerable
+
+        domain_ok = ctx.trace.intent == "system_info"
+        answerable_ok = ctx.trace.answerable is True
+
+        if answerable_ok and domain_ok:
+            record.status = "pass"
+        elif answerable_ok:
+            record.status = "partial"
+            record.failure_reasons.append(
+                f"Answerable but domain={ctx.trace.intent!r} (expected 'system_info')"
+            )
+        else:
+            reason = outcome.reason if isinstance(outcome, Refusal) else "not answerable"
+            record.status = "fail"
+            record.failure_reasons.append(f"system_info question refused: {reason}")
+
+        ctx.trace.execution_status = "skipped"
+        ctx.trace.latency_ms = build_latency(ctx)
+        record.trace = ctx.trace
+        record.latency_ms = ctx.trace.latency_ms.total_ms
+        return record
+
+    async def run_system_info_checks(self, questions: list[dict]) -> list[GoldenEvalRecord]:
+        records = []
+        for q in questions:
+            try:
+                records.append(await self.run_system_info_question(q))
+            except Exception as exc:
+                logger.exception("golden_runner.system_info_error q=%s", q.get("natural_language_question", "?"))
+                rec = GoldenEvalRecord(
+                    question=q.get("natural_language_question", "unknown"),
+                    expected_view="",
+                    expected_sql="",
+                    case_type="system_info",
+                    status="error",
+                )
+                rec.failure_reasons.append(str(exc))
+                records.append(rec)
+        return records
+
     async def run_conversation_checks(self, mode: str = "fast") -> list[GoldenEvalRecord]:
         """Run all 2-turn conversation test cases from golden_conversations.yml."""
         cases = self._load_conversation_cases()
@@ -717,26 +775,36 @@ class GoldenRunner:
                 return rec
 
     async def run_all(self, mode: str = "fast", limit: int | None = None, concurrency: int = 5) -> EvaluationReport:
-        questions = self._load_golden_questions()
-        if limit is not None:
-            questions = questions[:limit]
+        all_questions = self._load_golden_questions()
 
-        logger.info("golden_runner.start mode=%s total_positive=%d concurrency=%d", mode, len(questions), concurrency)
+        # Split: system_info questions use intent-only path; all others go through the SQL pipeline
+        system_info_questions = [q for q in all_questions if q.get("expected_intent") == "system_info"]
+        sql_questions = [q for q in all_questions if q.get("expected_intent") != "system_info"]
+
+        if limit is not None:
+            sql_questions = sql_questions[:limit]
+
+        logger.info(
+            "golden_runner.start mode=%s total_sql=%d total_system_info=%d concurrency=%d",
+            mode, len(sql_questions), len(system_info_questions), concurrency,
+        )
 
         sem = asyncio.Semaphore(concurrency)
         positive_records = await asyncio.gather(
-            *[self._run_question_safe(q, mode, sem) for q in questions]
+            *[self._run_question_safe(q, mode, sem) for q in sql_questions]
         )
         negative_records = await asyncio.gather(
             *[self._run_negative_safe(neg, sem) for neg in NEGATIVE_QUESTIONS]
         )
         access_records = await self.run_access_checks()
         conversation_records = await self.run_conversation_checks(mode=mode)
+        system_info_records = await self.run_system_info_checks(system_info_questions)
 
         records: list[GoldenEvalRecord] = [*positive_records, *negative_records]
         records.extend(self.run_negative_sql_checks())
         records.extend(access_records)
         records.extend(conversation_records)
+        records.extend(system_info_records)
 
         counts: dict[str, int] = {"pass": 0, "partial": 0, "fail": 0, "error": 0}
         for r in records:
@@ -744,6 +812,7 @@ class GoldenRunner:
 
         access_passed = sum(1 for r in access_records if r.status == "pass")
         conversation_passed = sum(1 for r in conversation_records if r.status == "pass")
+        system_info_passed = sum(1 for r in system_info_records if r.status == "pass")
 
         report = EvaluationReport(
             total=len(records),
@@ -756,10 +825,15 @@ class GoldenRunner:
             access_tests_total=len(access_records),
             conversation_tests_passed=conversation_passed,
             conversation_tests_total=len(conversation_records),
+            system_info_tests_passed=system_info_passed,
+            system_info_tests_total=len(system_info_records),
         )
         logger.info(
-            "golden_runner.complete total=%d pass=%d partial=%d fail=%d error=%d access=%d/%d conv=%d/%d",
+            "golden_runner.complete total=%d pass=%d partial=%d fail=%d error=%d "
+            "access=%d/%d conv=%d/%d sysinfo=%d/%d",
             report.total, report.passed, report.partial, report.failed, report.errors,
-            access_passed, len(access_records), conversation_passed, len(conversation_records),
+            access_passed, len(access_records),
+            conversation_passed, len(conversation_records),
+            system_info_passed, len(system_info_records),
         )
         return report

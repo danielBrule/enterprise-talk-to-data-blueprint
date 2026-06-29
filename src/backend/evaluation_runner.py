@@ -135,6 +135,10 @@ def _log_to_mlflow(report, mode: str, commit: str, eval_run: str, duration_s: fl
             round(report.conversation_tests_passed / report.conversation_tests_total, 4)
             if report.conversation_tests_total else 0.0
         )
+        system_info_pass_rate = (
+            round(report.system_info_tests_passed / report.system_info_tests_total, 4)
+            if report.system_info_tests_total else 0.0
+        )
         mlflow.log_metrics({
             "pass_rate": round(report.pass_rate, 4),
             "passed": report.passed,
@@ -151,6 +155,9 @@ def _log_to_mlflow(report, mode: str, commit: str, eval_run: str, duration_s: fl
             "conversation_tests_passed": report.conversation_tests_passed,
             "conversation_tests_total": report.conversation_tests_total,
             "conversation_tests_pass_rate": conversation_pass_rate,
+            "system_info_tests_passed": report.system_info_tests_passed,
+            "system_info_tests_total": report.system_info_tests_total,
+            "system_info_tests_pass_rate": system_info_pass_rate,
             **token_metrics,
         })
 
