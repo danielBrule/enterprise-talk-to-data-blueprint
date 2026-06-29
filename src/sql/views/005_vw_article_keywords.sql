@@ -16,6 +16,6 @@ SELECT
     k.id          AS keyword_id,
     k.full_keyword
 FROM dbo.core_articles AS a
-LEFT JOIN dbo.core_articles_urls AS au ON au.id = a.id
+LEFT JOIN dbo.stage_article_urls AS au ON au.id = a.id
 JOIN dbo.core_article_keywords   AS ak ON ak.article_id = a.id
 JOIN dbo.core_keywords           AS k  ON k.id = ak.keyword_id;

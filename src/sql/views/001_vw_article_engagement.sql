@@ -19,7 +19,7 @@ SELECT
     SUM(c.replies_count) AS total_replies,
     COUNT(DISTINCT ak.keyword_id) AS keyword_count
 FROM dbo.core_articles AS a
-LEFT JOIN dbo.core_articles_urls AS au ON au.id = a.id
+LEFT JOIN dbo.stage_article_urls AS au ON au.id = a.id
 LEFT JOIN dbo.core_comments AS c ON c.article_id = a.id
 LEFT JOIN dbo.core_article_keywords AS ak ON ak.article_id = a.id
 GROUP BY
