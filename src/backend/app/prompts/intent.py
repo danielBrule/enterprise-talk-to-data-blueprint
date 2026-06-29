@@ -1,15 +1,15 @@
 from datetime import date
 import json
 
-PROMPT_VERSION = "intent_v16"
+PROMPT_VERSION = "intent_v17"
 
 
 _KNOWN_DOMAINS = (
-    "article_engagement (article_id, title, publication_date, insert_date, comment_count, avg_comment_sentiment, total_replies, "
+    "article_engagement (article_id, title, publication_date, insert_date, url, comment_count, avg_comment_sentiment, total_replies, "
     "keyword_count [= number of keywords associated with the article — use this to answer 'how many keywords are linked to articles']), "
     "article_keywords [= vw_article_keywords; one row per article-keyword pair — use to LIST the specific keywords for a given article, "
     "or to LIST articles that have a specific keyword; do NOT use article_engagement for listing keyword names] "
-    "(article_id, title, publication_date, keyword_id, full_keyword), "
+    "(article_id, title, publication_date, url, keyword_id, full_keyword), "
     "keyword_engagement (keyword_id, full_keyword, article_count, comment_count, avg_comment_sentiment, contributor_count), "
     "contributor_behaviour [= vw_top_contributors; 'top' is the view name not a filter — covers ALL contributors] "
     "(contributor_id, comment_count, avg_sentiment, distinct_article_count, total_replies), "

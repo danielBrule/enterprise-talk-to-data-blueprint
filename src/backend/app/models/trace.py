@@ -74,8 +74,8 @@ class TraceRecord(BaseModel):
     caveats: list[str] = Field(default_factory=list)
     answer: str | None = None
 
-    # Token usage per LLM stage (prompt_tokens, completion_tokens, total_tokens)
-    token_usage: dict[str, dict[str, int]] = Field(default_factory=dict)
+    # Token usage per LLM stage (prompt_tokens, completion_tokens, total_tokens, model_name)
+    token_usage: dict[str, dict[str, Any]] = Field(default_factory=dict)
 
     # Latency (per stage, in milliseconds)
     latency_ms: StageLatency = Field(default_factory=StageLatency)
