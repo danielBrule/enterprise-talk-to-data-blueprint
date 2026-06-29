@@ -22,6 +22,11 @@ The request passes through 7 sequential stages. Each stage either passes control
 
 **SQL safety rules (stage 5):** SELECT only · `analytics.*` views only · no DDL/DML · no multi-statement · `TOP`/`LIMIT` required (max 500 rows).
 
+**Stage 1 short-circuits** (exit after intent, no SQL or DB access):
+- `system_info` — returns the list of views the caller's role can see
+- `clarifying` — ambiguous question returned as a clarifying question to the user
+- `data_quality` — returns a markdown quality report; "refresh data quality" triggers `DataQualityService.refresh_all()` first
+
 ## Repository layout
 
 ```

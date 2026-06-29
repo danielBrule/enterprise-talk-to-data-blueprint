@@ -6,11 +6,11 @@ Natural-language interface over Azure SQL analytics views. User asks a question 
 - **Backend** FastAPI + Poetry, Python 3.13, Azure OpenAI (3 deployments), Azure SQL via pyodbc
 - **Frontend** React + Vite + Tailwind CSS v4 (`src/frontend/`)
 - **Eval** MLflow (SQLite, local) + golden question runner
-- **Tests** pytest, 220 tests, `PYTHONPATH=src` always required
+- **Tests** pytest, 225 tests, `PYTHONPATH=src` always required
 
 ## Commands
 ```powershell
-make tests              # syntax check then pytest (220 tests)
+make tests              # syntax check then pytest (225 tests)
 make start-backend      # FastAPI → http://localhost:8000
 make start-frontend     # Vite dev server → http://localhost:5173
 make eval               # fast eval (stages 1–5, no DB)
@@ -22,16 +22,19 @@ make apply-sql-views    # deploy/update analytics views to Azure SQL
 ## Pipeline
 ```
 POST /ask
-  1. IntentStage         intent_v17    — classify domain, detect system_info / unanswerable
+  1. IntentStage         intent_v19    — classify domain, detect short-circuit intents
   2. ViewSelectionStage  view_sel_v1   — pick one or more analytics views
   3. MetadataStage                     — YAML lookup, no LLM
   4. SQLGenerationStage  sql_gen_v8    — generate T-SQL (SELECT TOP N)
   5. SQLValidationStage                — blocks DDL/DML, dbo.*, queries without LIMIT
   6. ExecutionStage                    — role-based access enforced here
-  7. AnswerStage         answer_gen_v2 — markdown answer with table formatting
+  7. AnswerStage         answer_gen_v3 — markdown answer with table formatting
 ```
 
-`system_info` intent short-circuits after stage 1 — no SQL, returns list of views the caller's role can see.
+Stage 1 short-circuits (no SQL, no DB) for three special intents:
+- `system_info` — returns list of views the caller's role can see
+- `clarifying` — ambiguous question returned as a clarifying question to the user
+- `data_quality` — returns a markdown quality report from `DataQualityStore`; phrase "refresh data quality" calls `DataQualityService.refresh_all()` first
 
 ## Analytics views (`analytics` schema)
 | View | Purpose |
