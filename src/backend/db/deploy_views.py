@@ -93,7 +93,7 @@ def deploy_views(views_dir: str = "src/sql/views"):
                     cursor.execute(statement)
 
             conn.commit()
-            print("✓")
+            print("ok")
 
         cursor.close()
         conn.close()
