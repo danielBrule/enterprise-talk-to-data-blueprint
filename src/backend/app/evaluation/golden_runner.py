@@ -989,7 +989,6 @@ class GoldenRunner:
 
         # Split: system_info and data_quality questions use intent-only paths; all others go through the SQL pipeline
         system_info_questions = [q for q in all_questions if q.get("expected_intent") == "system_info"]
-        data_quality_golden = [q for q in all_questions if q.get("expected_intent") == "data_quality"]
         sql_questions = [
             q for q in all_questions
             if q.get("expected_intent") not in ("system_info", "data_quality")
