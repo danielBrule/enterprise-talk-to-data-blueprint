@@ -22,15 +22,30 @@ value, and not one that maximises coverage at the expense of trust.
 
 ## Contents
 
+- [How to use this repo](#how-to-use-this-repo)
 - [How a question becomes a governed answer](#how-a-question-becomes-a-governed-answer)
-- [Implementation: proving the blueprint works](#implementation-proving-the-blueprint-works)
 - [What "governed" means in practice](#what-governed-means-in-practice)
-- [How to read this](#how-to-read-this)
 - [The nine phases](#the-nine-phases)
-- [Status](#status)
+- [Implementation: proving the blueprint works](#implementation-proving-the-blueprint-works)
 - [Repository](#repository)
-- [Who wrote this](#who-wrote-this)
+- [Where this stands](#where-this-stands)
 - [Scope and status](#scope-and-status)
+- [Who wrote this](#who-wrote-this)
+
+## How to use this repo
+
+This repository has two parts: a delivery blueprint (the methodology) and a reference
+implementation (the proof). Read the one that matches what you're here for.
+
+| You have | Read | You'll get |
+|---|---|---|
+| 3 minutes | this README | the thesis and the shape of the work |
+| 15 minutes | [`docs/master.md`](docs/master.md) | delivery logic, risks, decision gates, operating model |
+| Going deep | [`docs/phases/`](docs/phases) | the nine-phase delivery journey, end to end |
+| Building one | [`docs/annexes/`](docs/annexes) | templates, scorecards, registers, worked examples to adapt |
+| A project to build | [`src/README.md`](src/README.md) | a working reference implementation of the blueprint |
+
+Prefer a formatted document? PDF versions of every document are in [`docs/pdf/`](docs/pdf/).
 
 ## How a question becomes a governed answer
 
@@ -56,6 +71,51 @@ flowchart TD
     SF -.-> L
     L --> E["Evaluation and quality-monitoring loop"]
 ```
+
+## What "governed" means in practice
+
+Every metric the system can answer is defined once — with its calculation, grain, mandatory
+filters, access rules and caveats — and the model queries *that definition* rather than
+reconstructing one:
+
+| Field | Example |
+|---|---|
+| Metric | Net revenue |
+| Definition | Revenue after discounts, credits and refunds |
+| Calculation | `SUM(gross_revenue - discount_amount - refund_amount)` |
+| Grain | Order line |
+| Mandatory filters | Completed orders only; test orders excluded |
+| Access | Restricted by region and legal entity |
+| Caveat | Current month provisional; refunds may lag up to 48h |
+
+A user asking *"net revenue last month by region"* gets the approved definition, their permitted
+regions only, and the provisional-month caveat — or a refusal if the question falls outside
+approved scope. That control surface, not the language model, is the product.
+
+## The nine phases
+
+The phase model is delivery *logic*, not a fixed waterfall: phases run light for a POC, deepen for
+an MVP, and formalise before pilot or production. Progression at each phase is evidence-based, not
+date-based — a project moves forward because the required proof is in place, and narrowing,
+pausing or stopping is a valid outcome if it isn't. The discipline is to avoid carrying POC
+assumptions into production without revalidating them.
+
+| Phase | Focus | What it decides |
+|---|---|---|
+| 1 | [Framing](docs/phases/phase_1_framing.md) | Is T2D the right response to a real business need, and is it bounded and owned? |
+| 2 | [Data & semantic readiness](docs/phases/phase_2_data_semantic_readiness.md) | Which questions can be answered safely, and which need remediation, caveats or deferral? |
+| 3 | [Governed data foundation](docs/phases/phase_3_governed_data_foundation.md) | The approved queryable layer: metric logic, joins, filters, access controls, caveats, quality checks |
+| 4 | [Design architecture](docs/phases/phase_4_design_architecture.md) | How a question becomes a governed answer: grounding, model use, tool boundaries, validation, safe failure |
+| 5 | [Prototype / MVP build](docs/phases/phase_5_prototype_mvp_build.md) | A bounded, observable, testable build that generates evidence before formal validation |
+| 6 | [Validation, assurance & remediation](docs/phases/phase_6_validation_assurance_remediation.md) | Is it safe, reliable and evidenced enough for controlled user testing? |
+| 7 | [Controlled pilot & user testing](docs/phases/phase_7_controlled_pilot.md) | Does it hold up with real users, real questions and real operating conditions? |
+| 8 | [Production readiness & release](docs/phases/phase_8_production_readiness.md) | Resilience, support, monitoring, access, governance, ownership — and the release decision |
+| 9 | [Operate, adopt & improve](docs/phases/phase_9_operate_adopt_improve.md) | Run it as a live product: feedback, regression testing, cost control, semantic updates |
+
+Each phase has a main guide (delivery logic, decisions, risks, required outputs, handover) and an
+annex pack (practical material to adapt, not follow mechanically). See
+[`docs/master.md`](docs/master.md) for the full delivery logic behind this table — proportional
+delivery depth, decision-gate evidence requirements and the operating model after launch.
 
 ## Implementation: proving the blueprint works
 
@@ -102,68 +162,12 @@ fixtures.
 
 The blueprint documents what closing each gap requires in a full delivery.
 
-## What "governed" means in practice
-
-Every metric the system can answer is defined once — with its calculation, grain, mandatory
-filters, access rules and caveats — and the model queries *that definition* rather than
-reconstructing one:
-
-| Field | Example |
-|---|---|
-| Metric | Net revenue |
-| Definition | Revenue after discounts, credits and refunds |
-| Calculation | `SUM(gross_revenue - discount_amount - refund_amount)` |
-| Grain | Order line |
-| Mandatory filters | Completed orders only; test orders excluded |
-| Access | Restricted by region and legal entity |
-| Caveat | Current month provisional; refunds may lag up to 48h |
-
-A user asking *"net revenue last month by region"* gets the approved definition, their permitted
-regions only, and the provisional-month caveat — or a refusal if the question falls outside
-approved scope. That control surface, not the language model, is the product.
-
-## How to read this
-
-| You have | Read | You'll get |
-|---|---|---|
-| 3 minutes | this README | the thesis and the shape of the work |
-| 15 minutes | [`docs/master.md`](docs/master.md) | delivery logic, risks, decision gates, operating model |
-| Going deep | [`docs/phases/`](docs/phases) | the nine-phase delivery journey, end to end |
-| Building one | [`docs/annexes/`](docs/annexes) | templates, scorecards, registers, worked examples to adapt |
-
-Prefer a formatted document? PDF versions of every document are in [`docs/pdf/`](docs/pdf/).
-
-The phase model is delivery *logic*, not a fixed waterfall — phases run light for a POC, deepen for
-an MVP, and formalise before pilot or production. The discipline is to avoid carrying POC
-assumptions into production without revalidating them.
-
-## The nine phases
-
-| Phase | Focus | What it decides |
-|---|---|---|
-| 1 | [Framing](docs/phases/phase_1_framing.md) | Is T2D the right response to a real business need, and is it bounded and owned? |
-| 2 | [Data & semantic readiness](docs/phases/phase_2_data_semantic_readiness.md) | Which questions can be answered safely, and which need remediation, caveats or deferral? |
-| 3 | [Governed data foundation](docs/phases/phase_3_governed_data_foundation.md) | The approved queryable layer: metric logic, joins, filters, access controls, caveats, quality checks |
-| 4 | [Design architecture](docs/phases/phase_4_design_architecture.md) | How a question becomes a governed answer: grounding, model use, tool boundaries, validation, safe failure |
-| 5 | [Prototype / MVP build](docs/phases/phase_5_prototype_mvp_build.md) | A bounded, observable, testable build that generates evidence before formal validation |
-| 6 | [Validation, assurance & remediation](docs/phases/phase_6_validation_assurance_remediation.md) | Is it safe, reliable and evidenced enough for controlled user testing? |
-| 7 | [Controlled pilot & user testing](docs/phases/phase_7_controlled_pilot.md) | Does it hold up with real users, real questions and real operating conditions? |
-| 8 | [Production readiness & release](docs/phases/phase_8_production_readiness.md) | Resilience, support, monitoring, access, governance, ownership — and the release decision |
-| 9 | [Operate, adopt & improve](docs/phases/phase_9_operate_adopt_improve.md) | Run it as a live product: feedback, regression testing, cost control, semantic updates |
-
-Each phase has a main guide (delivery logic, decisions, risks, required outputs, handover) and an
-annex pack (practical material to adapt, not follow mechanically).
-
-## Status
-
-- **Blueprint (all nine phases + annexes):** published.
-- **Reference implementation:** in active development; will be published in this repository.
-
 ## Repository
 
 ```text
 README.md              This file — the pitch and a map of the repo
 Makefile               Task runner (install, eval, mlflow-ui, tests, infra-*)
+.github/workflows/     CI — lint + pytest on every push/PR to main
 docs/                  The blueprint — see docs/README.md
   master.md            Strategic overview: logic, risks, gates, operating model
   phases/              The nine phase guides
@@ -193,6 +197,23 @@ src/                   Reference implementation — see src/README.md
 - **The implementation** lives in [`src/`](src/) — see [`src/README.md`](src/README.md).
 - **Regenerate the PDFs** after editing any Markdown with `make pdf` (see the Makefile).
 
+## Where this stands
+
+Both the blueprint (all nine phases, plus annexes) and the reference implementation are published
+in this repository — the implementation is a working build, not a mockup. See
+[Implementation: proving the blueprint works](#implementation-proving-the-blueprint-works) for what
+it covers and the deliberate scope decisions behind it, and [Scope and status](#scope-and-status)
+below for what this document is and isn't.
+
+## Scope and status
+
+This is a delivery blueprint, not a technical design, security policy, compliance review or vendor
+selection framework. Cost, effort and timeline figures are illustrative planning aids, not
+benchmarks. Security, privacy and regulatory requirements should be reviewed by the appropriate
+specialists for each organisation.
+
+<!-- TODO: add a LICENSE file and reference it here, e.g. "Licensed under CC BY 4.0." -->
+
 ## Who wrote this
 
 I'm **Daniel Brule** — a data and AI delivery leader based in London, with around 15 years across
@@ -207,12 +228,3 @@ AI-assisted — deliberately, because it is the same AI-assisted delivery workfl
 advocates.
 
 Feedback and disagreement are welcome. LinkedIn: <https://www.linkedin.com/in/danielbrule/>
-
-## Scope and status
-
-This is a delivery blueprint, not a technical design, security policy, compliance review or vendor
-selection framework. Cost, effort and timeline figures are illustrative planning aids, not
-benchmarks. Security, privacy and regulatory requirements should be reviewed by the appropriate
-specialists for each organisation.
-
-<!-- TODO: add a LICENSE file and reference it here, e.g. "Licensed under CC BY 4.0." -->
