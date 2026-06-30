@@ -14,10 +14,17 @@ make tests              # syntax check then pytest (225 tests)
 make start-backend      # FastAPI → http://localhost:8000
 make start-frontend     # Vite dev server → http://localhost:5173
 make eval               # fast eval (stages 1–5, no DB)
-make eval MODE=full     # full eval (all 7 stages, needs live DB + OpenAI)
+make eval MODE=full CONCURRENCY=1 OUTPUT=src/evaluation_results/eval_<date>_full.json   # full eval — see note below
 make mlflow-ui          # MLflow UI → http://localhost:5000
 make apply-sql-views    # deploy/update analytics views to Azure SQL
+make apply-sql-indexes  # apply performance indexes to dbo tables (idempotent, safe to re-run)
 ```
+
+**Full-mode eval (`MODE=full`) must always run with `CONCURRENCY=1` and an explicit `OUTPUT=` path.**
+Higher concurrency causes concurrent Azure OpenAI rate-limit (429) retries to collide and exhaust
+each other's single retry, producing dozens of false `error` records that mask the real pass rate.
+Without `OUTPUT=`, no per-record JSON is saved — only MLflow summary metrics — so a failing run
+can't be diagnosed afterward.
 
 ## Pipeline
 ```

@@ -16,6 +16,7 @@ from backend.app.evaluation.golden_runner import (
     ACCESS_TEST_CASES,
     GoldenRunner,
     NEGATIVE_SQL_PATTERNS,
+    _check_answer_quality,
 )
 from backend.app.stages.execution import ExecutionStage
 from backend.app.stages.intent import IntentResult
@@ -176,6 +177,27 @@ async def test_run_negative_question_not_refused_fails(monkeypatch):
     assert record.status == "fail"
     assert record.intent_answerable is True
     assert record.failure_reasons
+
+
+def test_check_answer_quality_matches_whole_number_float():
+    # pyodbc aggregates (SUM/COUNT/MAX) often come back as floats/Decimals — a naive
+    # ".replace('.', '')" turns "2666366.0" into "26663660", which never matches the
+    # comma-formatted "2,666,366" in the natural-language answer.
+    rows = [{"total_comment_count": 2666366.0}]
+    answer = "The total number of comments across all articles is 2,666,366."
+    assert _check_answer_quality(answer, rows) is True
+
+
+def test_check_answer_quality_matches_plain_int():
+    rows = [{"max_comment_count": 16588}]
+    answer = "The maximum comment count for any article is 16,588."
+    assert _check_answer_quality(answer, rows) is True
+
+
+def test_check_answer_quality_rejects_unrelated_answer():
+    rows = [{"total_comment_count": 2666366.0}]
+    answer = "I'm not sure how many comments there are."
+    assert _check_answer_quality(answer, rows) is False
 
 
 def test_negative_sql_checks_all_blocked():

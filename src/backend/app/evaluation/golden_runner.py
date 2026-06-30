@@ -115,7 +115,7 @@ NEGATIVE_SQL_PATTERNS = [
 ACCESS_TEST_CASES = [
     {
         "description": "Editor denied: analytics.vw_ingestion_errors not in editor's allowed_views",
-        "sql": "SELECT TOP 10 stage, error_type, error_count FROM analytics.vw_ingestion_errors ORDER BY error_count DESC",
+        "sql": "SELECT TOP 10 stage, error_type, attempted_at FROM analytics.vw_ingestion_errors ORDER BY attempted_at DESC",
         "role": "editor",
         "allowed_views": ["analytics.vw_article_engagement", "analytics.vw_top_contributors"],
         "expect": "denied",
@@ -129,7 +129,7 @@ ACCESS_TEST_CASES = [
     },
     {
         "description": "Analyst allowed: analytics.vw_ingestion_errors is in analyst's allowed_views",
-        "sql": "SELECT TOP 10 stage, error_type, error_count FROM analytics.vw_ingestion_errors ORDER BY error_count DESC",
+        "sql": "SELECT TOP 10 stage, error_type, attempted_at FROM analytics.vw_ingestion_errors ORDER BY attempted_at DESC",
         "role": "analyst",
         "allowed_views": [
             "analytics.vw_article_engagement",
@@ -175,6 +175,7 @@ class GoldenEvalRecord:
     # Artefacts
     generated_sql: str | None = None
     execution_status: str | None = None  # "success" | "failed" | "skipped" (full mode only)
+    row_count: int | None = None  # rows returned by execution (full mode only) — lets answer_quality failures be diagnosed without re-running
     answer: str | None = None
     answer_quality_pass: bool | None = None
     trace: TraceRecord | None = None
@@ -325,6 +326,7 @@ class EvaluationReport:
                         "execution_status": r.execution_status,
                         "answer_quality": r.answer_quality_pass,
                     },
+                    "row_count": r.row_count,
                     "answer": r.answer,
                     "failure_reasons": r.failure_reasons,
                     "latency_ms": r.latency_ms,
@@ -357,6 +359,17 @@ def _extract_filter_terms(sql_upper: str) -> list[str]:
 _NO_RESULT_PHRASES = ("no ", "none", "zero", "empty", "0 ")
 
 
+def _normalize_number(raw: str) -> str:
+    """Strip formatting so "2,666,366" and "2666366.0" both normalize to "2666366".
+
+    A trailing ".0"/".00" (whole-number floats/Decimals from pyodbc aggregates)
+    must be dropped before removing the remaining dots, otherwise "2666366.0"
+    collapses to "26663660" instead of "2666366" and never matches the answer text.
+    """
+    raw = re.sub(r"\.0+$", "", raw)
+    return raw.replace(",", "").replace(".", "")
+
+
 def _check_answer_quality(answer: str, rows: list[dict]) -> bool:
     """Return True if the answer reflects the query result.
 
@@ -378,7 +391,7 @@ def _check_answer_quality(answer: str, rows: list[dict]) -> bool:
             raw = str(value).lower()
             if raw in answer_lower:
                 return True
-            normalized = raw.replace(",", "").replace(".", "")
+            normalized = _normalize_number(raw)
             if normalized and normalized in answer_stripped:
                 return True
     return False
@@ -511,6 +524,7 @@ class GoldenRunner:
                 record.failure_reasons.append(f"Execution: {exec_outcome.reason}")
             else:
                 record.execution_status = "success"
+                record.row_count = len(ctx.rows or [])
                 answer_outcome = await self._answer_stage.run(ctx)
                 record.answer = answer_outcome.answer
                 record.answer_quality_pass = _check_answer_quality(answer_outcome.answer, ctx.rows or [])
