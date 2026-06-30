@@ -1,6 +1,20 @@
 # Enterprise Talk to Data
 
-A natural-language-to-SQL pipeline for newspaper analytics. Users ask plain-English questions; the system classifies intent, selects the right database views, generates and validates SQL, executes it, and returns a natural-language answer — all through a single `/ask` endpoint.
+A natural-language-to-SQL pipeline over real Le Figaro article data, scraped by [lefigaro-harvester](https://github.com/danielBrule/lefigaro-harvester). Users ask plain-English questions; the system classifies intent, selects the right database views, generates and validates SQL, executes it, and returns a natural-language answer — all through a single `/ask` endpoint.
+
+## Contents
+
+- [How it works](#how-it-works)
+- [Repository layout](#repository-layout)
+- [Configuration](#configuration)
+- [Running locally](#running-locally)
+  - [Backend](#backend)
+  - [Frontend](#frontend)
+- [Production practices](#production-practices)
+- [Testing](#testing)
+- [Infrastructure](#infrastructure)
+  - [Resources created](#resources-created)
+  - [Deploying](#deploying)
 
 ## How it works
 
@@ -57,6 +71,8 @@ src/
     example_questions/    — golden questions for evaluation
   sql/               — view DDL and security scripts
   infra/             — Terraform modules for Azure deployment
+
+.github/workflows/    — CI: lint + pytest on every push/PR to main (repo root, sibling to src/)
 ```
 
 ## Configuration
@@ -79,7 +95,7 @@ AZURE_OPENAI_SQL_GENERATION_DEPLOYMENT=     # SQL generation (reasoning-capable 
 AZURE_OPENAI_SUMMARY_DEPLOYMENT=            # answer generation (instruction-following model)
 ```
 
-Three separate deployments are required — the pipeline uses different model tiers per task by design. Using the same deployment name for all three is valid for local development.
+Three separate Azure OpenAI deployments are required — one per pipeline stage (`SCHEMA_RETRIEVAL`, `SQL_GENERATION`, `SUMMARY`) — so each stage's model tier and token budget can be tuned independently. Pointing all three at the same deployment name is fine for local development; only in production would you typically split them onto different model tiers.
 
 If you provisioned infrastructure with Terraform, retrieve these values from its outputs:
 
@@ -95,6 +111,8 @@ Install Poetry once:
 ```powershell
 (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
 ```
+
+### Backend
 
 ```powershell
 # 1. Install all dependencies (creates .venv automatically)
@@ -121,9 +139,17 @@ The API is then available at `http://localhost:8000`.
 | `http://localhost:8000/api/v0/metadata/metrics` | Metrics metadata |
 | `http://localhost:8000/api/v0/metadata/glossary` | Domain glossary |
 
-## Frontend
+**Example request:**
 
-A React + Vite + Tailwind chat UI lives in `src/frontend/`. It talks to the backend at `http://localhost:8000`.
+```bash
+curl -X POST http://localhost:8000/api/v0/ask \
+  -H "Content-Type: application/json" \
+  -d '{"question": "Which articles had the most comments last week?"}'
+```
+
+### Frontend
+
+A React + Vite + Tailwind chat UI lives in `src/frontend/`. It talks to the backend at `http://localhost:8000` — start the backend first.
 
 **Prerequisite:** Node.js LTS — `winget install OpenJS.NodeJS.LTS` on Windows.
 
@@ -137,22 +163,12 @@ make start-frontend
 
 The UI is then available at `http://localhost:5173`.
 
-| Feature | Version |
-|---|---|
-| Chat with role selector (analyst / editor / admin) | v1 |
-| Thumbs up / down feedback per answer | v1 |
-| Right panel: source view, filters, SQL, row count, confidence | v2 |
-| Conversation context panel | v3 |
+- Chat with role selector (analyst / editor / admin)
+- Thumbs up / down feedback per answer
+- Right panel: source view, filters, SQL, row count, confidence
+- Conversation context panel
 
 For production, build the static bundle (`make build-frontend`) and serve from FastAPI via `StaticFiles`.
-
-**Example request:**
-
-```bash
-curl -X POST http://localhost:8000/api/v0/ask \
-  -H "Content-Type: application/json" \
-  -d '{"question": "Which articles had the most comments last week?"}'
-```
 
 ## Production practices
 
@@ -161,13 +177,21 @@ curl -X POST http://localhost:8000/api/v0/ask \
 ## Testing
 
 ```powershell
-make tests   # 225 unit tests, no external dependencies required
-make eval    # golden runner — requires a live .env with Azure OpenAI credentials
+make tests        # 225 unit tests, no external dependencies required
+make eval         # golden runner, fast mode — stages 1–5, no DB required
+make eval MODE=full  # full eval — all 7 stages, requires live .env
+make mlflow-ui    # browse eval results at http://localhost:5000
 ```
 
-The unit tests mock all external dependencies (LLM, database) and run fully offline.
+`mlflow.db` and `mlruns/` are committed to the repo, so `make mlflow-ui` shows real evaluation history immediately after `git clone` — no eval run required first. This is a pragmatic choice for a single-developer demo; a production setup would point at a remote tracking server instead (Azure ML has native MLflow support).
 
-The golden runner (`evaluation/golden_runner.py`) replays the questions in `metadata/example_questions/golden_questions.yml` through the intent and view-selection stages against a live LLM and asserts correct answerability and domain classification.
+The unit tests mock all external dependencies (LLM, database) and run fully offline. They include spot-check assertions on expected answers for curated questions, verified against known outputs from the production dataset.
+
+The golden runner replays curated questions from `metadata/example_questions/golden_questions.yml` through the live pipeline. Fast mode covers intent through SQL validation without hitting the database. Full mode runs all 7 stages including execution and answer generation. Pass rate, token usage and model names per stage are logged to MLflow on every run.
+
+**Evaluation scope:** questions are self-authored against a known dataset. The pass rate measures pipeline stability and answerability. A production evaluation would extend to second-party questions and systematic answer scoring against ground truth.
+
+**CI:** [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) runs lint (`ruff check`) and the full pytest suite on every push and pull request to `main`.
 
 ## Infrastructure
 
@@ -187,14 +211,14 @@ Default model for all three deployments is `gpt-4.1-mini`. Override per deployme
 
 ### Deploying
 
-Create a tfvars file for your target environment:
+Copy the example tfvars for your target environment and fill in your Azure IDs:
 
-```
-src/infra/terraform/envs/dev/terraform.tfvars
-src/infra/terraform/envs/prod/terraform.tfvars
+```powershell
+copy src\infra\terraform\envs\dev\terraform.tfvars.example src\infra\terraform\envs\dev\terraform.tfvars
+copy src\infra\terraform\envs\prod\terraform.tfvars.example src\infra\terraform\envs\prod\terraform.tfvars
 ```
 
-Required variables: `subscription_id`, `tenant_id`, `client_id`, `user_object_id`. Optional overrides: `location` (default `eastus`), `resource_group_name`, `openai_account_name`, model names.
+Required variables: `subscription_id`, `tenant_id`, `client_id`, `user_object_id`. Optional overrides: `location` (default `eastus`), `resource_group_name`, `openai_account_name`, model names. The real `terraform.tfvars` files are gitignored — only the `.example` templates are committed. `envs/prod/` is scaffolding for a second environment, not a deployed one.
 
 ```powershell
 make infra-init          # terraform init

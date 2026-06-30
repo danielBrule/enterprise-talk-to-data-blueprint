@@ -1,0 +1,22 @@
+# ── Required ──────────────────────────────────────────────────────────────────
+# Azure subscription, tenant and identity to deploy into.
+subscription_id = "your-subscription-id"
+tenant_id       = "your-tenant-id"
+client_id       = "your-service-principal-client-id"
+user_object_id  = "your-user-object-id"
+
+# ── Environment ───────────────────────────────────────────────────────────────
+environment = "prod"
+image_tag   = "prod"
+location    = "eastus"
+
+# ── Optional overrides ────────────────────────────────────────────────────────
+# Leave commented to derive names from `environment` (e.g. rg-lefigaro-talk2data-prod).
+# resource_group_name = ""
+# openai_account_name = ""
+
+# Model per deployment — default is gpt-4.1-mini for all three.
+# Consider higher-capacity / higher-tier models for prod token budgets.
+# schema_retrieval_model = "gpt-4.1-mini"
+# sql_generation_model   = "gpt-4.1-mini"
+# summary_model          = "gpt-4.1-mini"

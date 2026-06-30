@@ -20,6 +20,18 @@ everything is safe and useless, and it will not be adopted. The goal is a capabi
 useful inside a *deliberately designed* scope — not one that maximises caution at the expense of
 value, and not one that maximises coverage at the expense of trust.
 
+## Contents
+
+- [How a question becomes a governed answer](#how-a-question-becomes-a-governed-answer)
+- [Implementation: proving the blueprint works](#implementation-proving-the-blueprint-works)
+- [What "governed" means in practice](#what-governed-means-in-practice)
+- [How to read this](#how-to-read-this)
+- [The nine phases](#the-nine-phases)
+- [Status](#status)
+- [Repository](#repository)
+- [Who wrote this](#who-wrote-this)
+- [Scope and status](#scope-and-status)
+
 ## How a question becomes a governed answer
 
 ```mermaid
